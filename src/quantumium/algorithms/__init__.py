@@ -10,6 +10,7 @@ from .hamiltonian_sim import (
     transverse_field_ising,
 )
 from .shor import shor_factor, quantum_order_finding
+from .simon import simon_algorithm
 
 __all__ = [
     "qft",
@@ -28,4 +29,5 @@ __all__ = [
     "transverse_field_ising",
     "shor_factor",
     "quantum_order_finding",
+    "simon_algorithm",
 ]
