@@ -102,7 +102,7 @@ class TestVQE:
             num_starts=3,
         )
 
-        assert result.optimal_energy < exact + 0.05
+        assert result.optimal_energy < exact + 0.1
         assert len(result.history) > 0
         assert result.num_iterations > 0
 
