@@ -11,6 +11,7 @@ from .hamiltonian_sim import (
 )
 from .shor import shor_factor, quantum_order_finding
 from .simon import simon_algorithm
+from .hhl import hhl_solve
 
 __all__ = [
     "qft",
@@ -30,4 +31,5 @@ __all__ = [
     "shor_factor",
     "quantum_order_finding",
     "simon_algorithm",
+    "hhl_solve",
 ]
