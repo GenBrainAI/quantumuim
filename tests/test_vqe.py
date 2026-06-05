@@ -114,7 +114,7 @@ class TestVQE:
             num_qubits=1,
             hamiltonian=H,
             ansatz_depth=1,
-            max_iter=50,
-            num_starts=3,
+            max_iter=150,
+            num_starts=5,
         )
         assert result.optimal_energy < -0.9

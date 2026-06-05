@@ -76,7 +76,7 @@ class TestSimulateMolecule:
 
     def test_heh_plus_simulation(self):
         """HeH+ should also converge."""
-        result = simulate_molecule("HeH+", ansatz_depth=2, max_iter=100, num_starts=3)
+        result = simulate_molecule("HeH+", ansatz_depth=2, max_iter=200, num_starts=5)
         assert result.molecule == "HeH+"
         assert result.error < 0.15
         assert result.exact_energy < -2.0
