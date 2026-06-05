@@ -177,32 +177,47 @@ qc = pqc.bind({theta: 1.57})
 ### Circuit Templates (`quantumium.circuits`)
 Bell pair, GHZ state, quantum teleportation, QFT / inverse QFT
 
-## Examples
+## Jupyter Notebooks
+
+Interactive tutorials for learning quantum computing with Quantumium:
 
 ```bash
-python examples/bell_state.py
-python examples/grover_search.py
-python examples/ghz_entanglement.py
-python examples/deutsch_jozsa_demo.py
-python examples/noisy_simulation.py
-python examples/shor_factoring.py
-python examples/error_correction_demo.py
-python examples/algorithms/vqe_h2_example.py
-python examples/algorithms/qaoa_maxcut_example.py
-python examples/algorithms/qpe_example.py
-python examples/algorithms/qft_example.py
-python examples/algorithms/ising_simulation.py
+jupyter notebook notebooks/intro-to-quantum.ipynb      # Qubits, gates, circuits
+jupyter notebook notebooks/quantum-algorithms.ipynb     # Grover, VQE, QAOA
+jupyter notebook notebooks/quantum-finance.ipynb        # Option pricing, portfolios
 ```
+
+## Examples
+
+28 runnable example scripts covering every module:
+
+```bash
+python examples/bell_state.py               # Bell state basics
+python examples/grover_search.py            # Grover's search
+python examples/shor_factoring.py           # Shor's factoring
+python examples/quantum_finance_demo.py     # Finance applications
+python examples/qml_demo.py                 # Machine learning
+python examples/adiabatic_demo.py           # Adiabatic optimization
+python examples/stabilizer_demo.py          # Clifford simulation
+python examples/benchmarking_demo.py        # Hardware benchmarking
+python examples/tomography_demo.py          # State reconstruction
+python examples/tensor_network_demo.py      # MPS simulation
+python examples/algorithms/vqe_h2_example.py    # VQE for H2
+python examples/algorithms/qaoa_maxcut_example.py  # QAOA MaxCut
+```
+
+See `examples/` for the full list.
 
 ## Testing
 
 ```bash
-python -m pytest tests/ -q    # 877+ tests
+python -m pytest tests/ -q    # 877 tests
 ```
 
 ## Documentation
 
 - [Getting Started Tutorial](docs/getting-started.md) — step-by-step introduction
+- [Jupyter Notebooks](notebooks/) — interactive tutorials
 - [Contributing Guide](CONTRIBUTING.md) — development setup and workflow
 - [Changelog](CHANGELOG.md) — version history
 

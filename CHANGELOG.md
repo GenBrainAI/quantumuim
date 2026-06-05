@@ -6,6 +6,12 @@ All notable changes to the Quantumium SDK are documented in this file.
 
 Initial release of the Quantumium quantum computing SDK.
 
+### Recent Additions (pre-release)
+- Fixed flaky Simon's algorithm test — added classical period verification
+- 3 Jupyter notebook tutorials (intro, algorithms, finance)
+- 4 additional example scripts (adiabatic, stabilizer, benchmarking, tomography)
+- 28 total runnable examples, 3 interactive notebooks
+
 ### Core Framework
 - Qubit state vector representation with measurement and superposition
 - Full quantum gate library: I, X, Y, Z, H, S, T, CNOT, CZ, SWAP, CCX (Toffoli)
