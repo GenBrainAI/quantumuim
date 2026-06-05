@@ -57,6 +57,38 @@ SWAP = Gate(np.array([
 ], dtype=complex), "SWAP")
 
 
+CZ = Gate(np.array([
+    [1, 0, 0, 0],
+    [0, 1, 0, 0],
+    [0, 0, 1, 0],
+    [0, 0, 0, -1],
+], dtype=complex), "CZ")
+
+CCX = Gate(np.array([
+    [1, 0, 0, 0, 0, 0, 0, 0],
+    [0, 1, 0, 0, 0, 0, 0, 0],
+    [0, 0, 1, 0, 0, 0, 0, 0],
+    [0, 0, 0, 1, 0, 0, 0, 0],
+    [0, 0, 0, 0, 1, 0, 0, 0],
+    [0, 0, 0, 0, 0, 1, 0, 0],
+    [0, 0, 0, 0, 0, 0, 0, 1],
+    [0, 0, 0, 0, 0, 0, 1, 0],
+], dtype=complex), "CCX")
+
+
+def controlled(gate: Gate, name: str = "") -> Gate:
+    """Create a controlled version of a single-qubit gate.
+
+    The control qubit is the first qubit argument.
+    """
+    if gate.num_qubits != 1:
+        raise ValueError("controlled() only supports single-qubit gates")
+    dim = 4
+    matrix = np.eye(dim, dtype=complex)
+    matrix[2:, 2:] = gate.matrix
+    return Gate(matrix, name or f"C{gate.name}")
+
+
 def Rx(theta: float) -> Gate:
     """Rotation around X-axis."""
     return Gate(np.array([
@@ -79,3 +111,40 @@ def Rz(theta: float) -> Gate:
         [np.exp(-1j * theta / 2), 0],
         [0, np.exp(1j * theta / 2)],
     ], dtype=complex), f"Rz({theta:.3f})")
+
+
+def CRx(theta: float) -> Gate:
+    """Controlled rotation around X-axis."""
+    return controlled(Rx(theta), f"CRx({theta:.3f})")
+
+
+def CRy(theta: float) -> Gate:
+    """Controlled rotation around Y-axis."""
+    return controlled(Ry(theta), f"CRy({theta:.3f})")
+
+
+def CRz(theta: float) -> Gate:
+    """Controlled rotation around Z-axis."""
+    return controlled(Rz(theta), f"CRz({theta:.3f})")
+
+
+def Rxx(theta: float) -> Gate:
+    """Two-qubit XX rotation: exp(-i theta/2 X⊗X)."""
+    c = np.cos(theta / 2)
+    s = np.sin(theta / 2)
+    return Gate(np.array([
+        [c, 0, 0, -1j * s],
+        [0, c, -1j * s, 0],
+        [0, -1j * s, c, 0],
+        [-1j * s, 0, 0, c],
+    ], dtype=complex), f"Rxx({theta:.3f})")
+
+
+def Rzz(theta: float) -> Gate:
+    """Two-qubit ZZ rotation: exp(-i theta/2 Z⊗Z)."""
+    return Gate(np.array([
+        [np.exp(-1j * theta / 2), 0, 0, 0],
+        [0, np.exp(1j * theta / 2), 0, 0],
+        [0, 0, np.exp(1j * theta / 2), 0],
+        [0, 0, 0, np.exp(-1j * theta / 2)],
+    ], dtype=complex), f"Rzz({theta:.3f})")
