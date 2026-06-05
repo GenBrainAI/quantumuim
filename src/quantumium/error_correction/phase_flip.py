@@ -45,16 +45,23 @@ def phase_flip_encode(state: NDArray[np.complexfloating]) -> NDArray[np.complexf
 
 
 def phase_flip_syndrome(state: NDArray[np.complexfloating]) -> tuple[int, int]:
-    """Measure the phase-flip syndrome.
+    """Measure the phase-flip syndrome without collapsing the logical state.
 
-    Uses X₀X₁ and X₁X₂ stabilizers (equivalent to measuring in
-    Hadamard basis, then checking parity).
+    Computes the expectation values of the X_0 X_1 and X_1 X_2 stabilizer
+    generators and returns syndrome bits indicating which qubit (if any)
+    suffered a Z (phase-flip) error.
 
     Syndrome table:
-      (0, 0) → no error
-      (1, 0) → Z error on qubit 0
-      (1, 1) → Z error on qubit 1
-      (0, 1) → Z error on qubit 2
+      (0, 0) -> no error
+      (1, 0) -> Z error on qubit 0
+      (1, 1) -> Z error on qubit 1
+      (0, 1) -> Z error on qubit 2
+
+    Args:
+        state: 8-element statevector in the 3-qubit Hilbert space.
+
+    Returns:
+        A tuple (s1, s2) of syndrome bits, each 0 or 1.
     """
     state = np.asarray(state, dtype=complex)
 
@@ -81,7 +88,21 @@ def phase_flip_correct(
     state: NDArray[np.complexfloating],
     syndrome: tuple[int, int] | None = None,
 ) -> NDArray[np.complexfloating]:
-    """Apply Z correction based on syndrome."""
+    """Apply a Z correction to the qubit identified by the syndrome.
+
+    Looks up the syndrome in the error map and applies a phase-flip (Z gate)
+    to the erroneous qubit by negating the amplitudes where that qubit is |1>.
+    If no syndrome is provided, it is measured from the state first.
+
+    Args:
+        state: 8-element statevector in the 3-qubit Hilbert space.
+        syndrome: Optional precomputed syndrome tuple (s1, s2). If None,
+            the syndrome is measured via ``phase_flip_syndrome``.
+
+    Returns:
+        Corrected 8-element statevector with the identified phase-flip
+        error removed.
+    """
     state = np.asarray(state, dtype=complex).copy()
     if syndrome is None:
         syndrome = phase_flip_syndrome(state)
@@ -106,9 +127,19 @@ def phase_flip_correct(
 
 
 def phase_flip_decode(state: NDArray[np.complexfloating]) -> NDArray[np.complexfloating]:
-    """Decode 3-qubit phase-flip state back to single logical qubit.
+    """Decode a 3-qubit phase-flip code state back to a single logical qubit.
 
-    Projects onto the code space |+++⟩, |---⟩ and recovers α, β.
+    Projects the state onto the code space spanned by |+++> and |--->
+    by computing inner products with the logical basis states, then
+    normalizes the result.
+
+    Args:
+        state: 8-element statevector in the 3-qubit Hilbert space,
+            expected to be in the code space (no residual errors).
+
+    Returns:
+        2-element array [alpha, beta] representing the decoded logical
+        state alpha|0> + beta|1>, normalized to unit length.
     """
     state = np.asarray(state, dtype=complex)
 

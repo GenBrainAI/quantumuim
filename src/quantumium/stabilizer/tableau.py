@@ -32,6 +32,14 @@ class StabilizerTableau:
     """
 
     def __init__(self, num_qubits: int) -> None:
+        """Initialize a stabilizer tableau for the |0...0> state.
+
+        The initial state has destabilizers X_i and stabilizers Z_i for
+        each qubit i, representing the computational basis state |0...0>.
+
+        Args:
+            num_qubits (int): Number of qubits to simulate.
+        """
         self.n = num_qubits
         # Initialize to |0...0>: destabilizers = X_i, stabilizers = Z_i
         self.table = np.zeros((2 * num_qubits, 2 * num_qubits + 1), dtype=np.uint8)
@@ -41,9 +49,19 @@ class StabilizerTableau:
 
     @property
     def num_qubits(self) -> int:
+        """Return the number of qubits in this stabilizer state.
+
+        Returns:
+            int: Number of qubits.
+        """
         return self.n
 
     def copy(self) -> StabilizerTableau:
+        """Create a deep copy of this tableau.
+
+        Returns:
+            StabilizerTableau: A new tableau with independently copied data.
+        """
         t = StabilizerTableau.__new__(StabilizerTableau)
         t.n = self.n
         t.table = self.table.copy()
@@ -62,14 +80,28 @@ class StabilizerTableau:
         self.table[row, 2 * self.n] = val & 1
 
     def stabilizer_generators(self) -> list[str]:
-        """Return string representations of the stabilizer generators."""
+        """Return string representations of the n stabilizer generators.
+
+        Each generator is formatted as a signed Pauli string, e.g. "+ZII"
+        or "-XYZ".
+
+        Returns:
+            list[str]: List of n stabilizer generator strings.
+        """
         result = []
         for i in range(self.n, 2 * self.n):
             result.append(self._row_to_pauli(i))
         return result
 
     def destabilizer_generators(self) -> list[str]:
-        """Return string representations of the destabilizer generators."""
+        """Return string representations of the n destabilizer generators.
+
+        Destabilizers anti-commute with their corresponding stabilizer
+        and commute with all other stabilizers.
+
+        Returns:
+            list[str]: List of n destabilizer generator strings.
+        """
         result = []
         for i in range(self.n):
             result.append(self._row_to_pauli(i))
@@ -120,7 +152,15 @@ class StabilizerTableau:
 
 
 def hadamard(tableau: StabilizerTableau, qubit: int) -> None:
-    """Apply Hadamard gate to a qubit: H swaps X↔Z, flips phase for Y."""
+    """Apply the Hadamard gate to a qubit in the stabilizer tableau.
+
+    Transforms Pauli operators as: X -> Z, Z -> X, Y -> -Y.
+    Modifies the tableau in place.
+
+    Args:
+        tableau (StabilizerTableau): The stabilizer tableau to modify.
+        qubit (int): Index of the target qubit (0-indexed).
+    """
     for i in range(2 * tableau.n):
         x = tableau._x(i, qubit)
         z = tableau._z(i, qubit)
@@ -132,7 +172,15 @@ def hadamard(tableau: StabilizerTableau, qubit: int) -> None:
 
 
 def phase_gate(tableau: StabilizerTableau, qubit: int) -> None:
-    """Apply S gate: X→Y, Z→Z, Y→-X."""
+    """Apply the S (phase) gate to a qubit in the stabilizer tableau.
+
+    Transforms Pauli operators as: X -> Y, Z -> Z, Y -> -X.
+    Modifies the tableau in place.
+
+    Args:
+        tableau (StabilizerTableau): The stabilizer tableau to modify.
+        qubit (int): Index of the target qubit (0-indexed).
+    """
     for i in range(2 * tableau.n):
         x = tableau._x(i, qubit)
         z = tableau._z(i, qubit)
@@ -143,7 +191,17 @@ def phase_gate(tableau: StabilizerTableau, qubit: int) -> None:
 
 
 def cnot(tableau: StabilizerTableau, control: int, target: int) -> None:
-    """Apply CNOT with given control and target qubits."""
+    """Apply the CNOT (controlled-X) gate to the stabilizer tableau.
+
+    Transforms Pauli operators as:
+    X_c -> X_c X_t, Z_t -> Z_c Z_t, and adjusts phases accordingly.
+    Modifies the tableau in place.
+
+    Args:
+        tableau (StabilizerTableau): The stabilizer tableau to modify.
+        control (int): Index of the control qubit (0-indexed).
+        target (int): Index of the target qubit (0-indexed).
+    """
     for i in range(2 * tableau.n):
         xc = tableau._x(i, control)
         zc = tableau._z(i, control)
@@ -158,21 +216,46 @@ def cnot(tableau: StabilizerTableau, control: int, target: int) -> None:
 
 
 def cz(tableau: StabilizerTableau, qubit1: int, qubit2: int) -> None:
-    """Apply CZ gate (equivalent to H on target, CNOT, H on target)."""
+    """Apply the controlled-Z (CZ) gate to two qubits in the tableau.
+
+    Implemented as H on qubit2, CNOT(qubit1, qubit2), H on qubit2.
+    Modifies the tableau in place.
+
+    Args:
+        tableau (StabilizerTableau): The stabilizer tableau to modify.
+        qubit1 (int): Index of the first qubit (0-indexed).
+        qubit2 (int): Index of the second qubit (0-indexed).
+    """
     hadamard(tableau, qubit2)
     cnot(tableau, qubit1, qubit2)
     hadamard(tableau, qubit2)
 
 
 def pauli_x(tableau: StabilizerTableau, qubit: int) -> None:
-    """Apply Pauli X gate."""
+    """Apply the Pauli X gate to a qubit in the stabilizer tableau.
+
+    Flips the phase of any stabilizer/destabilizer that contains Z on
+    this qubit. Modifies the tableau in place.
+
+    Args:
+        tableau (StabilizerTableau): The stabilizer tableau to modify.
+        qubit (int): Index of the target qubit (0-indexed).
+    """
     for i in range(2 * tableau.n):
         z = tableau._z(i, qubit)
         tableau._set_r(i, (tableau._r(i) + z) % 2)
 
 
 def pauli_y(tableau: StabilizerTableau, qubit: int) -> None:
-    """Apply Pauli Y gate."""
+    """Apply the Pauli Y gate to a qubit in the stabilizer tableau.
+
+    Flips the phase of any stabilizer/destabilizer that contains X or Z
+    (but not both) on this qubit. Modifies the tableau in place.
+
+    Args:
+        tableau (StabilizerTableau): The stabilizer tableau to modify.
+        qubit (int): Index of the target qubit (0-indexed).
+    """
     for i in range(2 * tableau.n):
         x = tableau._x(i, qubit)
         z = tableau._z(i, qubit)
@@ -180,7 +263,15 @@ def pauli_y(tableau: StabilizerTableau, qubit: int) -> None:
 
 
 def pauli_z(tableau: StabilizerTableau, qubit: int) -> None:
-    """Apply Pauli Z gate."""
+    """Apply the Pauli Z gate to a qubit in the stabilizer tableau.
+
+    Flips the phase of any stabilizer/destabilizer that contains X on
+    this qubit. Modifies the tableau in place.
+
+    Args:
+        tableau (StabilizerTableau): The stabilizer tableau to modify.
+        qubit (int): Index of the target qubit (0-indexed).
+    """
     for i in range(2 * tableau.n):
         x = tableau._x(i, qubit)
         tableau._set_r(i, (tableau._r(i) + x) % 2)
@@ -193,11 +284,20 @@ def measure(
 ) -> int:
     """Measure a qubit in the computational basis.
 
-    Implements the Aaronson-Gottesman measurement algorithm.
-    Modifies the tableau in place to reflect the post-measurement state.
+    Implements the Aaronson-Gottesman measurement algorithm. If the
+    outcome is random (some stabilizer anti-commutes with Z on this
+    qubit), a random bit is chosen. If deterministic, the outcome is
+    computed from the destabilizer rows. Modifies the tableau in place
+    to reflect the post-measurement state.
+
+    Args:
+        tableau (StabilizerTableau): The stabilizer tableau to modify.
+        qubit (int): Index of the qubit to measure (0-indexed).
+        rng (np.random.Generator | None): Random number generator for
+            stochastic outcomes. If None, a default RNG is created.
 
     Returns:
-        0 or 1 measurement outcome.
+        int: Measurement outcome, either 0 or 1.
     """
     if rng is None:
         rng = np.random.default_rng()
@@ -253,9 +353,17 @@ def measure(
 
 
 def to_statevector(tableau: StabilizerTableau) -> NDArray[np.complexfloating]:
-    """Convert a stabilizer state to its statevector representation.
+    """Convert a stabilizer state to its full statevector representation.
 
-    Only practical for small numbers of qubits (< ~15).
+    Projects the uniform superposition through each stabilizer generator
+    to recover the unique stabilizer state. Only practical for small
+    numbers of qubits (fewer than about 15) due to exponential memory.
+
+    Args:
+        tableau (StabilizerTableau): The stabilizer tableau to convert.
+
+    Returns:
+        NDArray[np.complexfloating]: Normalized statevector of length 2^n.
     """
     n = tableau.n
     dim = 2**n

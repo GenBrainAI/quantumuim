@@ -19,7 +19,19 @@ from ..core.gate import Gate, H, CNOT, Ry, Rz
 
 @dataclass
 class VQEResult:
-    """Result from a VQE optimization."""
+    """Result container for a VQE optimization run.
+
+    Attributes
+    ----------
+    optimal_energy : float
+        The lowest energy found across all random starts.
+    optimal_params : NDArray[np.floating]
+        The parameter vector that achieved the optimal energy.
+    history : list[float]
+        Energy values at each iteration of the best optimization run.
+    num_iterations : int
+        Number of iterations completed in the best run.
+    """
     optimal_energy: float
     optimal_params: NDArray[np.floating]
     history: list[float]
@@ -27,7 +39,22 @@ class VQEResult:
 
 
 def pauli_z_expectation(statevector: NDArray[np.complexfloating], qubit: int, num_qubits: int) -> float:
-    """Compute ⟨ψ|Z_i|ψ⟩ for a single Pauli-Z on qubit i."""
+    """Compute the expectation value <psi|Z_i|psi> for a single Pauli-Z operator.
+
+    Parameters
+    ----------
+    statevector : NDArray[np.complexfloating]
+        The quantum state vector of length 2^num_qubits.
+    qubit : int
+        Index of the qubit on which the Pauli-Z acts (0-indexed).
+    num_qubits : int
+        Total number of qubits in the system.
+
+    Returns
+    -------
+    float
+        The expectation value, in the range [-1, 1].
+    """
     probs = np.abs(statevector) ** 2
     expectation = 0.0
     for basis_state in range(len(statevector)):
@@ -38,7 +65,25 @@ def pauli_z_expectation(statevector: NDArray[np.complexfloating], qubit: int, nu
 
 
 def pauli_zz_expectation(statevector: NDArray[np.complexfloating], qubit_i: int, qubit_j: int, num_qubits: int) -> float:
-    """Compute ⟨ψ|Z_i Z_j|ψ⟩."""
+    """Compute the expectation value <psi|Z_i Z_j|psi> for a two-qubit ZZ operator.
+
+    Parameters
+    ----------
+    statevector : NDArray[np.complexfloating]
+        The quantum state vector of length 2^num_qubits.
+    qubit_i : int
+        Index of the first qubit (0-indexed).
+    qubit_j : int
+        Index of the second qubit (0-indexed).
+    num_qubits : int
+        Total number of qubits in the system.
+
+    Returns
+    -------
+    float
+        The expectation value, in the range [-1, 1]. Positive when qubits
+        tend to agree (both |0> or both |1>), negative otherwise.
+    """
     probs = np.abs(statevector) ** 2
     expectation = 0.0
     for basis_state in range(len(statevector)):
@@ -53,7 +98,20 @@ def hamiltonian_expectation(
     statevector: NDArray[np.complexfloating],
     hamiltonian: NDArray[np.complexfloating],
 ) -> float:
-    """Compute ⟨ψ|H|ψ⟩ for an arbitrary Hamiltonian matrix."""
+    """Compute <psi|H|psi> for an arbitrary Hamiltonian matrix.
+
+    Parameters
+    ----------
+    statevector : NDArray[np.complexfloating]
+        The quantum state vector of length 2^n.
+    hamiltonian : NDArray[np.complexfloating]
+        The Hamiltonian as a 2^n x 2^n Hermitian matrix.
+
+    Returns
+    -------
+    float
+        The real part of the expectation value <psi|H|psi>.
+    """
     return float(np.real(statevector.conj() @ hamiltonian @ statevector))
 
 
@@ -62,13 +120,32 @@ def hardware_efficient_ansatz(
     params: NDArray[np.floating],
     depth: int = 1,
 ) -> QuantumCircuit:
-    """Build a hardware-efficient ansatz circuit.
+    """Build a hardware-efficient variational ansatz circuit.
 
-    Structure per layer:
-    - Ry(θ) + Rz(θ) on each qubit (2 params per qubit per layer)
-    - Linear entangling CNOT chain
+    Each layer consists of single-qubit Ry and Rz rotations on every qubit
+    followed by a linear chain of CNOT gates for entanglement.
 
-    Total params: num_qubits * 2 * depth
+    Parameters
+    ----------
+    num_qubits : int
+        Number of qubits in the ansatz.
+    params : NDArray[np.floating]
+        Parameter vector of length ``num_qubits * 2 * depth``. Parameters
+        are consumed in order: for each layer, Ry(theta) and Rz(theta) for
+        each qubit (2 parameters per qubit per layer).
+    depth : int, optional
+        Number of ansatz layers (default 1). More layers increase
+        expressibility but also the parameter count.
+
+    Returns
+    -------
+    QuantumCircuit
+        A parameterized quantum circuit implementing the ansatz.
+
+    Raises
+    ------
+    ValueError
+        If the length of ``params`` does not equal ``num_qubits * 2 * depth``.
     """
     expected_params = num_qubits * 2 * depth
     if len(params) != expected_params:
@@ -89,12 +166,26 @@ def hardware_efficient_ansatz(
 
 
 def h2_hamiltonian() -> NDArray[np.complexfloating]:
-    """Simplified H2 molecule Hamiltonian in STO-3G basis (2 qubits).
+    """Build a simplified H2 molecule Hamiltonian in the STO-3G basis (2 qubits).
 
-    This is the qubit Hamiltonian after Jordan-Wigner transformation
-    at bond length ~0.735 Å. Exact ground state energy ≈ -1.137 Ha.
+    Constructs the qubit Hamiltonian after Jordan-Wigner transformation
+    at an equilibrium bond length of approximately 0.735 Angstroms. The
+    exact ground state energy is approximately -1.137 Hartrees.
 
+    The Hamiltonian is:
     H = g0*I + g1*Z0 + g2*Z1 + g3*Z0Z1 + g4*X0X1 + g5*Y0Y1
+
+    Returns
+    -------
+    NDArray[np.complexfloating]
+        A 4x4 Hermitian matrix representing the H2 Hamiltonian in the
+        computational basis of 2 qubits.
+
+    Example
+    -------
+    >>> H = h2_hamiltonian()
+    >>> eigenvalues = np.linalg.eigvalsh(H)
+    >>> ground_energy = eigenvalues[0]  # approximately -1.137
     """
     g0 = -0.8105
     g1 = +0.1721
@@ -126,17 +217,36 @@ def vqe(
     learning_rate: float = 0.01,
     num_starts: int = 5,
 ) -> VQEResult:
-    """Run VQE with a hardware-efficient ansatz.
+    """Run VQE with a hardware-efficient ansatz to find the ground state energy.
 
-    Uses parameter-shift rule for gradient computation and the Adam optimizer.
+    Uses the parameter-shift rule for analytic gradient computation and the
+    Adam optimizer for parameter updates. Multiple random starting points
+    are tried to mitigate local minima.
 
-    Args:
-        num_qubits: Number of qubits.
-        hamiltonian: Hamiltonian matrix (2^n × 2^n).
-        ansatz_depth: Number of ansatz layers.
-        max_iter: Maximum optimization iterations per start.
-        learning_rate: Adam step size.
-        num_starts: Number of random initial parameter sets.
+    Parameters
+    ----------
+    num_qubits : int
+        Number of qubits in the ansatz and Hamiltonian.
+    hamiltonian : NDArray[np.complexfloating]
+        The Hamiltonian matrix of size 2^n x 2^n whose ground state
+        energy is to be found.
+    ansatz_depth : int, optional
+        Number of ansatz layers (default 2). Each layer has
+        ``num_qubits * 2`` parameters.
+    max_iter : int, optional
+        Maximum number of Adam optimization iterations per random start
+        (default 200).
+    learning_rate : float, optional
+        Adam optimizer step size (default 0.01).
+    num_starts : int, optional
+        Number of independent random initial parameter sets to try
+        (default 5). The best result across all starts is returned.
+
+    Returns
+    -------
+    VQEResult
+        Contains the optimal energy, optimal parameters, energy history
+        of the best run, and the number of iterations.
     """
     num_params = num_qubits * 2 * ansatz_depth
 

@@ -15,15 +15,24 @@ def partial_trace(
     keep: list[int],
     num_qubits: int,
 ) -> NDArray[np.complexfloating]:
-    """Trace out qubits not in `keep` from a density matrix.
+    """Trace out qubits not in the keep list from a density matrix.
+
+    Computes the reduced density matrix by performing a partial trace
+    over all qubits not specified in `keep`.
 
     Args:
-        rho: Density matrix of the full system (2^n x 2^n).
-        keep: List of qubit indices to keep (0-indexed).
-        num_qubits: Total number of qubits.
+        rho (NDArray[np.complexfloating]): Density matrix of the full
+            system, of shape (2^n, 2^n) where n = num_qubits.
+        keep (list[int]): List of qubit indices to retain (0-indexed).
+            The remaining qubits are traced out.
+        num_qubits (int): Total number of qubits in the system.
 
     Returns:
-        Reduced density matrix of the kept subsystem.
+        NDArray[np.complexfloating]: Reduced density matrix of the
+            kept subsystem, of shape (2^k, 2^k) where k = len(keep).
+
+    Raises:
+        ValueError: If the density matrix size does not match num_qubits.
     """
     if rho.shape[0] != 2**num_qubits:
         raise ValueError(f"Density matrix size {rho.shape[0]} doesn't match {num_qubits} qubits")
@@ -45,9 +54,16 @@ def partial_trace(
 
 
 def von_neumann_entropy(rho: NDArray[np.complexfloating]) -> float:
-    """Compute the von Neumann entropy S(rho) = -Tr(rho log2 rho).
+    """Compute the von Neumann entropy of a density matrix.
 
-    Returns 0 for pure states, log2(d) for maximally mixed states.
+    Defined as S(rho) = -Tr(rho * log2(rho)). Returns 0 for pure
+    states and log2(d) for the maximally mixed state of dimension d.
+
+    Args:
+        rho (NDArray[np.complexfloating]): Density matrix (d x d).
+
+    Returns:
+        float: Entropy in bits (base-2 logarithm).
     """
     eigvals = np.linalg.eigvalsh(rho)
     eigvals = eigvals[eigvals > 1e-15]
@@ -55,16 +71,38 @@ def von_neumann_entropy(rho: NDArray[np.complexfloating]) -> float:
 
 
 def purity(rho: NDArray[np.complexfloating]) -> float:
-    """Compute the purity Tr(rho^2). Returns 1 for pure states, 1/d for maximally mixed."""
+    """Compute the purity of a density matrix.
+
+    Purity is defined as Tr(rho^2). It equals 1 for pure states and
+    1/d for the maximally mixed state of dimension d.
+
+    Args:
+        rho (NDArray[np.complexfloating]): Density matrix (d x d).
+
+    Returns:
+        float: Purity value in [1/d, 1].
+    """
     return float(np.real(np.trace(rho @ rho)))
 
 
 def concurrence(rho: NDArray[np.complexfloating]) -> float:
     """Compute the concurrence of a two-qubit density matrix.
 
-    C(rho) = max(0, lambda_1 - lambda_2 - lambda_3 - lambda_4)
+    The concurrence C(rho) = max(0, lambda_1 - lambda_2 - lambda_3 - lambda_4)
     where lambda_i are the square roots of eigenvalues of rho * tilde(rho)
-    in decreasing order, and tilde(rho) = (Y⊗Y) rho* (Y⊗Y).
+    in decreasing order, and tilde(rho) = (Y x Y) rho* (Y x Y).
+
+    Concurrence ranges from 0 (separable) to 1 (maximally entangled).
+
+    Args:
+        rho (NDArray[np.complexfloating]): Two-qubit density matrix
+            of shape (4, 4).
+
+    Returns:
+        float: Concurrence value in [0, 1].
+
+    Raises:
+        ValueError: If rho is not a 4x4 matrix.
     """
     if rho.shape != (4, 4):
         raise ValueError("Concurrence is defined for two-qubit states (4x4 density matrix)")
@@ -90,13 +128,21 @@ def negativity(
 ) -> float:
     """Compute the negativity of a bipartite state under partial transpose.
 
-    N(rho) = (||rho^{T_A}||_1 - 1) / 2
-    where rho^{T_A} is the partial transpose with respect to subsystem A.
+    Negativity N(rho) = (||rho^{T_A}||_1 - 1) / 2 where rho^{T_A} is
+    the partial transpose with respect to subsystem A. It is zero for
+    separable states and positive for entangled states (for 2x2 and
+    2x3 systems, positivity is also sufficient for entanglement).
 
     Args:
-        rho: Full density matrix.
-        subsystem_a: Qubit indices forming subsystem A.
-        num_qubits: Total number of qubits.
+        rho (NDArray[np.complexfloating]): Full density matrix of shape
+            (2^n, 2^n) where n = num_qubits.
+        subsystem_a (list[int]): Qubit indices forming subsystem A
+            (0-indexed). The partial transpose is taken over this
+            subsystem.
+        num_qubits (int): Total number of qubits in the system.
+
+    Returns:
+        float: Negativity value (non-negative; 0 for separable states).
     """
     dims = [2] * num_qubits
     rho_tensor = rho.reshape(dims + dims)
@@ -120,14 +166,21 @@ def entanglement_entropy(
 ) -> float:
     """Compute the entanglement entropy of a subsystem.
 
-    For a pure state, this is the von Neumann entropy of the reduced density matrix.
-    For mixed states, this gives the entropy of the reduced state (not a true
-    entanglement measure, but still useful).
+    For a pure bipartite state, this is the von Neumann entropy of the
+    reduced density matrix and serves as a true entanglement measure.
+    For mixed states, it gives the entropy of the reduced state, which
+    is not a proper entanglement measure but is still diagnostically
+    useful.
 
     Args:
-        rho: Full system density matrix.
-        subsystem: Qubit indices of subsystem A.
-        num_qubits: Total number of qubits.
+        rho (NDArray[np.complexfloating]): Full system density matrix
+            of shape (2^n, 2^n) where n = num_qubits.
+        subsystem (list[int]): Qubit indices of subsystem A (0-indexed).
+            The von Neumann entropy is computed for this reduced subsystem.
+        num_qubits (int): Total number of qubits in the system.
+
+    Returns:
+        float: Entanglement entropy in bits (base-2 logarithm).
     """
     rho_reduced = partial_trace(rho, subsystem, num_qubits)
     return von_neumann_entropy(rho_reduced)
@@ -140,14 +193,28 @@ def schmidt_decomposition(
 ) -> tuple[NDArray[np.floating], NDArray[np.complexfloating], NDArray[np.complexfloating]]:
     """Compute the Schmidt decomposition of a bipartite pure state.
 
+    Decomposes |psi> = sum_i lambda_i |u_i> |v_i> where lambda_i are
+    the Schmidt coefficients and |u_i>, |v_i> are orthonormal bases
+    for subsystems A and B respectively. Only terms with non-negligible
+    coefficients (> 1e-15) are returned.
+
     Args:
-        statevector: State vector of the full system.
-        subsystem_a: Qubit indices forming subsystem A.
-        num_qubits: Total number of qubits.
+        statevector (NDArray[np.complexfloating]): State vector of the
+            full system, of length 2^num_qubits.
+        subsystem_a (list[int]): Qubit indices forming subsystem A
+            (0-indexed). Subsystem B consists of all remaining qubits.
+        num_qubits (int): Total number of qubits in the system.
 
     Returns:
-        (coefficients, u_vectors, v_vectors) where
-        |psi> = sum_i coefficients[i] * |u_i> |v_i>
+        tuple[NDArray[np.floating], NDArray[np.complexfloating],
+            NDArray[np.complexfloating]]: A tuple (coefficients,
+            u_vectors, v_vectors) where:
+            - coefficients: Schmidt coefficients (positive, descending),
+              array of shape (r,) where r is the Schmidt rank.
+            - u_vectors: Orthonormal basis vectors for subsystem A,
+              array of shape (2^n_a, r).
+            - v_vectors: Orthonormal basis vectors for subsystem B,
+              array of shape (r, 2^n_b).
     """
     subsystem_b = sorted(set(range(num_qubits)) - set(subsystem_a))
     n_a = len(subsystem_a)

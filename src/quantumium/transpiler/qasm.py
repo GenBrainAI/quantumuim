@@ -26,6 +26,7 @@ GATE_TO_QASM: dict[str, str] = {
     "CNOT": "cx",
     "SWAP": "swap",
 }
+"""Mapping from Quantumium gate names to their OpenQASM 2.0 equivalents."""
 
 QASM_TO_GATE: dict[str, Gate] = {
     "id": I,
@@ -38,16 +39,32 @@ QASM_TO_GATE: dict[str, Gate] = {
     "cx": CNOT,
     "swap": SWAP,
 }
+"""Mapping from OpenQASM 2.0 gate names to Quantumium Gate objects."""
 
 ROTATION_QASM: dict[str, str] = {
     "Rx": "rx",
     "Ry": "ry",
     "Rz": "rz",
 }
+"""Mapping from Quantumium rotation gate prefixes to OpenQASM names."""
 
 
 def _extract_rotation_angle(gate: Gate) -> tuple[str, float] | None:
-    """Try to identify a rotation gate and extract its angle."""
+    """Attempt to identify a rotation gate and extract its angle.
+
+    First tries to parse the angle from the gate's name (e.g.,
+    ``"Rx(1.5708)"``). If the name does not encode a rotation, falls back
+    to numerical analysis of the unitary matrix to detect Rx, Ry, or Rz
+    structure.
+
+    Args:
+        gate (Gate): The gate to inspect.
+
+    Returns:
+        tuple[str, float] | None: A ``(prefix, angle)`` pair such as
+            ``("Rx", 1.5708)`` if the gate is a recognized rotation, or
+            ``None`` if it cannot be identified as one.
+    """
     name = gate.name
     for prefix in ("Rx", "Ry", "Rz"):
         if name.startswith(prefix + "("):
@@ -127,7 +144,18 @@ def to_qasm(circuit: QuantumCircuit) -> str:
 
 
 def _decompose_u3(matrix: np.ndarray) -> str:
-    """Decompose a single-qubit unitary to U3(theta, phi, lambda) parameters."""
+    """Decompose a single-qubit unitary into U3(theta, phi, lambda) parameters.
+
+    Extracts the three Euler angles that parametrize the U3 gate from an
+    arbitrary 2x2 unitary matrix.
+
+    Args:
+        matrix (np.ndarray): A 2x2 complex unitary matrix.
+
+    Returns:
+        str: Comma-separated string ``"theta,phi,lambda"`` with 10 decimal
+            places, suitable for embedding in an OpenQASM ``u3(...)`` call.
+    """
     a = matrix[0, 0]
     b = matrix[0, 1]
     c = matrix[1, 0]
@@ -154,7 +182,19 @@ def _decompose_u3(matrix: np.ndarray) -> str:
 def from_qasm(qasm_str: str) -> QuantumCircuit:
     """Parse an OpenQASM 2.0 string into a QuantumCircuit.
 
-    Supports standard gates from qelib1.inc and rotation gates.
+    Supports the standard gates defined in ``qelib1.inc`` (id, x, y, z, h,
+    s, t, cx, swap), parametric rotation gates (rx, ry, rz), and the
+    universal U3 gate. Lines beginning with ``//``, ``OPENQASM``, or
+    ``include`` are silently skipped.
+
+    Args:
+        qasm_str (str): A complete OpenQASM 2.0 program string.
+
+    Returns:
+        QuantumCircuit: The reconstructed Quantumium circuit.
+
+    Raises:
+        ValueError: If the string contains no ``qreg`` declaration.
     """
     num_qubits = None
     instructions: list[tuple[str, list[float], list[int]]] = []

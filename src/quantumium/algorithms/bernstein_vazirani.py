@@ -1,4 +1,21 @@
-"""Bernstein-Vazirani algorithm implementation."""
+"""Bernstein-Vazirani algorithm implementation.
+
+The Bernstein-Vazirani algorithm determines a secret string s in {0,1}^n
+hidden inside a linear Boolean function f(x) = s . x (mod 2) using a
+single quantum query. Classically, n queries are required.
+
+This module provides:
+
+- :func:`bv_oracle` -- constructs the oracle for f(x) = s . x mod 2.
+- :func:`bernstein_vazirani` -- builds the complete circuit.
+- :func:`find_secret` -- runs the circuit and extracts the secret string.
+
+Example::
+
+    >>> from quantumium.algorithms.bernstein_vazirani import find_secret
+    >>> secret = find_secret(num_qubits=4, secret=0b1010)
+    >>> assert secret == 0b1010
+"""
 
 from __future__ import annotations
 
@@ -9,6 +26,20 @@ from quantumium.core.gate import Gate, H, X
 
 
 def _bit_reverse(val: int, n: int) -> int:
+    """Reverse the bit-order of an n-bit integer.
+
+    Parameters
+    ----------
+    val : int
+        The integer whose bits are to be reversed.
+    n : int
+        The number of bits to consider.
+
+    Returns
+    -------
+    int
+        The bit-reversed integer.
+    """
     result = 0
     for i in range(n):
         if val & (1 << i):
@@ -17,9 +48,27 @@ def _bit_reverse(val: int, n: int) -> int:
 
 
 def bv_oracle(num_qubits: int, secret: int) -> Gate:
-    """Build a Bernstein-Vazirani oracle for f(x) = s*x mod 2.
+    """Build a Bernstein-Vazirani oracle for f(x) = s . x mod 2.
 
-    Operates on num_qubits+1 qubits (n input + 1 ancilla).
+    Constructs the unitary |x>|y> -> |x>|y XOR (s . x mod 2)> on
+    ``num_qubits + 1`` qubits (n input qubits plus 1 ancilla).
+
+    Parameters
+    ----------
+    num_qubits : int
+        Number of input qubits.
+    secret : int
+        The secret integer s, where 0 <= s < 2^num_qubits.
+
+    Returns
+    -------
+    Gate
+        A unitary gate on ``num_qubits + 1`` qubits implementing the oracle.
+
+    Raises
+    ------
+    ValueError
+        If ``secret`` is negative or >= 2^num_qubits.
     """
     if secret < 0 or secret >= 2**num_qubits:
         raise ValueError(f"Secret {secret} out of range for {num_qubits} qubits")
@@ -42,15 +91,25 @@ def bv_oracle(num_qubits: int, secret: int) -> Gate:
 
 
 def bernstein_vazirani(num_qubits: int, secret: int) -> QuantumCircuit:
-    """Build a Bernstein-Vazirani circuit to find the secret string s.
+    """Build a complete Bernstein-Vazirani circuit to find the secret string s.
 
-    Args:
-        num_qubits: Number of input qubits.
-        secret: The secret integer s where f(x) = s*x mod 2.
+    The circuit applies Hadamards, queries the oracle, and applies Hadamards
+    again. Measuring the first ``num_qubits`` qubits directly reveals the
+    binary representation of the secret integer s.
 
-    Returns:
-        Circuit on num_qubits+1 qubits. Measuring the first n qubits
-        reveals the secret string s.
+    Parameters
+    ----------
+    num_qubits : int
+        Number of input qubits.
+    secret : int
+        The secret integer s, where f(x) = s . x mod 2. Must satisfy
+        0 <= s < 2^num_qubits.
+
+    Returns
+    -------
+    QuantumCircuit
+        A circuit on ``num_qubits + 1`` qubits. Measuring the first
+        ``num_qubits`` qubits reveals the secret string s in binary.
     """
     total_qubits = num_qubits + 1
     oracle = bv_oracle(num_qubits, secret)
@@ -71,7 +130,26 @@ def bernstein_vazirani(num_qubits: int, secret: int) -> QuantumCircuit:
 
 
 def find_secret(num_qubits: int, secret: int, shots: int = 1024) -> int:
-    """Run the algorithm and extract the secret string."""
+    """Run the Bernstein-Vazirani algorithm and extract the secret string.
+
+    Builds and executes the circuit, then reads the most frequent measurement
+    outcome on the input register to determine the secret.
+
+    Parameters
+    ----------
+    num_qubits : int
+        Number of input qubits.
+    secret : int
+        The secret integer s, where f(x) = s . x mod 2.
+    shots : int, optional
+        Number of measurement shots (default 1024).
+
+    Returns
+    -------
+    int
+        The recovered secret integer. Should equal ``secret`` with high
+        probability.
+    """
     qc = bernstein_vazirani(num_qubits, secret)
     counts = qc.measure_all(shots=shots)
 

@@ -33,7 +33,25 @@ from ..core.gate import Gate, H
 
 @dataclass
 class OptionPricingResult:
-    """Result from quantum option pricing."""
+    """Result from quantum European option pricing.
+
+    Attributes:
+        quantum_price: Option price estimated via quantum amplitude
+            estimation.
+        classical_price: Reference option price from the Black-Scholes
+            analytical formula.
+        relative_error: Relative difference between the quantum and
+            Black-Scholes prices, ``|quantum - classical| / classical``.
+        num_qubits: Number of qubits used for the price register
+            (excluding the ancilla).
+        num_price_bins: Number of discretization bins (``2**num_qubits``).
+        option_type: ``"call"`` or ``"put"``.
+        spot: Spot (current) price of the underlying asset.
+        strike: Strike price of the option.
+        risk_free_rate: Risk-free interest rate used for discounting.
+        volatility: Annualized volatility of the underlying asset.
+        maturity: Time to expiration in years.
+    """
     quantum_price: float
     classical_price: float
     relative_error: float
@@ -87,7 +105,16 @@ def black_scholes_price(
 
 
 def _norm_cdf(x: float) -> float:
-    """Standard normal CDF using the error function."""
+    """Compute the standard normal cumulative distribution function.
+
+    Uses the relationship ``Phi(x) = 0.5 * (1 + erf(x / sqrt(2)))``.
+
+    Args:
+        x: Point at which to evaluate the CDF.
+
+    Returns:
+        float: The probability ``P(Z <= x)`` for standard normal Z.
+    """
     return 0.5 * (1 + math.erf(x / math.sqrt(2)))
 
 
@@ -101,8 +128,23 @@ def _discretize_lognormal(
 ) -> tuple[NDArray[np.floating], NDArray[np.floating]]:
     """Discretize the risk-neutral log-normal distribution into bins.
 
+    Divides the log-price range into *num_bins* equal-width bins (in
+    log-space) spanning ``+/- num_std`` standard deviations around the
+    risk-neutral mean.
+
+    Args:
+        spot: Current asset price S_0.
+        rate: Risk-free interest rate r.
+        volatility: Annualized volatility sigma.
+        maturity: Time to maturity T (in years).
+        num_bins: Number of bins for discretization.
+        num_std: Number of standard deviations to cover on each side
+            of the mean.
+
     Returns:
-        (prices, probabilities) — bin center prices and their probabilities.
+        tuple[NDArray[np.floating], NDArray[np.floating]]: A 2-tuple of
+            ``(prices, probabilities)`` where *prices* are the bin-center
+            asset prices and *probabilities* sum to 1.
     """
     mu = math.log(spot) + (rate - 0.5 * volatility**2) * maturity
     sigma = volatility * math.sqrt(maturity)
@@ -128,7 +170,21 @@ def _payoff(
     strike: float,
     option_type: str,
 ) -> NDArray[np.floating]:
-    """Compute the payoff for each price bin."""
+    """Compute the option payoff for each discretized price bin.
+
+    Args:
+        prices: Array of asset prices (bin centers).
+        strike: Strike price of the option.
+        option_type: ``"call"`` for ``max(S - K, 0)`` or ``"put"``
+            for ``max(K - S, 0)``.
+
+    Returns:
+        NDArray[np.floating]: Array of payoff values, same shape as
+            *prices*.
+
+    Raises:
+        ValueError: If *option_type* is not ``"call"`` or ``"put"``.
+    """
     if option_type == "call":
         return np.maximum(prices - strike, 0.0)
     elif option_type == "put":

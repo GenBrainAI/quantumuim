@@ -18,16 +18,37 @@ class CirqBackend(Backend):
     """
 
     def __init__(self, use_hardware: bool = False, processor_id: str | None = None):
+        """Initialize the Cirq backend.
+
+        Args:
+            use_hardware (bool): If ``True``, execute on Google Quantum
+                hardware via the Cirq Engine API. If ``False`` (default),
+                use Cirq's built-in local simulator.
+            processor_id (str | None): Google Quantum processor name
+                (e.g., ``"rainbow"``). When *None* and *use_hardware* is
+                ``True``, defaults to ``"rainbow"``.
+        """
         self._use_hardware = use_hardware
         self._processor_id = processor_id
 
     @property
     def name(self) -> str:
+        """Return the human-readable backend name.
+
+        Returns:
+            str: ``"cirq-simulator"`` for local simulation, or
+                ``"cirq-google-<processor_id>"`` for hardware execution.
+        """
         if self._use_hardware:
             return f"cirq-google-{self._processor_id or 'auto'}"
         return "cirq-simulator"
 
     def is_available(self) -> bool:
+        """Check whether the Cirq SDK is importable.
+
+        Returns:
+            bool: ``True`` if ``cirq`` can be imported, ``False`` otherwise.
+        """
         try:
             import cirq  # noqa: F401
             return True
@@ -35,7 +56,20 @@ class CirqBackend(Backend):
             return False
 
     def _translate_circuit(self, circuit: QuantumCircuit):
-        """Convert a Quantumium circuit to a Cirq Circuit."""
+        """Convert a Quantumium circuit to a Cirq Circuit.
+
+        Each Quantumium gate is wrapped in a ``cirq.MatrixGate`` and applied
+        to the corresponding ``LineQubit`` targets. A measurement gate keyed
+        ``'result'`` is appended to all qubits.
+
+        Args:
+            circuit (QuantumCircuit): The Quantumium circuit to translate.
+
+        Returns:
+            tuple[cirq.Circuit, list[cirq.LineQubit]]: A two-element tuple
+                containing the translated Cirq circuit and the list of line
+                qubits used.
+        """
         import cirq
 
         qubits = cirq.LineQubit.range(circuit.num_qubits)
@@ -52,6 +86,22 @@ class CirqBackend(Backend):
         return cirq_circuit, qubits
 
     def run(self, circuit: QuantumCircuit, shots: int = 1024) -> ExecutionResult:
+        """Execute a Quantumium circuit via Google Cirq.
+
+        Translates the circuit to Cirq format and dispatches to either the
+        local Cirq simulator or Google Quantum hardware depending on the
+        ``use_hardware`` flag.
+
+        Args:
+            circuit (QuantumCircuit): The Quantumium circuit to execute.
+            shots (int): Number of measurement repetitions. Defaults to 1024.
+
+        Returns:
+            ExecutionResult: Sorted measurement counts and metadata.
+
+        Raises:
+            RuntimeError: If the Cirq SDK is not installed.
+        """
         if not self.is_available():
             raise RuntimeError("Cirq is not installed. Run: pip install cirq")
 
@@ -73,7 +123,20 @@ class CirqBackend(Backend):
         )
 
     def _result_to_counts(self, result, num_qubits: int) -> dict[str, int]:
-        """Convert Cirq measurement result to bitstring counts."""
+        """Convert a Cirq measurement result to bitstring counts.
+
+        Iterates over each measurement row, converts the binary array to a
+        bitstring, and tallies the occurrences.
+
+        Args:
+            result: A Cirq ``Result`` object containing measurement data
+                under the key ``'result'``.
+            num_qubits (int): Number of qubits in the circuit (used for
+                context; bitstring length is inferred from the data).
+
+        Returns:
+            dict[str, int]: Mapping of bitstrings to observation counts.
+        """
         import pandas as pd
 
         measurements = result.measurements['result']
@@ -84,7 +147,18 @@ class CirqBackend(Backend):
         return counts
 
     def _run_hardware(self, cirq_circuit, shots: int) -> dict[str, int]:
-        """Run on Google Quantum hardware via Cirq Engine."""
+        """Execute the circuit on Google Quantum hardware via the Cirq Engine.
+
+        Connects to the Google Quantum Engine, selects the configured
+        processor (or defaults to ``"rainbow"``), and submits the circuit.
+
+        Args:
+            cirq_circuit: A Cirq ``Circuit`` ready for execution.
+            shots (int): Number of measurement repetitions.
+
+        Returns:
+            dict[str, int]: Mapping of bitstrings to observation counts.
+        """
         import cirq_google
 
         engine = cirq_google.get_engine()

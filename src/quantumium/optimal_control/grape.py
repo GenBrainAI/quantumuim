@@ -28,7 +28,19 @@ from .fidelity import propagator_sequence, gate_fidelity, _matrix_exp
 
 @dataclass
 class GRAPEResult:
-    """Result from GRAPE optimization."""
+    """Result from GRAPE pulse optimization.
+
+    Attributes:
+        optimal_pulse (PulseSequence): The optimized pulse sequence that
+            best approximates the target unitary.
+        fidelity (float): Final gate fidelity achieved, in [0, 1].
+        fidelity_history (list[float]): Fidelity value at each iteration,
+            useful for monitoring convergence.
+        num_iterations (int): Total number of optimization iterations
+            performed (including the final evaluation).
+        converged (bool): Whether the optimization reached the convergence
+            threshold before exhausting iterations.
+    """
     optimal_pulse: PulseSequence
     fidelity: float
     fidelity_history: list[float]

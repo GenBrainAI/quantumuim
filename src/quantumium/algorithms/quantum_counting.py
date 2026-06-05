@@ -30,6 +30,20 @@ from .grover import grover_oracle, grover_diffuser
 
 
 def _bit_reverse(val: int, n: int) -> int:
+    """Reverse the bit-order of an n-bit integer.
+
+    Parameters
+    ----------
+    val : int
+        The integer whose bits are to be reversed.
+    n : int
+        The number of bits to consider.
+
+    Returns
+    -------
+    int
+        The bit-reversed integer.
+    """
     result = 0
     for i in range(n):
         if val & (1 << i):
@@ -41,7 +55,23 @@ def _build_grover_operator(
     num_qubits: int,
     marked_states: list[int],
 ) -> NDArray[np.complexfloating]:
-    """Build the Grover operator G = D · O as a matrix."""
+    """Build the Grover iterate G = D * O as a full matrix.
+
+    The Grover operator is the product of the diffusion operator D and the
+    oracle O. Its eigenvalues encode the fraction of marked states.
+
+    Parameters
+    ----------
+    num_qubits : int
+        Number of qubits in the search register.
+    marked_states : list[int]
+        Indices of the marked (target) states.
+
+    Returns
+    -------
+    NDArray[np.complexfloating]
+        The 2^num_qubits x 2^num_qubits Grover operator matrix.
+    """
     oracle = grover_oracle(num_qubits, marked_states)
     diffuser = grover_diffuser(num_qubits)
     return diffuser.matrix @ oracle.matrix
@@ -50,7 +80,21 @@ def _build_grover_operator(
 def _controlled_gate(
     U: NDArray[np.complexfloating],
 ) -> NDArray[np.complexfloating]:
-    """Build controlled-U gate matrix."""
+    """Build a controlled-U gate matrix.
+
+    Constructs the block-diagonal matrix [I, 0; 0, U] where the first
+    qubit is the control.
+
+    Parameters
+    ----------
+    U : NDArray[np.complexfloating]
+        The unitary matrix to be controlled (dimension d x d).
+
+    Returns
+    -------
+    NDArray[np.complexfloating]
+        A 2d x 2d controlled-U matrix.
+    """
     n = U.shape[0]
     dim = 2 * n
     CU = np.eye(dim, dtype=complex)
@@ -59,7 +103,21 @@ def _controlled_gate(
 
 
 def _controlled_phase(theta: float) -> Gate:
-    """Two-qubit controlled phase gate."""
+    """Build a two-qubit controlled phase gate.
+
+    Applies exp(i*theta) to the |11> state and acts as identity on all
+    other basis states.
+
+    Parameters
+    ----------
+    theta : float
+        The phase angle in radians.
+
+    Returns
+    -------
+    Gate
+        A two-qubit controlled phase gate.
+    """
     return Gate(np.array([
         [1, 0, 0, 0],
         [0, 1, 0, 0],
@@ -72,10 +130,17 @@ def _apply_inverse_qft_inplace(
     qc: QuantumCircuit,
     qubits: list[int],
 ) -> None:
-    """Apply inverse QFT to specified qubits within a circuit.
+    """Apply the inverse QFT to specified qubits within an existing circuit.
 
-    Uses the same structure as circuits.templates.inverse_qft but
-    operates on an arbitrary subset of qubits.
+    Modifies the circuit in place by appending SWAP gates, inverse
+    controlled-phase gates, and Hadamard gates.
+
+    Parameters
+    ----------
+    qc : QuantumCircuit
+        The circuit to modify.
+    qubits : list[int]
+        Indices of the qubits to which the inverse QFT is applied.
     """
     from ..core.gate import SWAP
     n = len(qubits)
@@ -97,10 +162,26 @@ def _extract_phase_from_counting_register(
     num_counting_qubits: int,
     total_qubits: int,
 ) -> float:
-    """Extract the estimated phase from QPE statevector.
+    """Extract the estimated phase from a QPE statevector.
 
-    Marginalizes over non-counting qubits, finds the peak, and
-    converts to a phase in [0, 1).
+    Marginalizes over non-counting qubits to compute the probability
+    distribution on the counting register, finds the most likely outcome,
+    and converts it to a phase in [0, 1).
+
+    Parameters
+    ----------
+    sv : NDArray[np.complexfloating]
+        The full statevector of the QPE circuit (length 2^total_qubits).
+    num_counting_qubits : int
+        Number of counting (evaluation) qubits.
+    total_qubits : int
+        Total number of qubits in the circuit.
+
+    Returns
+    -------
+    float
+        The estimated phase phi in [0, 1), where the QPE eigenvalue is
+        exp(2*pi*i*phi).
     """
     probs = np.abs(sv) ** 2
     num_counting_states = 2**num_counting_qubits
@@ -123,7 +204,22 @@ def _extract_phase_from_counting_register(
 
 @dataclass
 class QuantumCountingResult:
-    """Result of quantum counting."""
+    """Result container for quantum counting.
+
+    Attributes
+    ----------
+    estimated_count : float
+        The estimated number of marked items M = N * sin^2(theta).
+    theta : float
+        The estimated Grover angle theta in radians.
+    total_states : int
+        The total search space size N = 2^num_search_qubits.
+    num_counting_qubits : int
+        Number of counting qubits used for QPE precision.
+    confidence_interval : tuple[float, float]
+        A ``(lower, upper)`` confidence interval for the estimated count,
+        based on the QPE resolution.
+    """
     estimated_count: float
     theta: float
     total_states: int
@@ -138,17 +234,37 @@ def quantum_counting(
 ) -> QuantumCountingResult:
     """Estimate the number of marked items using quantum counting.
 
-    Applies QPE to the Grover operator G = D·O to estimate the angle
-    theta such that the eigenvalues of G are exp(±2i*theta). The number
-    of marked items is then M = N * sin^2(theta).
+    Applies quantum phase estimation (QPE) to the Grover operator G = D*O
+    to estimate the angle theta such that the eigenvalues of G are
+    exp(+/-2i*theta). The number of marked items is then M = N * sin^2(theta).
 
-    Args:
-        num_search_qubits: Number of qubits in the search space (N = 2^n).
-        marked_states: List of marked state indices.
-        num_counting_qubits: Number of counting qubits for QPE precision.
+    Parameters
+    ----------
+    num_search_qubits : int
+        Number of qubits in the search register. The total search space
+        has N = 2^num_search_qubits states.
+    marked_states : list[int]
+        List of integer indices identifying the marked (target) states.
+    num_counting_qubits : int, optional
+        Number of counting qubits for QPE precision (default 4). More
+        counting qubits improve the accuracy of the count estimate.
 
-    Returns:
-        QuantumCountingResult with estimated count and confidence interval.
+    Returns
+    -------
+    QuantumCountingResult
+        Contains the estimated count, Grover angle, and a confidence
+        interval for the estimate.
+
+    Raises
+    ------
+    ValueError
+        If ``marked_states`` is empty or contains all states.
+
+    Example
+    -------
+    >>> result = quantum_counting(3, [0, 1, 2, 3], num_counting_qubits=4)
+    >>> abs(result.estimated_count - 4) < 1.0  # N=8, M=4
+    True
     """
     N = 2**num_search_qubits
     M_true = len(marked_states)
@@ -226,7 +342,21 @@ def quantum_counting(
 
 @dataclass
 class AmplitudeEstimationResult:
-    """Result of amplitude estimation."""
+    """Result container for canonical amplitude estimation.
+
+    Attributes
+    ----------
+    estimated_amplitude : float
+        The estimated amplitude a = sin(theta) of the "good" subspace.
+    estimated_probability : float
+        The estimated probability a^2 = sin^2(theta).
+    theta : float
+        The estimated Grover angle theta in radians.
+    num_evaluation_qubits : int
+        Number of QPE evaluation qubits used.
+    num_grover_iterations : int
+        Total number of Grover operator applications (2^num_evaluation_qubits - 1).
+    """
     estimated_amplitude: float
     estimated_probability: float
     theta: float
@@ -242,21 +372,32 @@ def amplitude_estimation(
 ) -> AmplitudeEstimationResult:
     """Canonical (QPE-based) amplitude estimation.
 
-    Estimates the amplitude a = sin(theta) of the "good" subspace
-    after applying state preparation A: |0> -> a|good> + b|bad>.
+    Estimates the amplitude a = sin(theta) of the "good" subspace after
+    applying state preparation A: |0> -> a|good> + b|bad>. Uses QPE on
+    the Grover operator Q = A * S_0 * A^dagger * S_good, where S_good
+    is the oracle marking good states.
 
-    Uses QPE on the Grover operator Q = A S_0 A^dag S_good where
-    S_good is the oracle.
+    Parameters
+    ----------
+    oracle_circuit : QuantumCircuit
+        A circuit implementing the oracle (marks good states by flipping
+        their phase). Must operate on the same number of qubits as the
+        state preparation circuit.
+    state_prep_circuit : QuantumCircuit or None, optional
+        A circuit implementing the state preparation operator A. If None,
+        a uniform superposition (Hadamard on all qubits) is used.
+    good_states : list[int] or None, optional
+        Indices of good states. Currently unused (the oracle handles
+        marking), but included for API consistency.
+    num_evaluation_qubits : int, optional
+        Number of QPE evaluation qubits (default 4). More qubits improve
+        precision but increase circuit size exponentially.
 
-    Args:
-        oracle_circuit: Circuit implementing the oracle (marks good states).
-        state_prep_circuit: Circuit implementing state preparation A.
-            If None, uses uniform superposition (Hadamard on all qubits).
-        good_states: Indices of good states (unused, oracle handles marking).
-        num_evaluation_qubits: Number of QPE evaluation qubits.
-
-    Returns:
-        AmplitudeEstimationResult with estimated amplitude.
+    Returns
+    -------
+    AmplitudeEstimationResult
+        Contains the estimated amplitude, probability, Grover angle, and
+        resource counts.
     """
     n = oracle_circuit.num_qubits
 
@@ -337,7 +478,21 @@ def amplitude_estimation(
 
 @dataclass
 class IterativeAEResult:
-    """Result of iterative amplitude estimation."""
+    """Result container for iterative amplitude estimation.
+
+    Attributes
+    ----------
+    estimated_amplitude : float
+        The estimated amplitude a = sin(theta) of the marked subspace.
+    estimated_probability : float
+        The estimated probability a^2 = sin^2(theta).
+    theta : float
+        The estimated Grover angle theta in radians.
+    num_rounds : int
+        Number of refinement rounds performed.
+    total_oracle_calls : int
+        Total number of Grover operator applications across all rounds.
+    """
     estimated_amplitude: float
     estimated_probability: float
     theta: float
@@ -353,18 +508,34 @@ def iterative_amplitude_estimation(
 ) -> IterativeAEResult:
     """Iterative amplitude estimation without QPE.
 
-    Uses the method of Suzuki et al. (2020): iteratively narrows the
-    estimate of theta by measuring the success probability of Grover
-    iterations of increasing depth.
+    Implements the method of Suzuki et al. (2020), which iteratively narrows
+    the estimate of the Grover angle theta by measuring the success probability
+    of Grover iterations with exponentially increasing depth (2^r iterations
+    in round r). No phase estimation circuit is needed.
 
-    Args:
-        num_search_qubits: Number of qubits (N = 2^n states).
-        marked_states: Indices of marked states.
-        num_rounds: Number of refinement rounds.
-        confidence: Not used directly (for API consistency).
+    Parameters
+    ----------
+    num_search_qubits : int
+        Number of qubits in the search register (N = 2^n states).
+    marked_states : list[int]
+        Indices of the marked (target) states.
+    num_rounds : int, optional
+        Number of refinement rounds (default 5). Each round doubles the
+        Grover depth, so the total oracle calls scale as O(2^num_rounds).
+    confidence : float, optional
+        Confidence parameter (default 0.05). Reserved for API consistency;
+        not directly used in the current implementation.
 
-    Returns:
-        IterativeAEResult.
+    Returns
+    -------
+    IterativeAEResult
+        Contains the estimated amplitude, probability, Grover angle,
+        number of rounds, and total oracle calls.
+
+    Raises
+    ------
+    ValueError
+        If ``marked_states`` is empty or contains all states.
     """
     N = 2**num_search_qubits
     M_true = len(marked_states)
@@ -433,7 +604,21 @@ def iterative_amplitude_estimation(
 
 
 def _circuit_to_unitary(qc: QuantumCircuit) -> NDArray[np.complexfloating]:
-    """Extract the unitary matrix of a circuit."""
+    """Extract the full unitary matrix representation of a quantum circuit.
+
+    Multiplies out all gate matrices (expanded to the full Hilbert space)
+    in instruction order to produce the overall circuit unitary.
+
+    Parameters
+    ----------
+    qc : QuantumCircuit
+        The quantum circuit to convert.
+
+    Returns
+    -------
+    NDArray[np.complexfloating]
+        A 2^n x 2^n unitary matrix, where n = qc.num_qubits.
+    """
     n = qc.num_qubits
     dim = 2**n
     U = np.eye(dim, dtype=complex)

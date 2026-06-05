@@ -1,6 +1,15 @@
 """Quantum information theory toolkit.
 
-Channel representations, distance measures, and process tomography.
+This package provides channel representations and conversions (Kraus, Choi,
+superoperator, Pauli Transfer Matrix), distance measures between quantum
+states (trace distance, Bures distance, Hellinger distance, relative entropy),
+and quantum process tomography for characterizing unknown channels.
+
+Modules:
+    channels: Quantum channel class with lazy conversion between Kraus, Choi,
+        superoperator, and PTM representations.
+    distances: Distance and divergence measures between density matrices.
+    process_tomography: Quantum process tomography and chi-matrix reconstruction.
 """
 
 from .channels import (

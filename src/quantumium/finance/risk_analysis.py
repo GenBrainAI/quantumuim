@@ -31,7 +31,23 @@ from ..core.gate import Gate
 
 @dataclass
 class RiskAnalysisResult:
-    """Result from quantum risk analysis."""
+    """Result from quantum risk analysis.
+
+    Attributes:
+        var_quantum: Value at Risk estimated via quantum amplitude
+            estimation.
+        cvar_quantum: Conditional Value at Risk (Expected Shortfall)
+            estimated via quantum amplitude estimation.
+        var_classical: Value at Risk computed classically from the
+            discretized distribution.
+        cvar_classical: Conditional VaR computed classically.
+        confidence_level: Confidence level used (e.g., 0.95 for 95%).
+        num_qubits: Number of qubits used for the loss distribution
+            register.
+        num_bins: Number of discretization bins (``2**num_qubits``).
+        distribution: Name of the assumed loss distribution (e.g.,
+            ``"gaussian"``).
+    """
     var_quantum: float
     cvar_quantum: float
     var_classical: float
@@ -86,7 +102,24 @@ def _build_gaussian_distribution(
     num_bins: int,
     num_std: float = 3.0,
 ) -> tuple[NDArray[np.floating], NDArray[np.floating]]:
-    """Discretize a Gaussian distribution into bins."""
+    """Discretize a Gaussian distribution into equal-width bins.
+
+    Divides the range ``[mu - num_std*sigma, mu + num_std*sigma]`` into
+    *num_bins* bins, computing the probability mass in each bin via
+    the normal CDF.
+
+    Args:
+        mu: Mean of the Gaussian distribution.
+        sigma: Standard deviation of the Gaussian distribution.
+        num_bins: Number of bins for discretization.
+        num_std: Number of standard deviations to cover on each side
+            of the mean.
+
+    Returns:
+        tuple[NDArray[np.floating], NDArray[np.floating]]: A 2-tuple
+            ``(bin_centers, probabilities)`` where *bin_centers* are the
+            midpoints of each bin and *probabilities* sum to 1.
+    """
     lo = mu - num_std * sigma
     hi = mu + num_std * sigma
     edges = np.linspace(lo, hi, num_bins + 1)

@@ -22,8 +22,18 @@ def random_bits(
 ) -> str:
     """Generate a string of random bits using quantum measurement.
 
-    Each bit is produced by measuring a qubit in the |+⟩ state.
-    Uses batches of qubits for efficiency.
+    Each bit is produced by preparing a qubit in the |+> state
+    (via a Hadamard gate) and measuring in the computational basis.
+    Qubits are processed in batches for efficiency.
+
+    Args:
+        num_bits: Number of random bits to generate. Must be >= 1.
+        noise_model: Optional :class:`NoiseModel` to apply during
+            measurement, simulating hardware imperfections.
+
+    Returns:
+        str: A string of ``'0'`` and ``'1'`` characters of length
+            *num_bits*.
     """
     batch_size = min(num_bits, 8)
     bits = []
@@ -51,9 +61,23 @@ def random_int(
     high: int,
     noise_model: NoiseModel | None = None,
 ) -> int:
-    """Generate a random integer in [low, high) using quantum randomness.
+    """Generate a uniformly distributed random integer in [low, high).
 
-    Uses rejection sampling to ensure uniform distribution.
+    Uses rejection sampling on quantum random bits to guarantee a
+    perfectly uniform distribution over the requested range, regardless
+    of whether the range is a power of two.
+
+    Args:
+        low: Inclusive lower bound of the range.
+        high: Exclusive upper bound of the range. Must be > *low*.
+        noise_model: Optional :class:`NoiseModel` to apply during
+            measurement.
+
+    Returns:
+        int: A random integer ``r`` satisfying ``low <= r < high``.
+
+    Raises:
+        ValueError: If *low* >= *high*.
     """
     if low >= high:
         raise ValueError(f"low ({low}) must be less than high ({high})")
@@ -69,11 +93,19 @@ def random_int(
 
 
 def random_float(noise_model: NoiseModel | None = None, precision: int = 32) -> float:
-    """Generate a random float in [0, 1) using quantum randomness.
+    """Generate a uniformly distributed random float in [0, 1).
+
+    Produces *precision* quantum random bits and interprets them as the
+    binary fraction ``0.b_1 b_2 ... b_n``.
 
     Args:
-        noise_model: Optional noise model.
-        precision: Number of random bits (default 32 gives ~9 decimal digits).
+        noise_model: Optional :class:`NoiseModel` to apply during
+            measurement.
+        precision: Number of random bits to use. Default is 32,
+            yielding approximately 9 decimal digits of precision.
+
+    Returns:
+        float: A random value ``f`` satisfying ``0.0 <= f < 1.0``.
     """
     bits = random_bits(precision, noise_model)
     value = int(bits, 2)
@@ -84,7 +116,19 @@ def random_bytes(
     num_bytes: int,
     noise_model: NoiseModel | None = None,
 ) -> bytes:
-    """Generate random bytes using quantum measurement."""
+    """Generate random bytes using quantum measurement.
+
+    Each byte is assembled from 8 quantum random bits. The result is
+    suitable for cryptographic seeding or key material.
+
+    Args:
+        num_bytes: Number of random bytes to generate. Must be >= 1.
+        noise_model: Optional :class:`NoiseModel` to apply during
+            measurement.
+
+    Returns:
+        bytes: A bytes object of length *num_bytes*.
+    """
     bits = random_bits(num_bytes * 8, noise_model)
     return bytes(int(bits[i:i + 8], 2) for i in range(0, len(bits), 8))
 
@@ -93,7 +137,21 @@ def random_choice(
     items: list,
     noise_model: NoiseModel | None = None,
 ) -> object:
-    """Select a random item from a list using quantum randomness."""
+    """Select a random item from a list using quantum randomness.
+
+    Uses :func:`random_int` internally to pick a uniformly random index.
+
+    Args:
+        items: Non-empty list of items to choose from.
+        noise_model: Optional :class:`NoiseModel` to apply during
+            measurement.
+
+    Returns:
+        object: A randomly selected element from *items*.
+
+    Raises:
+        ValueError: If *items* is empty.
+    """
     if not items:
         raise ValueError("Cannot choose from empty list")
     idx = random_int(0, len(items), noise_model)
@@ -104,7 +162,22 @@ def random_shuffle(
     items: list,
     noise_model: NoiseModel | None = None,
 ) -> list:
-    """Return a new list with items shuffled using quantum randomness (Fisher-Yates)."""
+    """Return a new list with items shuffled using quantum randomness.
+
+    Implements the Fisher-Yates (Knuth) shuffle algorithm with swap
+    indices drawn from quantum random bits, producing a uniformly
+    random permutation.
+
+    Args:
+        items: List of items to shuffle. The original list is not
+            modified.
+        noise_model: Optional :class:`NoiseModel` to apply during
+            measurement.
+
+    Returns:
+        list: A new list containing the same elements in a randomly
+            permuted order.
+    """
     result = list(items)
     for i in range(len(result) - 1, 0, -1):
         j = random_int(0, i + 1, noise_model)
@@ -115,12 +188,28 @@ def random_shuffle(
 def entropy_test(num_bits: int = 1000, noise_model: NoiseModel | None = None) -> dict:
     """Run basic statistical tests on quantum random bits.
 
-    Returns a dict with:
-    - bits: the generated bitstring
-    - ones_ratio: fraction of 1s (should be ~0.5)
-    - runs_count: number of runs (consecutive same-bit sequences)
-    - longest_run: longest run of same bits
-    - min_entropy_estimate: conservative entropy estimate (bits per bit)
+    Generates *num_bits* quantum random bits and computes several
+    summary statistics useful for validating randomness quality.
+
+    Args:
+        num_bits: Number of random bits to generate and test.
+            Defaults to 1000.
+        noise_model: Optional :class:`NoiseModel` to apply during
+            measurement.
+
+    Returns:
+        dict: A dictionary with the following keys:
+
+            - ``"num_bits"`` (int): Number of bits generated.
+            - ``"ones_ratio"`` (float): Fraction of ``'1'`` bits
+              (ideally ~0.5).
+            - ``"runs_count"`` (int): Number of runs (consecutive
+              sequences of identical bits).
+            - ``"longest_run"`` (int): Length of the longest run.
+            - ``"min_entropy_estimate"`` (float): Conservative
+              min-entropy estimate in bits per bit.
+            - ``"bits_preview"`` (str): First 64 bits (with ``"..."``
+              appended if truncated).
     """
     bits = random_bits(num_bits, noise_model)
 

@@ -46,7 +46,17 @@ _PAULIS_1Q = [_I, _X, _Y, _Z]
 
 
 def _nqubit_paulis(n: int) -> list[NDArray[np.complexfloating]]:
-    """Build all n-qubit Pauli operators (unnormalized)."""
+    """Build all n-qubit Pauli operators (unnormalized).
+
+    Generates the d^2 tensor products of single-qubit Pauli matrices
+    {I, X, Y, Z}^{otimes n} where d = 2^n.
+
+    Args:
+        n: Number of qubits.
+
+    Returns:
+        A list of d^2 matrices, each of shape (d, d).
+    """
     if n == 1:
         return _PAULIS_1Q
     return [
@@ -56,6 +66,14 @@ def _nqubit_paulis(n: int) -> list[NDArray[np.complexfloating]]:
 
 
 def _multi_kron(matrices: tuple) -> NDArray[np.complexfloating]:
+    """Compute the Kronecker (tensor) product of a sequence of matrices.
+
+    Args:
+        matrices: Tuple of 2-D NumPy arrays to tensor together.
+
+    Returns:
+        The tensor product matrix.
+    """
     result = matrices[0]
     for m in matrices[1:]:
         result = np.kron(result, m)
@@ -63,7 +81,18 @@ def _multi_kron(matrices: tuple) -> NDArray[np.complexfloating]:
 
 
 def _input_states(n: int) -> list[NDArray[np.complexfloating]]:
-    """Build n-qubit input states as tensor products of single-qubit inputs."""
+    """Build the complete set of n-qubit input states for process tomography.
+
+    Generates tensor products of the single-qubit input states
+    {|0>, |1>, |+>, |+i>} to form a tomographically complete set of 4^n
+    input states.
+
+    Args:
+        n: Number of qubits.
+
+    Returns:
+        A list of 4^n statevectors, each of length 2^n.
+    """
     if n == 1:
         return _INPUT_STATES_1Q
     return [
@@ -73,6 +102,14 @@ def _input_states(n: int) -> list[NDArray[np.complexfloating]]:
 
 
 def _multi_kron_vec(vectors: tuple) -> NDArray[np.complexfloating]:
+    """Compute the Kronecker (tensor) product of a sequence of vectors.
+
+    Args:
+        vectors: Tuple of 1-D NumPy arrays to tensor together.
+
+    Returns:
+        The tensor product vector.
+    """
     result = vectors[0]
     for v in vectors[1:]:
         result = np.kron(result, v)
@@ -86,8 +123,18 @@ def _apply_channel_simulation(
 ) -> NDArray[np.complexfloating]:
     """Apply a channel (given as a circuit) to an input state.
 
-    Prepares the input state, applies the channel circuit, and reconstructs
-    the output density matrix via state tomography with a large shot count.
+    Constructs the full unitary of the channel circuit, applies it to the
+    input state, and returns the output density matrix as a pure-state
+    outer product.
+
+    Args:
+        channel_circuit: The quantum circuit representing the channel.
+        input_state: Input statevector of length 2^n.
+        shots: Number of measurement shots (currently unused; the output
+            is computed analytically from the circuit unitary).
+
+    Returns:
+        Output density matrix of shape (d, d) where d = 2^n.
     """
     n = channel_circuit.num_qubits
     d = 2**n
@@ -125,14 +172,34 @@ def _apply_channel_direct(
     unitary: NDArray[np.complexfloating],
     input_state: NDArray[np.complexfloating],
 ) -> NDArray[np.complexfloating]:
-    """Apply a unitary channel directly to an input state."""
+    """Apply a unitary channel directly to an input state.
+
+    Computes U|psi> and returns the output density matrix |psi'><psi'|.
+
+    Args:
+        unitary: (d x d) unitary matrix.
+        input_state: Input statevector of length d.
+
+    Returns:
+        Output density matrix of shape (d, d).
+    """
     output = unitary @ input_state
     return np.outer(output, output.conj())
 
 
 @dataclass
 class ProcessTomographyResult:
-    """Result from quantum process tomography."""
+    """Container for quantum process tomography results.
+
+    Attributes:
+        chi_matrix: The chi (process) matrix of shape (d^2, d^2), where
+            E(rho) = sum_{ij} chi_{ij} P_i rho P_j^dag.
+        choi_matrix: The Choi-Jamiolkowski matrix of shape (d^2, d^2).
+        num_qubits: Number of qubits in the characterized process.
+        process_fidelity: Process fidelity with respect to a target unitary,
+            or None if no target was provided.
+        input_states_used: Number of input states used in the tomography.
+    """
     chi_matrix: NDArray[np.complexfloating]
     choi_matrix: NDArray[np.complexfloating]
     num_qubits: int

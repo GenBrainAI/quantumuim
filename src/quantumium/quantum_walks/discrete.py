@@ -89,7 +89,19 @@ def _build_shift_operator(
 
 @dataclass
 class DiscreteWalkResult:
-    """Result of a discrete-time quantum walk."""
+    """Result of a discrete-time quantum walk.
+
+    Attributes:
+        position_probabilities (NDArray[np.floating]): Probability of
+            finding the walker at each vertex, array of shape (num_vertices,).
+        num_vertices (int): Number of vertices in the graph.
+        num_steps (int): Number of walk steps performed.
+        coin_dimension (int): Dimension of the coin (internal) space,
+            equal to the maximum vertex degree.
+        full_state (NDArray[np.complexfloating]): Full quantum state
+            vector in the position-coin Hilbert space, of length
+            num_vertices * coin_dimension.
+    """
     position_probabilities: NDArray[np.floating]
     num_vertices: int
     num_steps: int

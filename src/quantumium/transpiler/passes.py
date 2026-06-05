@@ -14,15 +14,43 @@ from ..core.gate import Gate, I, X, Y, Z, H, S, T, CNOT, SWAP
 
 
 def _gates_equal(a: Gate, b: Gate) -> bool:
+    """Check whether two gates have numerically identical matrices.
+
+    Args:
+        a (Gate): First gate.
+        b (Gate): Second gate.
+
+    Returns:
+        bool: ``True`` if the unitary matrices are element-wise close
+            within an absolute tolerance of 1e-10.
+    """
     return np.allclose(a.matrix, b.matrix, atol=1e-10)
 
 
 def _is_identity(gate: Gate) -> bool:
+    """Check whether a gate is the identity matrix.
+
+    Args:
+        gate (Gate): The gate to test.
+
+    Returns:
+        bool: ``True`` if the gate's matrix is close to the identity matrix
+            of the same dimension.
+    """
     return np.allclose(gate.matrix, np.eye(gate.matrix.shape[0], dtype=complex), atol=1e-10)
 
 
 def _product_gate(a: Gate, b: Gate) -> Gate:
-    """Compute the product gate b @ a (b applied after a)."""
+    """Compute the product gate b @ a (b applied after a).
+
+    Args:
+        a (Gate): The gate applied first.
+        b (Gate): The gate applied second.
+
+    Returns:
+        Gate: A new gate whose matrix is ``b.matrix @ a.matrix`` and whose
+            name is the concatenation of both gate names.
+    """
     matrix = b.matrix @ a.matrix
     return Gate(matrix, f"{b.name}{a.name}")
 
@@ -32,7 +60,15 @@ def _product_gate(a: Gate, b: Gate) -> Gate:
 def cancel_inverses(instructions: list[Instruction]) -> list[Instruction]:
     """Remove adjacent gate pairs that multiply to identity.
 
-    Catches: X-X, Y-Y, Z-Z, H-H, and any gate followed by its inverse.
+    Scans for consecutive instructions on the same qubits whose combined
+    matrix product equals the identity. This catches self-inverse gates
+    (X-X, Y-Y, Z-Z, H-H) as well as any gate followed by its inverse.
+
+    Args:
+        instructions (list[Instruction]): The instruction list to optimize.
+
+    Returns:
+        list[Instruction]: A new list with inverse pairs removed.
     """
     result: list[Instruction] = []
     i = 0
@@ -51,12 +87,35 @@ def cancel_inverses(instructions: list[Instruction]) -> list[Instruction]:
 
 
 def remove_identity_gates(instructions: list[Instruction]) -> list[Instruction]:
-    """Remove gates that are the identity matrix."""
+    """Remove gates that are the identity matrix.
+
+    Any instruction whose gate matrix is numerically equal to the identity
+    is dropped, since it has no effect on the quantum state.
+
+    Args:
+        instructions (list[Instruction]): The instruction list to filter.
+
+    Returns:
+        list[Instruction]: A new list with identity-gate instructions removed.
+    """
     return [inst for inst in instructions if not _is_identity(inst.gate)]
 
 
 def merge_single_qubit_gates(instructions: list[Instruction]) -> list[Instruction]:
-    """Merge consecutive single-qubit gates on the same qubit into one unitary."""
+    """Merge consecutive single-qubit gates on the same qubit into one unitary.
+
+    Scans for runs of single-qubit instructions targeting the same qubit
+    and collapses them into a single gate whose matrix is the product of
+    all constituent matrices. If the merged result is the identity, the
+    entire run is dropped.
+
+    Args:
+        instructions (list[Instruction]): The instruction list to optimize.
+
+    Returns:
+        list[Instruction]: A new list with consecutive single-qubit gates
+            merged where possible.
+    """
     if not instructions:
         return []
 
@@ -94,7 +153,17 @@ def merge_single_qubit_gates(instructions: list[Instruction]) -> list[Instructio
 
 
 def cancel_cnots(instructions: list[Instruction]) -> list[Instruction]:
-    """Remove adjacent CNOT pairs on the same qubits (CNOT^2 = I)."""
+    """Remove adjacent CNOT pairs on the same qubits (CNOT^2 = I).
+
+    Two consecutive CNOT gates with identical control and target qubits
+    cancel each other because CNOT is self-inverse.
+
+    Args:
+        instructions (list[Instruction]): The instruction list to optimize.
+
+    Returns:
+        list[Instruction]: A new list with adjacent CNOT pairs removed.
+    """
     result: list[Instruction] = []
     i = 0
     while i < len(instructions):
@@ -114,8 +183,17 @@ def cancel_cnots(instructions: list[Instruction]) -> list[Instruction]:
 def commute_and_cancel(instructions: list[Instruction]) -> list[Instruction]:
     """Move commuting gates closer together to enable cancellation.
 
-    Single-qubit gates on different qubits commute freely. After commutation,
-    runs cancel_inverses to catch newly adjacent inverse pairs.
+    Single-qubit gates on disjoint qubits commute freely. This pass
+    iteratively swaps neighbouring instructions that act on non-overlapping
+    qubit sets whenever doing so brings an inverse pair adjacent. After
+    reaching a fixed point, ``cancel_inverses`` is applied to eliminate the
+    newly adjacent inverse pairs.
+
+    Args:
+        instructions (list[Instruction]): The instruction list to optimize.
+
+    Returns:
+        list[Instruction]: A new list with commuted and cancelled gates.
     """
     working = list(instructions)
     changed = True
@@ -149,7 +227,18 @@ def commute_and_cancel(instructions: list[Instruction]) -> list[Instruction]:
 
 
 def decompose_swap(instructions: list[Instruction]) -> list[Instruction]:
-    """Decompose SWAP gates into 3 CNOTs: SWAP(a,b) = CNOT(a,b) CNOT(b,a) CNOT(a,b)."""
+    """Decompose SWAP gates into three CNOT gates.
+
+    Applies the identity SWAP(a,b) = CNOT(a,b) . CNOT(b,a) . CNOT(a,b).
+    Non-SWAP instructions are passed through unchanged.
+
+    Args:
+        instructions (list[Instruction]): The instruction list to process.
+
+    Returns:
+        list[Instruction]: A new list with every SWAP replaced by three
+            CNOT instructions.
+    """
     result: list[Instruction] = []
     for inst in instructions:
         if inst.gate.num_qubits == 2 and _gates_equal(inst.gate, SWAP):
@@ -163,7 +252,14 @@ def decompose_swap(instructions: list[Instruction]) -> list[Instruction]:
 
 
 def count_gates(instructions: list[Instruction]) -> dict[str, int]:
-    """Count gates by type."""
+    """Count the number of gates of each type in the instruction list.
+
+    Args:
+        instructions (list[Instruction]): The instructions to tally.
+
+    Returns:
+        dict[str, int]: Mapping of gate name to occurrence count.
+    """
     counts: dict[str, int] = {}
     for inst in instructions:
         name = inst.gate.name
@@ -172,7 +268,19 @@ def count_gates(instructions: list[Instruction]) -> dict[str, int]:
 
 
 def circuit_depth(instructions: list[Instruction], num_qubits: int) -> int:
-    """Compute circuit depth (longest path through the circuit)."""
+    """Compute the circuit depth (longest path through the circuit).
+
+    The depth equals the maximum number of sequential gate layers across
+    all qubits, determined by tracking the latest time-step on each qubit.
+
+    Args:
+        instructions (list[Instruction]): The instructions comprising the
+            circuit.
+        num_qubits (int): Total number of qubits in the circuit.
+
+    Returns:
+        int: The circuit depth. Returns 0 for an empty circuit.
+    """
     qubit_depth = [0] * num_qubits
     for inst in instructions:
         max_d = max(qubit_depth[q] for q in inst.target_qubits)

@@ -1,4 +1,27 @@
-"""Quantum Phase Estimation algorithm."""
+"""Quantum Phase Estimation (QPE) algorithm.
+
+QPE estimates the eigenvalue phase of a unitary operator. Given a unitary U
+with eigenvector |u> such that U|u> = exp(2*pi*i*theta)|u>, QPE estimates
+theta to n-bit precision using n counting qubits.
+
+This module provides:
+
+- :func:`controlled_unitary` -- wraps a gate with a control qubit.
+- :func:`unitary_power` -- computes U^power via matrix exponentiation.
+- :func:`qpe_circuit` -- builds the QPE circuit for a single-qubit unitary.
+- :func:`estimate_phase` -- runs QPE and returns the estimated phase value.
+
+Example::
+
+    >>> import numpy as np
+    >>> from quantumium.core.gate import Gate
+    >>> from quantumium.algorithms.qpe import estimate_phase
+    >>> # T gate has eigenvalue exp(2*pi*i/8) on |1>, so theta = 1/8
+    >>> T = Gate(np.diag([1, np.exp(1j * np.pi / 4)]), "T")
+    >>> phase = estimate_phase(4, T)
+    >>> abs(phase - 0.125) < 0.01
+    True
+"""
 
 from __future__ import annotations
 
@@ -17,7 +40,24 @@ def _bit_reverse(val: int, n: int) -> int:
 
 
 def controlled_unitary(unitary: Gate) -> Gate:
-    """Create a controlled version of a unitary gate."""
+    """Create a controlled version of a unitary gate.
+
+    Constructs a two-register gate where the first qubit acts as the
+    control and the remaining qubits are the target. The unitary is
+    applied to the target register only when the control qubit is |1>.
+
+    Parameters
+    ----------
+    unitary : Gate
+        The gate to be controlled. Can operate on any number of qubits.
+
+    Returns
+    -------
+    Gate
+        A controlled gate on (1 + unitary.num_qubits) qubits. The matrix
+        is block-diagonal: identity on the |0>-control subspace and
+        ``unitary.matrix`` on the |1>-control subspace.
+    """
     n = unitary.matrix.shape[0]
     dim = 2 * n
     matrix = np.eye(dim, dtype=complex)
@@ -26,7 +66,20 @@ def controlled_unitary(unitary: Gate) -> Gate:
 
 
 def unitary_power(unitary: Gate, power: int) -> Gate:
-    """Compute U^power for a unitary gate."""
+    """Compute U^power for a unitary gate via matrix exponentiation.
+
+    Parameters
+    ----------
+    unitary : Gate
+        The base unitary gate.
+    power : int
+        The integer exponent.
+
+    Returns
+    -------
+    Gate
+        A gate whose matrix is ``unitary.matrix`` raised to the given power.
+    """
     result = np.linalg.matrix_power(unitary.matrix, power)
     return Gate(result, f"{unitary.name}^{power}")
 
@@ -37,17 +90,32 @@ def qpe_circuit(
 ) -> QuantumCircuit:
     """Build a Quantum Phase Estimation circuit.
 
-    Args:
-        num_counting_qubits: Number of qubits for phase precision.
-        unitary: The unitary gate whose eigenvalue phase to estimate.
-            Must be a single-qubit gate. The eigenstate should be
-            prepared on the target qubit externally.
+    Constructs the standard QPE circuit: Hadamard gates on the counting
+    register, controlled-U^(2^k) operations, and an inverse QFT on the
+    counting register.
 
-    Returns:
-        Circuit with num_counting_qubits + 1 total qubits.
-        Counting qubits are 0..n-1, target qubit is n.
+    Parameters
+    ----------
+    num_counting_qubits : int
+        Number of counting qubits, determining the phase precision to
+        n bits (precision ~ 1/2^n).
+    unitary : Gate
+        The unitary gate whose eigenvalue phase is to be estimated.
+        Must be a single-qubit gate. The eigenstate should be prepared
+        on the target qubit externally before combining with this circuit.
+
+    Returns
+    -------
+    QuantumCircuit
+        A circuit with ``num_counting_qubits + 1`` total qubits.
+        Qubits 0 through n-1 are counting qubits; qubit n is the target.
         After measurement, the counting qubits encode the phase as
-        theta ~= measured_value / 2^n.
+        theta approximately equal to measured_value / 2^n.
+
+    Raises
+    ------
+    ValueError
+        If ``unitary`` is not a single-qubit gate.
     """
     if unitary.num_qubits != 1:
         raise ValueError("QPE currently supports single-qubit unitaries only")
@@ -80,8 +148,28 @@ def estimate_phase(
 ) -> float:
     """Run QPE and return the estimated phase theta in [0, 1).
 
-    The eigenvalue is exp(2*pi*i*theta). By default, prepares the target
-    qubit in |1> (eigenstate with non-trivial phase for diagonal gates).
+    Builds and executes the full QPE circuit, then extracts the most likely
+    phase value from measurement statistics. The eigenvalue of the unitary
+    is exp(2*pi*i*theta).
+
+    Parameters
+    ----------
+    num_counting_qubits : int
+        Number of counting qubits for phase precision.
+    unitary : Gate
+        Single-qubit unitary gate whose eigenvalue phase to estimate.
+    shots : int, optional
+        Number of measurement shots (default 4096).
+    prepare_one : bool, optional
+        If True (default), prepares the target qubit in |1>, which is the
+        eigenstate with non-trivial phase for diagonal gates. Set to False
+        to leave the target in |0>.
+
+    Returns
+    -------
+    float
+        The estimated phase theta in the range [0, 1). The corresponding
+        eigenvalue is exp(2*pi*i*theta).
     """
     from quantumium.core.gate import X as X_gate
 

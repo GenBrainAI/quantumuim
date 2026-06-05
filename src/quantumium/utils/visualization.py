@@ -9,12 +9,23 @@ from ..core.circuit import QuantumCircuit, Instruction
 
 
 def circuit_to_ascii(circuit: QuantumCircuit) -> str:
-    """Render a quantum circuit as an ASCII diagram.
+    """Render a quantum circuit as an ASCII text diagram for terminal display.
 
-    Example output:
-        q0: ──H──●──
-                 │
-        q1: ─────X──
+    Produces a human-readable diagram with horizontal wire lines for each
+    qubit and gate symbols placed along the wires. Multi-qubit gates are
+    connected by vertical lines.
+
+    Example output::
+
+        q0: --H--*--
+                 |
+        q1: -----X--
+
+    Args:
+        circuit (QuantumCircuit): The quantum circuit to render.
+
+    Returns:
+        str: Multi-line string containing the ASCII circuit diagram.
     """
     n = circuit.num_qubits
     instructions = circuit.instructions

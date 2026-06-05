@@ -16,7 +16,21 @@ from ..algorithms.vqe import vqe, h2_hamiltonian, hamiltonian_expectation, VQERe
 
 @dataclass
 class MoleculeResult:
-    """Result from a molecular simulation."""
+    """Result from a molecular ground-state energy simulation.
+
+    Encapsulates both the VQE-computed energy and the exact
+    diagonalization reference, along with accuracy metrics.
+
+    Attributes:
+        molecule: Name of the simulated molecule (e.g., ``"H2"``).
+        ground_energy: Ground-state energy found by VQE (Hartree).
+        exact_energy: Exact ground-state energy from diagonalization (Hartree).
+        error: Absolute difference between VQE and exact energies.
+        chemical_accuracy: ``True`` if the error is below 1.6 mHa
+            (1 kcal/mol), the standard chemical accuracy threshold.
+        vqe_result: Full :class:`VQEResult` object from the underlying
+            VQE run, containing optimal parameters and convergence history.
+    """
     molecule: str
     ground_energy: float
     exact_energy: float
@@ -29,12 +43,24 @@ def _build_hamiltonian(
     coefficients: dict[str, float],
     num_qubits: int,
 ) -> NDArray[np.complexfloating]:
-    """Build a qubit Hamiltonian from Pauli string coefficients.
+    """Build a qubit Hamiltonian matrix from Pauli string coefficients.
+
+    Constructs the full 2^n x 2^n Hamiltonian matrix as a sum of
+    tensor-product Pauli terms weighted by the given coefficients.
 
     Args:
-        coefficients: Dict mapping Pauli strings to coefficients.
-            e.g. {"II": -0.5, "ZI": 0.3, "IZ": -0.2, "ZZ": 0.1, "XX": 0.05}
-        num_qubits: Number of qubits.
+        coefficients: Dict mapping Pauli strings to their real-valued
+            coefficients. Each key is a string of ``'I'``, ``'X'``, ``'Y'``,
+            ``'Z'`` characters with length equal to *num_qubits*.
+            Example: ``{"II": -0.5, "ZI": 0.3, "XX": 0.05}``.
+        num_qubits: Number of qubits in the system.
+
+    Returns:
+        NDArray[np.complexfloating]: The Hamiltonian as a dense complex
+            matrix of shape ``(2**num_qubits, 2**num_qubits)``.
+
+    Raises:
+        ValueError: If any Pauli string length does not match *num_qubits*.
     """
     dim = 2**num_qubits
     H = np.zeros((dim, dim), dtype=complex)
@@ -119,10 +145,23 @@ MOLECULAR_HAMILTONIANS = {
 
 
 def get_molecular_hamiltonian(molecule: str) -> tuple[NDArray[np.complexfloating], int]:
-    """Get the qubit Hamiltonian for a molecule.
+    """Get the qubit Hamiltonian for a known molecule.
+
+    Looks up pre-computed Jordan-Wigner-transformed Pauli coefficients
+    (STO-3G basis) and builds the full Hamiltonian matrix.
+
+    Args:
+        molecule: Molecule identifier. Must be one of the keys in
+            :data:`MOLECULAR_HAMILTONIANS` (e.g., ``"H2"``, ``"LiH"``,
+            ``"HeH+"``).
 
     Returns:
-        Tuple of (hamiltonian_matrix, num_qubits).
+        tuple[NDArray[np.complexfloating], int]: A 2-tuple of
+            ``(hamiltonian_matrix, num_qubits)`` where the matrix has
+            shape ``(2**num_qubits, 2**num_qubits)``.
+
+    Raises:
+        ValueError: If *molecule* is not in the library.
     """
     if molecule not in MOLECULAR_HAMILTONIANS:
         available = ", ".join(MOLECULAR_HAMILTONIANS.keys())
@@ -139,13 +178,27 @@ def simulate_molecule(
     max_iter: int = 200,
     num_starts: int = 5,
 ) -> MoleculeResult:
-    """Run VQE to find the ground state energy of a molecule.
+    """Run VQE to find the ground-state energy of a molecule.
+
+    Retrieves the pre-built qubit Hamiltonian for the requested molecule,
+    computes the exact ground-state energy via diagonalization, and then
+    runs VQE to find the variational minimum. The result includes an
+    accuracy check against chemical accuracy (1.6 mHa).
 
     Args:
-        molecule: Molecule name (e.g., "H2", "LiH", "HeH+").
-        ansatz_depth: Number of ansatz layers.
-        max_iter: Maximum VQE iterations.
-        num_starts: Number of random restarts.
+        molecule: Molecule name. Must be a key in
+            :data:`MOLECULAR_HAMILTONIANS` (e.g., ``"H2"``, ``"LiH"``,
+            ``"HeH+"``).
+        ansatz_depth: Number of layers in the hardware-efficient ansatz.
+        max_iter: Maximum number of VQE optimizer iterations per start.
+        num_starts: Number of random parameter initializations to try.
+
+    Returns:
+        MoleculeResult: Contains the VQE energy, exact energy, absolute
+            error, chemical-accuracy flag, and the full VQE result object.
+
+    Raises:
+        ValueError: If *molecule* is not in the library.
     """
     H, num_qubits = get_molecular_hamiltonian(molecule)
     exact = float(np.linalg.eigvalsh(H)[0])
@@ -179,19 +232,26 @@ def potential_energy_surface(
     max_iter: int = 150,
     num_starts: int = 3,
 ) -> list[tuple[float, float, float]]:
-    """Compute potential energy surface by scanning bond distances.
+    """Compute a potential energy surface by scanning bond distances.
+
+    For each bond distance, generates the molecular Hamiltonian via the
+    user-supplied coefficient function, computes the exact ground-state
+    energy, and runs VQE to obtain the variational estimate.
 
     Args:
-        molecule_coeffs_fn: Function that takes a distance and returns
-            a dict of Pauli string coefficients.
-        distances: List of bond distances to scan.
-        num_qubits: Number of qubits.
-        ansatz_depth: Ansatz layers.
-        max_iter: VQE iterations per point.
-        num_starts: Random restarts per point.
+        molecule_coeffs_fn: Callable that accepts a bond distance (float)
+            and returns a ``dict[str, float]`` mapping Pauli strings to
+            their coefficients at that geometry.
+        distances: Bond distances (in Angstroms) to evaluate.
+        num_qubits: Number of qubits in the Hamiltonian.
+        ansatz_depth: Number of variational ansatz layers.
+        max_iter: Maximum VQE optimizer iterations per distance point.
+        num_starts: Number of random restarts per distance point.
 
     Returns:
-        List of (distance, vqe_energy, exact_energy) tuples.
+        list[tuple[float, float, float]]: A list of
+            ``(distance, vqe_energy, exact_energy)`` tuples, one per
+            entry in *distances*.
     """
     results = []
     for d in distances:

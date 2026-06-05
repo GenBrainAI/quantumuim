@@ -45,11 +45,21 @@ def propagator_sequence(
     hamiltonian: ControlHamiltonian,
     pulse: PulseSequence,
 ) -> list[NDArray[np.complexfloating]]:
-    """Compute the propagator at each time step (for GRAPE gradients).
+    """Compute the step-wise propagators for each time step.
+
+    Used internally by the GRAPE algorithm to compute gradients.
+    Each propagator U_k = exp(-i * H(t_k) * dt) corresponds to one
+    piecewise-constant time step.
+
+    Args:
+        hamiltonian (ControlHamiltonian): Control Hamiltonian system
+            with drift and control terms.
+        pulse (PulseSequence): Time-discretized pulse sequence
+            providing amplitudes and time step.
 
     Returns:
-        List of N unitaries [U_1, U_2, ..., U_N] where
-        U_k = exp(-i H(t_k) dt).
+        list[NDArray[np.complexfloating]]: List of N unitary matrices
+            [U_1, U_2, ..., U_N] where U_k = exp(-i * H(t_k) * dt).
     """
     propagators = []
     for step in range(pulse.num_steps):

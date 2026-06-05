@@ -35,15 +35,35 @@ class AdiabaticResult:
 
 
 def linear_schedule(t: float, T: float) -> float:
-    """Linear annealing schedule s(t) = t/T."""
+    """Linear annealing schedule s(t) = t/T.
+
+    The simplest schedule that interpolates uniformly from s=0 at t=0
+    to s=1 at t=T.
+
+    Args:
+        t (float): Current time.
+        T (float): Total anneal duration.
+
+    Returns:
+        float: Schedule parameter s in [0, 1].
+    """
     return t / T
 
 
 def polynomial_schedule(t: float, T: float, power: float = 2.0) -> float:
-    """Polynomial schedule s(t) = (t/T)^p.
+    """Polynomial annealing schedule s(t) = (t/T)^p.
 
-    Higher power spends more time near s=0 (useful when the gap
-    is smallest near the end of the anneal).
+    Higher power values cause the schedule to spend more time near
+    s=0 and accelerate through the end of the anneal. This is useful
+    when the spectral gap is smallest near s=1.
+
+    Args:
+        t (float): Current time.
+        T (float): Total anneal duration.
+        power (float): Polynomial exponent p. Defaults to 2.0.
+
+    Returns:
+        float: Schedule parameter s in [0, 1].
     """
     return (t / T) ** power
 
@@ -151,11 +171,27 @@ def spectral_gap(
     num_points: int = 100,
     schedule: Callable[[float, float], float] | None = None,
 ) -> tuple[NDArray[np.floating], NDArray[np.floating]]:
-    """Compute the spectral gap along the annealing path.
+    """Compute the spectral gap along the adiabatic annealing path.
+
+    Evaluates the energy gap between the ground state and first excited
+    state of H(s) = (1 - s)*H_init + s*H_final at evenly spaced schedule
+    parameter values. The minimum gap determines the required anneal time
+    for adiabatic evolution to succeed.
+
+    Args:
+        H_init (NDArray[np.complexfloating]): Initial Hamiltonian matrix.
+        H_final (NDArray[np.complexfloating]): Final (problem) Hamiltonian
+            matrix.
+        num_points (int): Number of evaluation points along the path.
+            Defaults to 100.
+        schedule (Callable[[float, float], float] | None): Schedule
+            function s(t, T) mapping time to [0, 1]. Defaults to
+            linear_schedule.
 
     Returns:
-        (s_values, gaps) — schedule parameter values and corresponding
-        energy gaps between ground and first excited states.
+        tuple[NDArray[np.floating], NDArray[np.floating]]: A pair
+            (s_values, gaps) where s_values are the schedule parameter
+            values and gaps are the corresponding energy gaps.
     """
     if schedule is None:
         schedule = linear_schedule

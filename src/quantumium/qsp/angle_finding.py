@@ -114,14 +114,18 @@ def _chebyshev(n: int, x: NDArray[np.floating]) -> NDArray[np.floating]:
 
 
 def chebyshev_angles(degree: int) -> NDArray[np.floating]:
-    """QSP angles that realize the Chebyshev polynomial T_d(a).
+    """Compute QSP angles that realize the Chebyshev polynomial T_d(a).
 
-    For T_d, the QSP angles have a known closed form:
-    φ_0 = (1-d)π/4 if d is odd, (2-d)π/4 if d is even,
-    φ_k = π/4 for 1 ≤ k ≤ d-1,
-    φ_d = π/4.
+    For the degree-d Chebyshev polynomial T_d, the QSP angles have a
+    known closed form based on the factorization of T_d in the QSP
+    convention.
 
-    These come from the factorization of T_d in the QSP convention.
+    Args:
+        degree (int): Degree d of the Chebyshev polynomial. Must be
+            non-negative.
+
+    Returns:
+        NDArray[np.floating]: Array of d+1 QSP processing angles.
     """
     if degree == 0:
         return np.array([0.0])
@@ -140,18 +144,23 @@ def chebyshev_angles(degree: int) -> NDArray[np.floating]:
 
 
 def sign_function_angles(degree: int = 15, kappa: float = 1.0) -> NDArray[np.floating]:
-    """QSP angles approximating the sign function sgn(a).
+    """Compute QSP angles approximating the sign function sgn(a).
 
-    Uses Chebyshev polynomial approximation of erf(κa) as a smooth
-    approximation to the sign function.
+    Uses a Chebyshev polynomial approximation of tanh(kappa * a) as a
+    smooth approximation to the sign function. If the given degree is
+    even, it is incremented by 1 since the sign function requires an
+    odd-degree polynomial.
 
     Args:
-        degree: Polynomial degree (higher = sharper transition).
-            Must be odd for sign function (odd polynomial).
-        kappa: Sharpness parameter (larger = closer to step function).
+        degree (int): Polynomial degree (higher gives a sharper
+            transition). Automatically made odd if even. Defaults to 15.
+        kappa (float): Sharpness parameter controlling how closely the
+            polynomial approximates a true step function. Larger values
+            give a sharper transition. Defaults to 1.0.
 
     Returns:
-        QSP angles of length degree + 1.
+        NDArray[np.floating]: QSP angles of length degree + 1 (after
+            possible adjustment to make degree odd).
     """
     if degree % 2 == 0:
         degree += 1
@@ -173,18 +182,22 @@ def threshold_angles(
     degree: int = 15,
     width: float = 0.1,
 ) -> NDArray[np.floating]:
-    """QSP angles approximating a threshold (step) function.
+    """Compute QSP angles approximating a threshold (step) function.
 
-    H(a - threshold) ≈ 1 if a > threshold, 0 if a < threshold,
-    with smooth transition of given width.
+    The target function approximates the Heaviside step:
+    H(a - threshold) ~ 1 if a > threshold, ~ 0 if a < threshold,
+    with a smooth sigmoidal transition of the given width.
 
     Args:
-        threshold: Location of the step.
-        degree: Polynomial degree.
-        width: Width of the transition region.
+        threshold (float): Location of the step along the signal axis
+            a in [-1, 1]. Defaults to 0.5.
+        degree (int): Polynomial degree for the approximation. Higher
+            values yield a sharper transition. Defaults to 15.
+        width (float): Width of the smooth transition region around the
+            threshold. Defaults to 0.1.
 
     Returns:
-        QSP angles.
+        NDArray[np.floating]: QSP angles of length degree + 1.
     """
     grid = np.linspace(-1, 1, 100)
     target = 0.5 * (1 + np.tanh((grid - threshold) / width))

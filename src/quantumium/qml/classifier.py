@@ -24,6 +24,19 @@ from .encoding import angle_encode
 
 @dataclass
 class VQCResult:
+    """Result from training a variational quantum classifier.
+
+    Attributes:
+        weights: Optimized variational parameters of shape
+            ``(num_layers * num_qubits * 2,)``, containing Ry and Rz
+            rotation angles for each qubit in each layer.
+        bias: Learned bias term added to the expectation value before
+            thresholding.
+        loss_history: Mean squared error loss recorded at each training
+            epoch.
+        accuracy: Classification accuracy on the training data after
+            the final epoch, as a fraction in [0, 1].
+    """
     weights: NDArray[np.floating]
     bias: float
     loss_history: list[float]
@@ -36,7 +49,18 @@ def _build_ansatz(
     num_qubits: int,
     num_layers: int,
 ) -> None:
-    """Append a hardware-efficient variational ansatz to the circuit."""
+    """Append a hardware-efficient variational ansatz to the circuit.
+
+    Each layer applies Ry and Rz rotations on every qubit, followed by
+    a linear chain of CNOT entangling gates.
+
+    Args:
+        qc: The :class:`QuantumCircuit` to modify in place.
+        weights: Flat array of rotation angles. Must have length
+            ``num_layers * num_qubits * 2``.
+        num_qubits: Number of qubits in the circuit.
+        num_layers: Number of ansatz layers to append.
+    """
     idx = 0
     for _ in range(num_layers):
         for q in range(num_qubits):
@@ -54,7 +78,21 @@ def _predict_single(
     bias: float,
     num_layers: int,
 ) -> float:
-    """Get raw prediction for a single data point."""
+    """Get the raw prediction score for a single data point.
+
+    Encodes the data via Ry rotations, applies the variational ansatz,
+    and returns the expectation value of Z on qubit 0 plus the bias.
+
+    Args:
+        x: Feature vector of shape ``(num_qubits,)``.
+        weights: Variational ansatz parameters.
+        bias: Scalar bias term.
+        num_layers: Number of ansatz layers.
+
+    Returns:
+        float: Raw prediction score. Positive values predict class +1,
+            negative values predict class -1.
+    """
     num_qubits = len(x)
     qc = QuantumCircuit(num_qubits)
 
@@ -84,7 +122,18 @@ def _loss_fn(
     bias: float,
     num_layers: int,
 ) -> float:
-    """Mean squared error loss."""
+    """Compute mean squared error loss over the dataset.
+
+    Args:
+        X: Training data of shape ``(num_samples, num_features)``.
+        y: Labels of shape ``(num_samples,)``, values in {-1, +1}.
+        weights: Variational ansatz parameters.
+        bias: Scalar bias term.
+        num_layers: Number of ansatz layers.
+
+    Returns:
+        float: Mean squared error averaged over all samples.
+    """
     total = 0.0
     for i in range(len(X)):
         pred = _predict_single(X[i], weights, bias, num_layers)

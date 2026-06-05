@@ -34,7 +34,18 @@ def _matrix_exp(
 
 @dataclass
 class ContinuousWalkResult:
-    """Result of a continuous-time quantum walk."""
+    """Result of a continuous-time quantum walk.
+
+    Attributes:
+        position_probabilities (NDArray[np.floating]): Probability of
+            finding the walker at each vertex, array of shape (num_vertices,).
+        num_vertices (int): Number of vertices in the graph.
+        time (float): Evolution time at which probabilities were computed.
+        state (NDArray[np.complexfloating]): Full quantum state vector
+            in the vertex space, of length num_vertices.
+        hamiltonian (str): Label indicating which Hamiltonian was used,
+            either "adjacency" or "laplacian".
+    """
     position_probabilities: NDArray[np.floating]
     num_vertices: int
     time: float

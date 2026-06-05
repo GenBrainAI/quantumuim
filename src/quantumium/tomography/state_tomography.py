@@ -29,7 +29,18 @@ S_DAG = Gate(np.array([[1, 0], [0, -1j]], dtype=complex), "Sdg")
 
 @dataclass
 class TomographyResult:
-    """Result from quantum state tomography."""
+    """Container for quantum state tomography results.
+
+    Attributes:
+        density_matrix: Reconstructed density matrix as a (2^n x 2^n) complex
+            NumPy array.
+        fidelity: Fidelity of the reconstructed state against the ideal state,
+            or None if no ideal reference was available.
+        num_qubits: Number of qubits in the tomographed system.
+        method: Reconstruction method used (``"linear"`` or ``"mle"``).
+        measurements: Raw measurement counts keyed by Pauli basis string
+            (e.g., ``{"XZ": {"00": 512, "01": 488, ...}, ...}``).
+    """
     density_matrix: NDArray[np.complexfloating]
     fidelity: float | None
     num_qubits: int
@@ -38,7 +49,17 @@ class TomographyResult:
 
 
 def _measurement_bases(num_qubits: int) -> list[str]:
-    """Generate all Pauli measurement bases for n qubits (excluding I)."""
+    """Generate all Pauli measurement basis labels for n qubits.
+
+    Produces every combination of X, Y, Z across n qubits (identity is
+    excluded because it carries no information in tomography).
+
+    Args:
+        num_qubits: Number of qubits.
+
+    Returns:
+        A list of basis label strings, e.g., ["XX", "XY", "XZ", ...] for 2 qubits.
+    """
     return ["".join(combo) for combo in iterproduct("XYZ", repeat=num_qubits)]
 
 
@@ -46,7 +67,19 @@ def _add_basis_rotation(
     qc: QuantumCircuit,
     basis: str,
 ) -> QuantumCircuit:
-    """Add gates to rotate from a Pauli basis to the Z (computational) basis."""
+    """Append gates that rotate from a Pauli basis to the computational (Z) basis.
+
+    For each qubit, applies H for the X basis or S^dag then H for the Y basis,
+    leaving Z-basis qubits unchanged.
+
+    Args:
+        qc: The quantum circuit to modify in place.
+        basis: A string of length ``num_qubits`` with characters from
+            {``"X"``, ``"Y"``, ``"Z"``}.
+
+    Returns:
+        The same QuantumCircuit ``qc`` with basis-rotation gates appended.
+    """
     for i, b in enumerate(basis):
         if b == "X":
             qc.apply(H, i)
@@ -61,7 +94,22 @@ def collect_tomography_data(
     shots_per_basis: int = 4096,
     noise_model: NoiseModel | None = None,
 ) -> dict[str, dict[str, int]]:
-    """Run a circuit in all Pauli bases and collect measurement counts."""
+    """Run a circuit in all Pauli measurement bases and collect counts.
+
+    For each Pauli basis combination, copies the circuit, appends the
+    appropriate basis-rotation gates, and performs measurement (optionally
+    with a noise model).
+
+    Args:
+        circuit: The quantum circuit whose output state is to be tomographed.
+        shots_per_basis: Number of measurement shots per basis setting.
+        noise_model: Optional noise model to simulate hardware noise during
+            measurement. If None, ideal (shot-noise-only) measurement is used.
+
+    Returns:
+        A dict mapping basis label strings (e.g., ``"XYZ"``) to measurement
+        count dicts (e.g., ``{"000": 512, "001": 488, ...}``).
+    """
     n = circuit.num_qubits
     bases = _measurement_bases(n)
     results: dict[str, dict[str, int]] = {}
@@ -86,7 +134,19 @@ def _expectation_from_counts(
     counts: dict[str, int],
     qubit_indices: list[int],
 ) -> float:
-    """Compute expectation value of Z^⊗n from measurement counts."""
+    """Compute the expectation value of Z^{otimes n} from measurement counts.
+
+    Calculates the parity of the specified qubit positions for each
+    measured bitstring and returns the weighted average of (-1)^parity.
+
+    Args:
+        counts: Measurement count dict mapping bitstrings to counts.
+        qubit_indices: Indices (positions) in the bitstring over which
+            to compute the Z parity.
+
+    Returns:
+        Expectation value in [-1, 1].
+    """
     total = sum(counts.values())
     expectation = 0.0
     for bitstring, count in counts.items():
@@ -99,10 +159,22 @@ def linear_inversion(
     measurements: dict[str, dict[str, int]],
     num_qubits: int,
 ) -> NDArray[np.complexfloating]:
-    """Reconstruct density matrix via linear inversion.
+    """Reconstruct a density matrix via linear inversion of Pauli expectations.
 
-    Uses the relation: rho = sum_P <P> * P / 2^n
-    where the sum is over all n-qubit Pauli operators.
+    Uses the relation rho = (1/d) * sum_P <P> * P where the sum runs over
+    all n-qubit Pauli operators (including identity) and d = 2^n.
+
+    Note: the returned matrix is not guaranteed to be positive semidefinite;
+    use ``_project_to_physical`` to obtain a valid density matrix.
+
+    Args:
+        measurements: Dict mapping Pauli basis labels to measurement count
+            dicts, as returned by ``collect_tomography_data``.
+        num_qubits: Number of qubits in the system.
+
+    Returns:
+        Reconstructed (2^n x 2^n) density matrix (may have negative
+        eigenvalues due to finite statistics).
     """
     dim = 2**num_qubits
     rho = np.zeros((dim, dim), dtype=complex)
@@ -135,7 +207,17 @@ def linear_inversion(
 
 
 def _project_to_physical(rho: NDArray[np.complexfloating]) -> NDArray[np.complexfloating]:
-    """Project a matrix to the closest valid density matrix (positive semidefinite, trace 1)."""
+    """Project a matrix to the closest valid density matrix.
+
+    Ensures the result is Hermitian, positive semidefinite (by clipping
+    negative eigenvalues to zero), and has unit trace.
+
+    Args:
+        rho: A square complex matrix (possibly non-physical).
+
+    Returns:
+        The nearest valid density matrix (positive semidefinite, trace 1).
+    """
     rho = (rho + rho.conj().T) / 2
 
     eigvals, eigvecs = np.linalg.eigh(rho)
@@ -152,9 +234,21 @@ def maximum_likelihood(
     num_qubits: int,
     max_iter: int = 100,
 ) -> NDArray[np.complexfloating]:
-    """Reconstruct density matrix via iterative maximum likelihood estimation.
+    """Reconstruct a density matrix via iterative maximum likelihood estimation.
 
-    Uses the R*rho*R algorithm (diluted MLE) which guarantees physicality.
+    Uses the R*rho*R algorithm (diluted MLE), which iteratively refines the
+    density matrix to maximize the likelihood of the observed measurement data
+    while guaranteeing a physical (positive semidefinite, trace-1) result.
+
+    Args:
+        measurements: Dict mapping Pauli basis labels to measurement count
+            dicts, as returned by ``collect_tomography_data``.
+        num_qubits: Number of qubits in the system.
+        max_iter: Maximum number of MLE iterations.
+
+    Returns:
+        Reconstructed (2^n x 2^n) density matrix that is guaranteed to be
+        a valid quantum state.
     """
     dim = 2**num_qubits
     rho = np.eye(dim, dtype=complex) / dim
@@ -213,7 +307,20 @@ def state_fidelity(
     rho: NDArray[np.complexfloating],
     sigma: NDArray[np.complexfloating],
 ) -> float:
-    """Compute fidelity between two density matrices: F = (Tr sqrt(sqrt(rho) sigma sqrt(rho)))^2."""
+    """Compute the Uhlmann fidelity between two density matrices.
+
+    F(rho, sigma) = (Tr sqrt(sqrt(rho) * sigma * sqrt(rho)))^2
+
+    The fidelity is 1 when the two states are identical and 0 when they
+    have orthogonal support.
+
+    Args:
+        rho: First density matrix (d x d).
+        sigma: Second density matrix (d x d).
+
+    Returns:
+        Fidelity value in [0, 1].
+    """
     eigvals, eigvecs = np.linalg.eigh(rho)
     sqrt_eigvals = np.sqrt(np.maximum(eigvals, 0))
     sqrt_rho = eigvecs @ np.diag(sqrt_eigvals) @ eigvecs.conj().T

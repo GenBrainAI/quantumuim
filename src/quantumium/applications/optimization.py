@@ -16,7 +16,19 @@ from ..algorithms.qaoa import qaoa_maxcut, maxcut_cost_operator, QAOAResult
 
 @dataclass
 class OptimizationResult:
-    """Result from a quantum optimization run."""
+    """Result from a quantum optimization run.
+
+    Attributes:
+        problem: Human-readable description of the problem instance
+            (e.g., ``"MaxCut (5 nodes, 7 edges)"``).
+        solution: Optimal bitstring found by the solver, where each
+            character ``'0'``/``'1'`` indicates the assignment of the
+            corresponding decision variable.
+        objective_value: Value of the objective function at the returned
+            solution.
+        qaoa_result: Full :class:`QAOAResult` from the underlying QAOA
+            run, including optimal parameters and convergence history.
+    """
     problem: str
     solution: str
     objective_value: float
@@ -29,13 +41,22 @@ def solve_maxcut(
     num_starts: int = 10,
     max_iter: int = 100,
 ) -> OptimizationResult:
-    """Solve MaxCut using QAOA.
+    """Solve the MaxCut problem on a graph using QAOA.
+
+    Partitions the graph vertices into two sets to maximize the number
+    of edges crossing the partition. The adjacency matrix is converted
+    to an edge list internally.
 
     Args:
-        adjacency: Adjacency matrix or list of lists.
-        p: QAOA depth.
-        num_starts: Random restarts.
-        max_iter: Optimization iterations.
+        adjacency: Symmetric adjacency matrix of shape ``(n, n)`` as a
+            list of lists or NumPy array. Non-zero entries indicate edges.
+        p: Number of QAOA layers (circuit depth).
+        num_starts: Number of random parameter initializations.
+        max_iter: Maximum optimizer iterations per start.
+
+    Returns:
+        OptimizationResult: Contains the partition bitstring, the cut
+            value (number of edges cut), and the full QAOA result.
     """
     adj = np.asarray(adjacency)
     n = adj.shape[0]
@@ -65,17 +86,28 @@ def solve_tsp_qaoa(
     num_starts: int = 10,
     max_iter: int = 100,
 ) -> OptimizationResult:
-    """Solve small TSP instances using QAOA with penalty encoding.
+    """Solve small Travelling Salesman Problem instances using QAOA.
 
-    Uses one-hot encoding: n² qubits for n cities.
-    Only practical for n ≤ 4 on simulators due to qubit count.
+    Encodes the TSP as a QUBO using one-hot encoding with ``n**2`` qubits
+    for *n* cities. Row and column constraints (each city visited exactly
+    once, each time-step has exactly one city) are enforced via quadratic
+    penalty terms. Only practical for ``n <= 4`` on statevector simulators
+    due to the exponential qubit count.
 
     Args:
-        distances: n×n distance matrix.
-        p: QAOA depth.
-        penalty: Penalty weight for constraint violations.
-        num_starts: Random restarts.
-        max_iter: Optimization iterations.
+        distances: Distance matrix of shape ``(n, n)`` as a list of lists
+            or NumPy array.
+        p: Number of QAOA layers (circuit depth).
+        penalty: Weight of the penalty terms for constraint violations.
+            Higher values encourage feasible solutions at the cost of
+            harder optimization.
+        num_starts: Number of random parameter initializations.
+        max_iter: Maximum optimizer iterations per start.
+
+    Returns:
+        OptimizationResult: Contains the best bitstring encoding the
+            route (one-hot, row-major), the total route distance as the
+            objective value, and the full QAOA result.
     """
     dist = np.asarray(distances, dtype=float)
     n = dist.shape[0]
@@ -164,20 +196,27 @@ def portfolio_optimization(
     num_starts: int = 10,
     max_iter: int = 100,
 ) -> OptimizationResult:
-    """Portfolio optimization using QAOA.
+    """Solve mean-variance portfolio optimization using QAOA.
 
-    Maximize: μᵀx - q·xᵀΣx   subject to  Σxᵢ = budget
-
-    Each qubit represents whether to include an asset.
+    Maximizes the objective ``mu^T x - q * x^T Sigma x`` subject to an
+    optional budget constraint ``sum(x) = budget``, where each binary
+    variable ``x_i`` indicates whether asset *i* is selected. The budget
+    constraint is enforced with a quadratic penalty term.
 
     Args:
-        expected_returns: Expected return per asset.
-        covariance: Covariance matrix.
-        risk_aversion: Risk aversion parameter q.
-        budget: Number of assets to select (None = no constraint).
-        p: QAOA depth.
-        num_starts: Random restarts.
-        max_iter: Iterations.
+        expected_returns: Expected return for each asset, shape ``(n,)``.
+        covariance: Covariance matrix of asset returns, shape ``(n, n)``.
+        risk_aversion: Risk aversion parameter *q*. Higher values penalize
+            portfolio variance more heavily.
+        budget: Number of assets to select. If ``None``, no cardinality
+            constraint is imposed.
+        p: Number of QAOA layers (circuit depth).
+        num_starts: Number of random parameter initializations.
+        max_iter: Maximum optimizer iterations per start.
+
+    Returns:
+        OptimizationResult: Contains the selected-asset bitstring, the
+            objective value, and the full QAOA result.
     """
     n_assets = len(expected_returns)
     num_qubits = n_assets

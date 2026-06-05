@@ -38,13 +38,21 @@ def bit_flip_encode(state: NDArray[np.complexfloating]) -> NDArray[np.complexflo
 def bit_flip_syndrome(state: NDArray[np.complexfloating]) -> tuple[int, int]:
     """Measure the bit-flip syndrome without collapsing the logical state.
 
-    Returns syndrome bits (s1, s2) from stabilizers Z₀Z₁ and Z₁Z₂.
+    Computes the eigenvalues of the stabilizer generators Z_0 Z_1 and Z_1 Z_2
+    from the probability distribution of the statevector and returns the
+    corresponding syndrome bits.
 
     Syndrome table:
-      (0, 0) → no error
-      (1, 0) → error on qubit 0
-      (1, 1) → error on qubit 1
-      (0, 1) → error on qubit 2
+      (0, 0) -> no error
+      (1, 0) -> error on qubit 0
+      (1, 1) -> error on qubit 1
+      (0, 1) -> error on qubit 2
+
+    Args:
+        state: 8-element statevector in the 3-qubit Hilbert space.
+
+    Returns:
+        A tuple (s1, s2) of syndrome bits, each 0 or 1.
     """
     state = np.asarray(state, dtype=complex)
     probs = np.abs(state) ** 2
@@ -67,9 +75,20 @@ def bit_flip_correct(
     state: NDArray[np.complexfloating],
     syndrome: tuple[int, int] | None = None,
 ) -> NDArray[np.complexfloating]:
-    """Apply correction based on syndrome.
+    """Apply an X correction to the qubit identified by the syndrome.
 
-    If syndrome is None, it is measured first.
+    Looks up the syndrome in the error map and applies a bit-flip (X gate)
+    to the erroneous qubit by swapping amplitudes in the statevector.
+    If no syndrome is provided, it is measured from the state first.
+
+    Args:
+        state: 8-element statevector in the 3-qubit Hilbert space.
+        syndrome: Optional precomputed syndrome tuple (s1, s2). If None,
+            the syndrome is measured via ``bit_flip_syndrome``.
+
+    Returns:
+        Corrected 8-element statevector with the identified bit-flip
+        error removed.
     """
     state = np.asarray(state, dtype=complex).copy()
     if syndrome is None:
@@ -96,9 +115,19 @@ def bit_flip_correct(
 
 
 def bit_flip_decode(state: NDArray[np.complexfloating]) -> NDArray[np.complexfloating]:
-    """Decode 3-qubit state back to single logical qubit.
+    """Decode a 3-qubit bit-flip code state back to a single logical qubit.
 
-    Assumes the state is in the code space (no errors remaining).
+    Projects onto the code space spanned by |000> and |111> and returns the
+    normalized logical qubit amplitudes. Assumes the state has already been
+    corrected (no residual errors).
+
+    Args:
+        state: 8-element statevector in the 3-qubit Hilbert space,
+            expected to be in the code space.
+
+    Returns:
+        2-element array [alpha, beta] representing the decoded logical
+        state alpha|0> + beta|1>, normalized to unit length.
     """
     state = np.asarray(state, dtype=complex)
     decoded = np.zeros(2, dtype=complex)

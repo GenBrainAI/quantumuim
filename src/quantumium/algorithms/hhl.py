@@ -27,6 +27,23 @@ from ..core.gate import Gate, H, SWAP
 
 @dataclass
 class HHLResult:
+    """Result container for the HHL algorithm.
+
+    Attributes
+    ----------
+    solution_state : NDArray[np.complexfloating]
+        The normalized quantum state proportional to A^{-1}|b>, extracted
+        via post-selection on the ancilla qubit.
+    success_probability : float
+        The probability of successful post-selection (measuring the ancilla
+        in state |1>). Low values indicate that the algorithm may need
+        more clock qubits or parameter tuning.
+    classical_solution : NDArray[np.complexfloating]
+        The normalized classical solution x = A^{-1}b for comparison.
+    fidelity : float
+        The state fidelity |<x_quantum|x_classical>|^2 between the quantum
+        and classical solutions. Values close to 1.0 indicate high accuracy.
+    """
     solution_state: NDArray[np.complexfloating]
     success_probability: float
     classical_solution: NDArray[np.complexfloating]
@@ -34,13 +51,37 @@ class HHLResult:
 
 
 def _hermitian_exp(A: NDArray, t: float) -> NDArray:
-    """Compute e^(iAt) via eigendecomposition."""
+    """Compute the matrix exponential exp(i*A*t) via eigendecomposition.
+
+    Parameters
+    ----------
+    A : NDArray
+        A Hermitian matrix.
+    t : float
+        The time/scaling parameter.
+
+    Returns
+    -------
+    NDArray
+        The unitary matrix exp(i*A*t).
+    """
     eigenvalues, eigenvectors = np.linalg.eigh(A)
     return eigenvectors @ np.diag(np.exp(1j * eigenvalues * t)) @ eigenvectors.conj().T
 
 
 def _apply_qft(qc: QuantumCircuit, qubits: list[int]) -> None:
-    """Apply QFT to the given qubits in the circuit."""
+    """Apply the Quantum Fourier Transform to specified qubits in a circuit.
+
+    Appends QFT gates (Hadamard, controlled-phase, SWAP) directly to the
+    given circuit, modifying it in place.
+
+    Parameters
+    ----------
+    qc : QuantumCircuit
+        The circuit to modify.
+    qubits : list[int]
+        Indices of the qubits to transform.
+    """
     from ..circuits.templates import _controlled_phase
     n = len(qubits)
     for i in range(n):
@@ -55,7 +96,18 @@ def _apply_qft(qc: QuantumCircuit, qubits: list[int]) -> None:
 
 
 def _apply_inverse_qft(qc: QuantumCircuit, qubits: list[int]) -> None:
-    """Apply inverse QFT to the given qubits in the circuit."""
+    """Apply the inverse Quantum Fourier Transform to specified qubits.
+
+    Appends inverse QFT gates (SWAP, inverse controlled-phase, Hadamard)
+    directly to the given circuit, modifying it in place.
+
+    Parameters
+    ----------
+    qc : QuantumCircuit
+        The circuit to modify.
+    qubits : list[int]
+        Indices of the qubits to transform.
+    """
     from ..circuits.templates import _controlled_phase
     n = len(qubits)
     for i in range(n // 2):
@@ -76,14 +128,40 @@ def _build_hhl_circuit(
     t: float,
     C: float,
 ) -> tuple[QuantumCircuit, int]:
-    """Build the full HHL circuit.
+    """Build the full HHL circuit for solving Ax = b.
+
+    Constructs the complete HHL circuit consisting of:
+    1. State preparation: encodes |b> into the state register.
+    2. QPE: extracts eigenvalues of A into the clock register.
+    3. Eigenvalue inversion: controlled rotation on the ancilla with
+       amplitude C/lambda for each eigenvalue lambda.
+    4. Inverse QPE: uncomputes the clock register.
 
     Layout:
-      - Qubits 0..num_clock-1: clock register
+      - Qubits 0 to num_clock-1: clock register (for QPE)
       - Qubit num_clock: ancilla (for eigenvalue inversion)
-      - Qubits num_clock+1..end: state register (|b>)
+      - Qubits num_clock+1 to end: state register (encodes |b>)
 
-    Returns (circuit, total_qubits).
+    Parameters
+    ----------
+    A : NDArray[np.complexfloating]
+        The Hermitian matrix of the linear system.
+    b : NDArray[np.complexfloating]
+        The right-hand side vector.
+    num_clock : int
+        Number of clock qubits for QPE precision.
+    t : float
+        Evolution time parameter for the Hamiltonian simulation in QPE.
+    C : float
+        Scaling constant for eigenvalue inversion. Should be less than or
+        equal to the smallest eigenvalue of A.
+
+    Returns
+    -------
+    tuple[QuantumCircuit, int]
+        A pair ``(circuit, total_qubits)`` where ``circuit`` is the
+        constructed HHL circuit and ``total_qubits`` is the total number
+        of qubits used.
     """
     n_state = int(np.log2(len(b)))
     total = num_clock + 1 + n_state
@@ -176,17 +254,48 @@ def hhl_solve(
     num_clock: int = 2,
     t: float | None = None,
 ) -> HHLResult:
-    """Solve Ax = b using the HHL algorithm.
+    """Solve the linear system Ax = b using the HHL algorithm.
 
-    Args:
-        A: Hermitian matrix (must have positive eigenvalues for best results).
-        b: Right-hand side vector.
-        num_clock: Number of clock qubits for QPE precision.
-        t: Evolution time. Default: auto-selected so eigenvalues map
-           to distinct clock states.
+    Implements the Harrow-Hassidim-Lloyd algorithm, which produces a quantum
+    state |x> proportional to A^{-1}|b>. The solution is extracted by
+    post-selecting on the ancilla qubit in state |1>.
 
-    Returns:
-        HHLResult with the solution state, success probability, and fidelity.
+    Parameters
+    ----------
+    A : NDArray[np.complexfloating]
+        A Hermitian matrix with positive eigenvalues. Must be square and
+        its dimension must be a power of 2.
+    b : NDArray[np.complexfloating]
+        The right-hand side vector. Length must match the dimension of A.
+    num_clock : int, optional
+        Number of clock qubits for QPE precision (default 2). More clock
+        qubits improve eigenvalue resolution but increase circuit size.
+    t : float or None, optional
+        Evolution time for Hamiltonian simulation within QPE. If None
+        (default), auto-selected as ``2*pi / 2^num_clock`` so that integer
+        eigenvalues map to distinct clock register states.
+
+    Returns
+    -------
+    HHLResult
+        Contains the normalized solution state, post-selection success
+        probability, the classical reference solution, and the fidelity
+        between quantum and classical solutions.
+
+    Raises
+    ------
+    ValueError
+        If A is not square, not Hermitian, if b has incompatible length,
+        or if A has no positive eigenvalues.
+
+    Example
+    -------
+    >>> import numpy as np
+    >>> A = np.array([[2, 0], [0, 3]], dtype=complex)
+    >>> b = np.array([1, 0], dtype=complex)
+    >>> result = hhl_solve(A, b, num_clock=3)
+    >>> result.fidelity > 0.9
+    True
     """
     A = np.asarray(A, dtype=complex)
     b = np.asarray(b, dtype=complex)

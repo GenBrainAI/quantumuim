@@ -29,17 +29,38 @@ class PulseSequence:
 
     @property
     def num_steps(self) -> int:
+        """Return the number of time steps in the pulse sequence.
+
+        Returns:
+            int: Number of time steps.
+        """
         return self.amplitudes.shape[0]
 
     @property
     def num_controls(self) -> int:
+        """Return the number of control channels.
+
+        Returns:
+            int: Number of control channels.
+        """
         return self.amplitudes.shape[1]
 
     @property
     def total_time(self) -> float:
+        """Return the total duration of the pulse sequence.
+
+        Returns:
+            float: Total time (num_steps * dt).
+        """
         return self.num_steps * self.dt
 
     def copy(self) -> PulseSequence:
+        """Create a deep copy of this pulse sequence.
+
+        Returns:
+            PulseSequence: A new PulseSequence with independently copied
+                amplitude data.
+        """
         return PulseSequence(
             amplitudes=self.amplitudes.copy(),
             dt=self.dt,
@@ -52,13 +73,20 @@ def constant_pulse(
     dt: float = 0.1,
     num_controls: int = 1,
 ) -> PulseSequence:
-    """Create a constant pulse on the first control channel.
+    """Create a constant-amplitude pulse on the first control channel.
+
+    All other control channels are set to zero amplitude.
 
     Args:
-        amplitude: Constant amplitude value.
-        num_steps: Number of time steps.
-        dt: Time step duration.
-        num_controls: Number of control channels.
+        amplitude (float): Constant amplitude value for channel 0.
+        num_steps (int): Number of time steps in the pulse.
+        dt (float): Time step duration. Defaults to 0.1.
+        num_controls (int): Total number of control channels.
+            Defaults to 1.
+
+    Returns:
+        PulseSequence: A pulse sequence with constant amplitude on
+            channel 0 and zero on all other channels.
     """
     amps = np.zeros((num_steps, num_controls))
     amps[:, 0] = amplitude
@@ -73,17 +101,25 @@ def gaussian_pulse(
     num_controls: int = 1,
     channel: int = 0,
 ) -> PulseSequence:
-    """Create a Gaussian-shaped pulse.
+    """Create a Gaussian-shaped pulse centered in the time window.
 
-    u(t) = amplitude * exp(-(t - t_center)² / (2σ²))
+    The pulse envelope is u(t) = amplitude * exp(-(t - t_center)^2 / (2*sigma^2)),
+    where t_center is the midpoint of the pulse duration.
 
     Args:
-        amplitude: Peak amplitude.
-        sigma: Gaussian width (in time units).
-        num_steps: Number of time steps.
-        dt: Time step duration.
-        num_controls: Number of control channels.
-        channel: Which control channel to put the pulse on.
+        amplitude (float): Peak amplitude at the center of the Gaussian.
+        sigma (float): Standard deviation (width) of the Gaussian in
+            time units.
+        num_steps (int): Number of time steps in the pulse.
+        dt (float): Time step duration. Defaults to 0.1.
+        num_controls (int): Total number of control channels.
+            Defaults to 1.
+        channel (int): Index of the control channel for the Gaussian
+            pulse. Defaults to 0.
+
+    Returns:
+        PulseSequence: A pulse sequence with the Gaussian envelope on
+            the specified channel and zero on all others.
     """
     amps = np.zeros((num_steps, num_controls))
     t_center = (num_steps - 1) * dt / 2

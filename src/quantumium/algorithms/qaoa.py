@@ -17,7 +17,21 @@ from ..core.gate import Gate, H
 
 @dataclass
 class QAOAResult:
-    """Result from a QAOA optimization run."""
+    """Result container for a QAOA optimization run.
+
+    Attributes
+    ----------
+    optimal_params : NDArray[np.floating]
+        Concatenation of the optimal gamma and beta parameters
+        (length 2*p, where p is the number of QAOA layers).
+    optimal_value : float
+        The best expected cost function value found.
+    optimal_bitstring : str
+        The bitstring sampled most frequently from the optimal circuit,
+        representing the approximate solution to the optimization problem.
+    history : list[float]
+        Expected cost value at each iteration of the best optimization run.
+    """
     optimal_params: NDArray[np.floating]
     optimal_value: float
     optimal_bitstring: str
@@ -25,11 +39,25 @@ class QAOAResult:
 
 
 def maxcut_cost_operator(num_qubits: int, edges: list[tuple[int, int]]) -> NDArray[np.complexfloating]:
-    """Build the diagonal cost operator for MaxCut.
+    """Build the diagonal cost operator for the MaxCut problem.
 
-    C = Σ_{(i,j)∈E} (1 - Z_i Z_j) / 2
+    The cost function is C = sum_{(i,j) in E} (1 - Z_i Z_j) / 2,
+    where each edge contributes 1 if qubits i and j are in different
+    states (a "cut" edge) and 0 if they agree.
 
-    Each edge contributes 1 if qubits i,j differ, 0 if they agree.
+    Parameters
+    ----------
+    num_qubits : int
+        Number of qubits (nodes in the graph).
+    edges : list[tuple[int, int]]
+        List of edges as ``(i, j)`` pairs, where i and j are qubit indices.
+
+    Returns
+    -------
+    NDArray[np.complexfloating]
+        A 1-D array of length 2^num_qubits containing the diagonal of the
+        cost Hamiltonian. Entry ``cost[k]`` is the number of cut edges for
+        computational basis state ``k``.
     """
     dim = 2**num_qubits
     cost = np.zeros(dim, dtype=float)
@@ -43,16 +71,42 @@ def maxcut_cost_operator(num_qubits: int, edges: list[tuple[int, int]]) -> NDArr
 
 
 def _cost_unitary(cost_diag: NDArray, gamma: float) -> Gate:
-    """e^{-i γ C} where C is diagonal."""
+    """Build the cost unitary exp(-i * gamma * C) where C is diagonal.
+
+    Parameters
+    ----------
+    cost_diag : NDArray
+        Diagonal of the cost Hamiltonian (1-D array of length 2^n).
+    gamma : float
+        The cost layer parameter.
+
+    Returns
+    -------
+    Gate
+        A diagonal unitary gate implementing the cost evolution.
+    """
     phases = np.exp(-1j * gamma * cost_diag)
     matrix = np.diag(phases)
     return Gate(matrix, f"U_C(γ={gamma:.3f})")
 
 
 def _mixer_unitary(num_qubits: int, beta: float) -> Gate:
-    """e^{-i β B} where B = Σ X_i (transverse field mixer).
+    """Build the mixer unitary exp(-i * beta * B) where B = sum_i X_i.
 
-    Built by exponentiating the full mixer Hamiltonian.
+    The mixer Hamiltonian is the transverse field B = sum_i X_i. The
+    exponential is computed via eigendecomposition of the full mixer matrix.
+
+    Parameters
+    ----------
+    num_qubits : int
+        Number of qubits.
+    beta : float
+        The mixer layer parameter.
+
+    Returns
+    -------
+    Gate
+        A unitary gate implementing the mixer evolution.
     """
     dim = 2**num_qubits
     pauli_x = np.array([[0, 1], [1, 0]], dtype=complex)
@@ -79,11 +133,26 @@ def qaoa_circuit(
 ) -> QuantumCircuit:
     """Build a QAOA circuit with p layers.
 
-    Args:
-        num_qubits: Number of qubits.
-        cost_diag: Diagonal of the cost Hamiltonian (2^n entries).
-        gammas: Cost layer parameters (length p).
-        betas: Mixer layer parameters (length p).
+    Constructs the circuit: initial Hadamard layer to create a uniform
+    superposition, then p alternating applications of the cost unitary
+    exp(-i*gamma_l*C) and the mixer unitary exp(-i*beta_l*B).
+
+    Parameters
+    ----------
+    num_qubits : int
+        Number of qubits (must match the dimension of ``cost_diag``).
+    cost_diag : NDArray
+        Diagonal of the cost Hamiltonian as a 1-D array of length 2^num_qubits.
+    gammas : NDArray[np.floating]
+        Cost layer parameters, one per QAOA layer (length p).
+    betas : NDArray[np.floating]
+        Mixer layer parameters, one per QAOA layer (length p). Must have
+        the same length as ``gammas``.
+
+    Returns
+    -------
+    QuantumCircuit
+        A quantum circuit implementing the p-layer QAOA ansatz.
     """
     p = len(gammas)
     assert len(betas) == p, "gammas and betas must have same length"
@@ -109,7 +178,27 @@ def qaoa_expectation(
     gammas: NDArray[np.floating],
     betas: NDArray[np.floating],
 ) -> float:
-    """Compute ⟨γ,β|C|γ,β⟩ — the expected cost value."""
+    """Compute the expected cost value <gamma,beta|C|gamma,beta>.
+
+    Builds the QAOA circuit, computes the statevector, and evaluates the
+    expectation of the diagonal cost operator.
+
+    Parameters
+    ----------
+    num_qubits : int
+        Number of qubits.
+    cost_diag : NDArray
+        Diagonal of the cost Hamiltonian (length 2^num_qubits).
+    gammas : NDArray[np.floating]
+        Cost layer parameters (length p).
+    betas : NDArray[np.floating]
+        Mixer layer parameters (length p).
+
+    Returns
+    -------
+    float
+        The expected cost value for the given parameters.
+    """
     qc = qaoa_circuit(num_qubits, cost_diag, gammas, betas)
     sv = qc.statevector()
     probs = np.abs(sv) ** 2
@@ -124,18 +213,37 @@ def qaoa_maxcut(
     max_iter: int = 100,
     learning_rate: float = 0.1,
 ) -> QAOAResult:
-    """Run QAOA for MaxCut with gradient-free optimization.
+    """Run QAOA for the MaxCut problem with gradient-ascent optimization.
 
-    Uses coordinate descent with finite differences for simplicity.
-    For production, replace with scipy.optimize.minimize(method='COBYLA').
+    Uses finite-difference gradient estimation with multiple random restarts
+    to find the QAOA parameters that maximize the expected number of cut edges.
 
-    Args:
-        num_qubits: Number of nodes in the graph.
-        edges: List of (i, j) edges.
-        p: Number of QAOA layers (depth).
-        num_starts: Number of random restarts.
-        max_iter: Maximum iterations per restart.
-        learning_rate: Step size for parameter updates.
+    Parameters
+    ----------
+    num_qubits : int
+        Number of nodes in the graph.
+    edges : list[tuple[int, int]]
+        List of edges as ``(i, j)`` pairs, where i and j are node indices.
+    p : int, optional
+        Number of QAOA layers / depth (default 1). Higher values allow
+        better approximation ratios but increase parameter count.
+    num_starts : int, optional
+        Number of random restarts for the optimizer (default 10).
+    max_iter : int, optional
+        Maximum number of gradient-ascent iterations per restart (default 100).
+    learning_rate : float, optional
+        Step size for parameter updates (default 0.1).
+
+    Returns
+    -------
+    QAOAResult
+        Contains the optimal parameters, expected cost value, most likely
+        bitstring solution, and optimization history.
+
+    Note
+    ----
+    For production use, consider replacing the finite-difference optimizer
+    with ``scipy.optimize.minimize(method='COBYLA')`` for better convergence.
     """
     cost_diag = maxcut_cost_operator(num_qubits, edges)
 

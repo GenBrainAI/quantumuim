@@ -17,7 +17,22 @@ from numpy.typing import NDArray
 def _ensure_density_matrix(
     rho: NDArray[np.complexfloating],
 ) -> NDArray[np.complexfloating]:
-    """Validate and coerce to a density matrix."""
+    """Validate and coerce an input to a density matrix.
+
+    If the input is a 1-D statevector, converts it to a density matrix
+    via the outer product |psi><psi|. If already 2-D, validates that
+    it is square.
+
+    Args:
+        rho: A statevector (1-D array of length d) or density matrix
+            (2-D array of shape (d, d)).
+
+    Returns:
+        A (d x d) complex density matrix.
+
+    Raises:
+        ValueError: If the input is 2-D but not square.
+    """
     rho = np.asarray(rho, dtype=complex)
     if rho.ndim == 1:
         rho = np.outer(rho, rho.conj())
@@ -157,7 +172,17 @@ def _uhlmann_fidelity(
     rho: NDArray[np.complexfloating],
     sigma: NDArray[np.complexfloating],
 ) -> float:
-    """Uhlmann fidelity F(rho, sigma) = (Tr sqrt(sqrt(rho) sigma sqrt(rho)))^2."""
+    """Compute the Uhlmann fidelity between two density matrices.
+
+    F(rho, sigma) = (Tr sqrt(sqrt(rho) * sigma * sqrt(rho)))^2
+
+    Args:
+        rho: First density matrix (d x d).
+        sigma: Second density matrix (d x d).
+
+    Returns:
+        Fidelity value in [0, 1].
+    """
     sqrt_rho = _matrix_sqrt(rho)
     product = sqrt_rho @ sigma @ sqrt_rho
     eigvals = np.linalg.eigvalsh(product)
@@ -167,7 +192,17 @@ def _uhlmann_fidelity(
 def _matrix_sqrt(
     A: NDArray[np.complexfloating],
 ) -> NDArray[np.complexfloating]:
-    """Matrix square root of a positive semidefinite matrix."""
+    """Compute the matrix square root of a positive semidefinite matrix.
+
+    Uses eigendecomposition: sqrt(A) = V * diag(sqrt(eigenvalues)) * V^dag.
+    Negative eigenvalues (due to numerical noise) are clipped to zero.
+
+    Args:
+        A: A positive semidefinite (d x d) complex matrix.
+
+    Returns:
+        The matrix square root, a (d x d) complex matrix.
+    """
     eigvals, eigvecs = np.linalg.eigh(A)
     eigvals = np.maximum(eigvals, 0.0)
     return eigvecs @ np.diag(np.sqrt(eigvals)) @ eigvecs.conj().T

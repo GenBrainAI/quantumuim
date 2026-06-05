@@ -13,9 +13,20 @@ from numpy.typing import NDArray
 
 
 def sigma_minus(num_qubits: int = 1, qubit: int = 0) -> NDArray[np.complexfloating]:
-    """Qubit lowering operator σ- = |0><1|.
+    """Construct the qubit lowering operator sigma_minus = |0><1|.
 
-    Models spontaneous emission / amplitude damping.
+    Models spontaneous emission and amplitude damping transitions.
+    For multi-qubit systems, the operator acts on the specified qubit
+    and identity on all others.
+
+    Args:
+        num_qubits (int): Total number of qubits in the system. Defaults to 1.
+        qubit (int): Index of the qubit on which to apply the operator
+            (0-indexed). Defaults to 0.
+
+    Returns:
+        NDArray[np.complexfloating]: The lowering operator matrix of shape
+            (2^num_qubits, 2^num_qubits).
     """
     sm = np.array([[0, 1], [0, 0]], dtype=complex)
     if num_qubits == 1:
@@ -24,7 +35,20 @@ def sigma_minus(num_qubits: int = 1, qubit: int = 0) -> NDArray[np.complexfloati
 
 
 def sigma_plus(num_qubits: int = 1, qubit: int = 0) -> NDArray[np.complexfloating]:
-    """Qubit raising operator σ+ = |1><0|."""
+    """Construct the qubit raising operator sigma_plus = |1><0|.
+
+    Models excitation and absorption transitions. For multi-qubit systems,
+    the operator acts on the specified qubit and identity on all others.
+
+    Args:
+        num_qubits (int): Total number of qubits in the system. Defaults to 1.
+        qubit (int): Index of the qubit on which to apply the operator
+            (0-indexed). Defaults to 0.
+
+    Returns:
+        NDArray[np.complexfloating]: The raising operator matrix of shape
+            (2^num_qubits, 2^num_qubits).
+    """
     sp = np.array([[0, 0], [1, 0]], dtype=complex)
     if num_qubits == 1:
         return sp
@@ -36,10 +60,21 @@ def decay_operator(
     num_qubits: int = 1,
     qubit: int = 0,
 ) -> tuple[float, NDArray[np.complexfloating]]:
-    """T1 decay (amplitude damping) collapse operator.
+    """Construct a T1 decay (amplitude damping) collapse operator.
 
-    Returns (rate, operator) pair for the Lindblad equation.
-    Rate γ = 1/T1 gives the energy relaxation rate.
+    Returns a (rate, operator) pair suitable for the Lindblad master
+    equation. The rate gamma = 1/T1 gives the energy relaxation rate.
+
+    Args:
+        gamma (float): Decay rate (inverse of T1 relaxation time).
+        num_qubits (int): Total number of qubits. Defaults to 1.
+        qubit (int): Index of the qubit subject to decay (0-indexed).
+            Defaults to 0.
+
+    Returns:
+        tuple[float, NDArray[np.complexfloating]]: A (rate, operator)
+            pair where the operator is sigma_minus acting on the
+            specified qubit.
     """
     return gamma, sigma_minus(num_qubits, qubit)
 
@@ -49,12 +84,21 @@ def dephasing_operator(
     num_qubits: int = 1,
     qubit: int = 0,
 ) -> tuple[float, NDArray[np.complexfloating]]:
-    """Pure dephasing collapse operator.
+    """Construct a pure dephasing collapse operator.
 
-    Uses L = σz/2. The pure dephasing rate γ_φ relates to T2 by:
-    1/T2 = 1/(2T1) + γ_φ
+    Uses L = sigma_z / 2. The pure dephasing rate gamma_phi relates
+    to the T2 decoherence time by: 1/T2 = 1/(2*T1) + gamma_phi.
 
-    Returns (rate, operator) pair.
+    Args:
+        gamma (float): Pure dephasing rate gamma_phi.
+        num_qubits (int): Total number of qubits. Defaults to 1.
+        qubit (int): Index of the qubit subject to dephasing (0-indexed).
+            Defaults to 0.
+
+    Returns:
+        tuple[float, NDArray[np.complexfloating]]: A (rate, operator)
+            pair where the operator is sigma_z/2 acting on the
+            specified qubit.
     """
     sz = np.array([[1, 0], [0, -1]], dtype=complex) / 2
     if num_qubits == 1:
@@ -70,15 +114,25 @@ def thermal_operator(
     num_qubits: int = 1,
     qubit: int = 0,
 ) -> list[tuple[float, NDArray[np.complexfloating]]]:
-    """Thermal bath operators for a qubit at finite temperature.
+    """Construct thermal bath collapse operators for a qubit at finite temperature.
 
-    Returns two (rate, operator) pairs:
-    - Emission: rate = γ(1 + n̄), operator = σ-
-    - Absorption: rate = γn̄, operator = σ+
+    Returns up to two (rate, operator) pairs modeling stimulated and
+    spontaneous transitions:
+    - Emission: rate = gamma * (1 + n_bar), operator = sigma_minus
+    - Absorption: rate = gamma * n_bar, operator = sigma_plus
+      (only included when n_thermal > 0)
 
     Args:
-        gamma: Base transition rate.
-        n_thermal: Mean thermal photon number n̄ = 1/(exp(ℏω/kT) - 1).
+        gamma (float): Base transition rate.
+        n_thermal (float): Mean thermal photon number
+            n_bar = 1 / (exp(hbar*omega / (k_B*T)) - 1).
+        num_qubits (int): Total number of qubits. Defaults to 1.
+        qubit (int): Index of the qubit coupled to the thermal bath
+            (0-indexed). Defaults to 0.
+
+    Returns:
+        list[tuple[float, NDArray[np.complexfloating]]]: List of
+            (rate, operator) pairs for use in the Lindblad equation.
     """
     ops = [(gamma * (1 + n_thermal), sigma_minus(num_qubits, qubit))]
     if n_thermal > 0:
@@ -87,9 +141,18 @@ def thermal_operator(
 
 
 def annihilation_operator(dim: int) -> NDArray[np.complexfloating]:
-    """Bosonic annihilation operator a for a truncated Fock space.
+    """Construct the bosonic annihilation operator for a truncated Fock space.
 
-    a|n> = √n |n-1>
+    The annihilation operator satisfies a|n> = sqrt(n) |n-1> for n >= 1,
+    and a|0> = 0. The Fock space is truncated to the first `dim` levels.
+
+    Args:
+        dim (int): Dimension of the truncated Fock space (number of
+            levels to include).
+
+    Returns:
+        NDArray[np.complexfloating]: The annihilation operator matrix
+            of shape (dim, dim).
     """
     a = np.zeros((dim, dim), dtype=complex)
     for n in range(1, dim):
@@ -98,12 +161,36 @@ def annihilation_operator(dim: int) -> NDArray[np.complexfloating]:
 
 
 def creation_operator(dim: int) -> NDArray[np.complexfloating]:
-    """Bosonic creation operator a† for a truncated Fock space."""
+    """Construct the bosonic creation operator for a truncated Fock space.
+
+    The creation operator satisfies a_dag|n> = sqrt(n+1) |n+1>. It is
+    the conjugate transpose of the annihilation operator.
+
+    Args:
+        dim (int): Dimension of the truncated Fock space (number of
+            levels to include).
+
+    Returns:
+        NDArray[np.complexfloating]: The creation operator matrix
+            of shape (dim, dim).
+    """
     return annihilation_operator(dim).conj().T
 
 
 def number_operator(dim: int) -> NDArray[np.complexfloating]:
-    """Number operator n = a†a for a truncated Fock space."""
+    """Construct the photon number operator for a truncated Fock space.
+
+    The number operator n = a_dag * a satisfies n|k> = k|k>. It is
+    represented as a diagonal matrix with entries 0, 1, ..., dim-1.
+
+    Args:
+        dim (int): Dimension of the truncated Fock space (number of
+            levels to include).
+
+    Returns:
+        NDArray[np.complexfloating]: The number operator matrix
+            of shape (dim, dim).
+    """
     return np.diag(np.arange(dim, dtype=complex))
 
 

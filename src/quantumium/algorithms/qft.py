@@ -1,4 +1,19 @@
-"""Quantum Fourier Transform implementation."""
+"""Quantum Fourier Transform (QFT) implementation.
+
+The QFT maps computational basis states to Fourier basis states:
+|j> -> (1/sqrt(N)) * sum_k exp(2*pi*i*j*k/N) |k>
+
+It is the quantum analogue of the discrete Fourier transform and serves as
+a key subroutine in quantum phase estimation, Shor's algorithm, and many
+other quantum algorithms.
+
+This module provides:
+
+- :func:`qft` -- applies the QFT to specified qubits of a circuit.
+- :func:`inverse_qft` -- applies the inverse QFT (QFT-dagger).
+
+The implementation uses O(n^2) controlled phase rotation gates.
+"""
 
 from __future__ import annotations
 
@@ -9,7 +24,21 @@ from ..core.gate import Gate, H, SWAP
 
 
 def _controlled_phase(k: int) -> Gate:
-    """Controlled rotation gate CR_k: phase shift of 2π/2^k on target when control is |1⟩."""
+    """Build the controlled rotation gate CR_k.
+
+    Applies a phase shift of 2*pi/2^k to the target qubit when the control
+    qubit is in state |1>.
+
+    Parameters
+    ----------
+    k : int
+        The rotation index. The applied phase is 2*pi / 2^k.
+
+    Returns
+    -------
+    Gate
+        A two-qubit controlled phase gate.
+    """
     angle = 2 * np.pi / (2**k)
     matrix = np.array([
         [1, 0, 0, 0],
@@ -21,12 +50,26 @@ def _controlled_phase(k: int) -> Gate:
 
 
 def qft(circuit: QuantumCircuit, qubits: list[int]) -> QuantumCircuit:
-    """Apply Quantum Fourier Transform to the specified qubits of a circuit.
+    """Apply the Quantum Fourier Transform to specified qubits of a circuit.
 
-    The QFT maps computational basis states to Fourier basis states:
-    |j⟩ → (1/√N) Σₖ e^(2πijk/N) |k⟩
+    Transforms computational basis states to Fourier basis states:
+    |j> -> (1/sqrt(N)) * sum_k exp(2*pi*i*j*k/N) |k>, where N = 2^n.
 
-    Uses O(n²) gates where n = len(qubits).
+    The implementation uses O(n^2) controlled phase rotation gates and
+    a final layer of SWAP gates to produce the standard QFT output ordering.
+
+    Parameters
+    ----------
+    circuit : QuantumCircuit
+        The circuit to which the QFT gates are appended (modified in place).
+    qubits : list[int]
+        Indices of the qubits to transform. The QFT is applied across these
+        qubits in the order given.
+
+    Returns
+    -------
+    QuantumCircuit
+        The same circuit object, with QFT gates appended (returned for chaining).
     """
     n = len(qubits)
     for i in range(n):
@@ -42,7 +85,24 @@ def qft(circuit: QuantumCircuit, qubits: list[int]) -> QuantumCircuit:
 
 
 def inverse_qft(circuit: QuantumCircuit, qubits: list[int]) -> QuantumCircuit:
-    """Apply inverse QFT (QFT†) to the specified qubits."""
+    """Apply the inverse Quantum Fourier Transform (QFT-dagger) to specified qubits.
+
+    This is the Hermitian conjugate of the QFT, mapping Fourier basis states
+    back to computational basis states. Used extensively in quantum phase
+    estimation and related algorithms.
+
+    Parameters
+    ----------
+    circuit : QuantumCircuit
+        The circuit to which the inverse QFT gates are appended (modified in place).
+    qubits : list[int]
+        Indices of the qubits to transform.
+
+    Returns
+    -------
+    QuantumCircuit
+        The same circuit object, with inverse QFT gates appended.
+    """
     n = len(qubits)
 
     for i in range(n // 2):
@@ -58,7 +118,21 @@ def inverse_qft(circuit: QuantumCircuit, qubits: list[int]) -> QuantumCircuit:
 
 
 def _controlled_phase_dag(k: int) -> Gate:
-    """Inverse of controlled rotation gate CR_k."""
+    """Build the inverse (conjugate) of the controlled rotation gate CR_k.
+
+    Applies a phase shift of -2*pi/2^k to the target qubit when the control
+    qubit is in state |1>.
+
+    Parameters
+    ----------
+    k : int
+        The rotation index. The applied phase is -2*pi / 2^k.
+
+    Returns
+    -------
+    Gate
+        A two-qubit controlled phase gate (inverse of CR_k).
+    """
     angle = -2 * np.pi / (2**k)
     matrix = np.array([
         [1, 0, 0, 0],

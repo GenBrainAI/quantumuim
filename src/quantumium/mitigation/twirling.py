@@ -44,8 +44,18 @@ def pauli_twirl_cnot(
 ) -> QuantumCircuit:
     """Apply one random Pauli twirl to all CNOT gates in the circuit.
 
-    For each CNOT, randomly selects P_a ⊗ P_b from the twirl group
-    and inserts the corresponding correction after the CNOT.
+    For each CNOT gate, a random entry from the CNOT twirl table is
+    selected. The corresponding Pauli gates P_a, P_b are inserted before
+    the CNOT and the correction Paulis P_c, P_d are inserted after it,
+    preserving the ideal unitary while randomizing coherent errors.
+
+    Args:
+        circuit: The quantum circuit containing CNOT gates to twirl.
+        rng: Optional NumPy random generator for reproducibility.
+            If None, a default generator is created.
+
+    Returns:
+        A new QuantumCircuit with Pauli twirling applied to every CNOT gate.
     """
     if rng is None:
         rng = np.random.default_rng()
@@ -80,7 +90,20 @@ def twirled_circuit_ensemble(
     num_samples: int = 20,
     seed: int | None = None,
 ) -> list[QuantumCircuit]:
-    """Generate an ensemble of Pauli-twirled circuits."""
+    """Generate an ensemble of independently Pauli-twirled circuits.
+
+    Each circuit in the ensemble has a different random Pauli twirl
+    applied to its CNOT gates. Averaging results over the ensemble
+    converts coherent errors into stochastic (Pauli) noise.
+
+    Args:
+        circuit: The base quantum circuit to twirl.
+        num_samples: Number of twirled circuit copies to generate.
+        seed: Optional random seed for reproducibility.
+
+    Returns:
+        A list of ``num_samples`` twirled QuantumCircuit instances.
+    """
     rng = np.random.default_rng(seed)
     return [pauli_twirl_cnot(circuit, rng) for _ in range(num_samples)]
 

@@ -29,6 +29,25 @@ from ..core.gate import H, X
 
 @dataclass
 class BB84Result:
+    """Result from a BB84 quantum key distribution simulation.
+
+    Attributes:
+        alice_key: Alice's portion of the final shared key (list of 0/1).
+        bob_key: Bob's portion of the final shared key (list of 0/1).
+            In the absence of eavesdropping, ``alice_key == bob_key``.
+        sifted_length: Number of bits remaining after basis sifting
+            (before the error-check sacrifice).
+        qber: Quantum Bit Error Rate estimated from the sacrificed check
+            bits. Without eavesdropping this should be ~0; with
+            intercept-resend it is ~0.25.
+        final_key_length: Length of the usable key after removing the
+            check bits.
+        eavesdropper_detected: ``True`` if the estimated QBER exceeds
+            :attr:`detection_threshold`.
+        num_qubits_sent: Total number of qubits Alice transmitted.
+        detection_threshold: QBER threshold used for eavesdropper
+            detection (default 0.11).
+    """
     alice_key: list[int]
     bob_key: list[int]
     sifted_length: int
@@ -42,8 +61,15 @@ class BB84Result:
 def _prepare_qubit(bit: int, basis: int) -> NDArray[np.complexfloating]:
     """Prepare a single qubit in the given basis and bit value.
 
-    basis=0 (Z): |0> or |1>
-    basis=1 (X): |+> or |->
+    Args:
+        bit: Bit value to encode (0 or 1).
+        basis: Measurement basis selection.
+            ``0`` (Z-basis): prepares |0> or |1>.
+            ``1`` (X-basis): prepares |+> or |->.
+
+    Returns:
+        NDArray[np.complexfloating]: The 2-element statevector of the
+            prepared qubit.
     """
     qc = QuantumCircuit(1)
     if bit:
@@ -60,8 +86,17 @@ def _measure_qubit(
 ) -> int:
     """Measure a qubit in the given basis.
 
-    basis=0: Z measurement
-    basis=1: X measurement (apply H then Z-measure)
+    For the X-basis, a Hadamard rotation is applied before the
+    computational-basis (Z) measurement.
+
+    Args:
+        state: The 2-element statevector of the qubit.
+        basis: Measurement basis. ``0`` for Z-basis, ``1`` for X-basis.
+        rng: NumPy random generator used for the probabilistic
+            measurement outcome.
+
+    Returns:
+        int: Measurement result, either ``0`` or ``1``.
     """
     if basis == 1:
         # Rotate to Z basis: apply H
@@ -76,7 +111,21 @@ def _eve_intercept_resend(
     state: NDArray[np.complexfloating],
     rng: np.random.Generator,
 ) -> NDArray[np.complexfloating]:
-    """Eve intercepts, measures in a random basis, and re-prepares."""
+    """Simulate Eve's intercept-resend attack on a single qubit.
+
+    Eve chooses a random basis, measures the qubit (collapsing its state),
+    and re-prepares a new qubit in the measured state/basis. When Eve's
+    basis differs from Alice's, this introduces errors detectable via
+    the QBER check.
+
+    Args:
+        state: The 2-element statevector of the qubit being transmitted.
+        rng: NumPy random generator for Eve's basis choice and
+            measurement outcome.
+
+    Returns:
+        NDArray[np.complexfloating]: The re-prepared qubit statevector.
+    """
     eve_basis = int(rng.integers(0, 2))
     eve_bit = _measure_qubit(state, eve_basis, rng)
     return _prepare_qubit(eve_bit, eve_basis)

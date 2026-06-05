@@ -25,6 +25,25 @@ from ..core.gate import Gate, H, X
 
 @dataclass
 class ShorResult:
+    """Result container for Shor's factoring algorithm.
+
+    Attributes
+    ----------
+    N : int
+        The number that was factored.
+    a : int
+        The base used for order finding.
+    order : int or None
+        The order of ``a`` mod ``N`` found by QPE, or None if order-finding
+        was not used (e.g., trivial gcd factor found).
+    factors : tuple[int, int] or None
+        A pair of non-trivial factors ``(p, q)`` such that ``p * q == N``,
+        or None if factoring failed.
+    phase_estimate : float
+        The phase value measured by QPE (0.0 if QPE was not used).
+    success : bool
+        Whether non-trivial factors were successfully found.
+    """
     N: int
     a: int
     order: int | None
@@ -34,9 +53,26 @@ class ShorResult:
 
 
 def _mod_exp_unitary(a: int, power: int, N: int, n_work: int) -> Gate:
-    """Build unitary for |x⟩ → |a^power * x mod N⟩ on n_work qubits.
+    """Build the modular exponentiation unitary |x> -> |a^power * x mod N>.
 
-    States |x⟩ with x >= N map to themselves (identity on overflow states).
+    For computational basis states |x> with x < N, maps to |(a^power * x) mod N>.
+    States |x> with x >= N are mapped to themselves (identity on overflow).
+
+    Parameters
+    ----------
+    a : int
+        The base for modular exponentiation.
+    power : int
+        The exponent (a is raised to this power mod N).
+    N : int
+        The modulus.
+    n_work : int
+        Number of work qubits (must satisfy 2^n_work >= N).
+
+    Returns
+    -------
+    Gate
+        A unitary gate on n_work qubits implementing the permutation.
     """
     dim = 2**n_work
     matrix = np.zeros((dim, dim), dtype=complex)
@@ -50,7 +86,21 @@ def _mod_exp_unitary(a: int, power: int, N: int, n_work: int) -> Gate:
 
 
 def _controlled_unitary(U: Gate) -> Gate:
-    """Build controlled-U: |0⟩|x⟩ → |0⟩|x⟩, |1⟩|x⟩ → |1⟩U|x⟩."""
+    """Build a controlled-U gate.
+
+    The resulting gate acts as identity when the control qubit is |0>
+    and applies U to the target register when the control is |1>.
+
+    Parameters
+    ----------
+    U : Gate
+        The unitary gate to control.
+
+    Returns
+    -------
+    Gate
+        A gate on (1 + U.num_qubits) qubits with the control on the first qubit.
+    """
     n = U.matrix.shape[0]
     dim = 2 * n
     matrix = np.eye(dim, dtype=complex)
@@ -59,12 +109,34 @@ def _controlled_unitary(U: Gate) -> Gate:
 
 
 def _num_bits(N: int) -> int:
-    """Number of bits needed to represent N."""
+    """Return the number of bits needed to represent the integer N.
+
+    Parameters
+    ----------
+    N : int
+        A non-negative integer.
+
+    Returns
+    -------
+    int
+        The minimum number of bits required, at least 1.
+    """
     return max(N.bit_length(), 1)
 
 
 def _inverse_qft_inplace(qc: QuantumCircuit, qubits: list[int]) -> None:
-    """Apply inverse QFT to specified qubits in the circuit."""
+    """Apply inverse QFT to specified qubits within an existing circuit.
+
+    Appends SWAP and controlled-phase gates directly to the given circuit,
+    modifying it in place.
+
+    Parameters
+    ----------
+    qc : QuantumCircuit
+        The circuit to modify.
+    qubits : list[int]
+        Indices of the qubits to which the inverse QFT is applied.
+    """
     n = len(qubits)
     for i in range(n // 2):
         j = n - 1 - i
@@ -81,14 +153,44 @@ def _inverse_qft_inplace(qc: QuantumCircuit, qubits: list[int]) -> None:
 
 
 def _controlled_phase(angle: float) -> Gate:
-    """Controlled phase gate: |11⟩ → e^(i*angle)|11⟩."""
+    """Build a controlled phase gate that applies exp(i*angle) to |11>.
+
+    Parameters
+    ----------
+    angle : float
+        The phase angle in radians.
+
+    Returns
+    -------
+    Gate
+        A two-qubit gate that is identity on |00>, |01>, |10> and applies
+        exp(i*angle) to |11>.
+    """
     matrix = np.eye(4, dtype=complex)
     matrix[3, 3] = np.exp(1j * angle)
     return Gate(matrix, f"CP({angle:.3f})")
 
 
 def _continued_fraction_order(phase: float, N: int, max_denom: int) -> int | None:
-    """Extract order from phase estimate using continued fractions."""
+    """Extract a candidate order from a phase estimate using continued fractions.
+
+    Expands the phase as a continued fraction and returns the denominator
+    of the best convergent that could be a valid order.
+
+    Parameters
+    ----------
+    phase : float
+        The estimated phase theta in [0, 1), from QPE measurement.
+    N : int
+        The number being factored (used for range checks).
+    max_denom : int
+        Maximum allowed denominator for convergents.
+
+    Returns
+    -------
+    int or None
+        A candidate order r, or None if no valid candidate was found.
+    """
     if abs(phase) < 1e-10:
         return None
 
@@ -131,7 +233,25 @@ def quantum_order_finding(
 ) -> tuple[float, int | None]:
     """Find the order of a mod N using quantum phase estimation.
 
-    Returns (phase_estimate, candidate_order).
+    The order r is the smallest positive integer such that a^r = 1 (mod N).
+    This is the quantum subroutine at the heart of Shor's algorithm.
+
+    Parameters
+    ----------
+    a : int
+        The base whose order is to be found. Must satisfy gcd(a, N) = 1.
+    N : int
+        The modulus.
+    num_counting_qubits : int or None, optional
+        Number of counting (precision) qubits for QPE. Defaults to
+        ``2 * ceil(log2(N)) + 1`` for sufficient precision.
+
+    Returns
+    -------
+    tuple[float, int | None]
+        A pair ``(phase_estimate, candidate_order)`` where ``phase_estimate``
+        is the raw phase from QPE and ``candidate_order`` is the extracted
+        order r (or None if extraction failed).
     """
     n_work = _num_bits(N)
     if num_counting_qubits is None:
@@ -195,16 +315,36 @@ def shor_factor(
     num_counting_qubits: int | None = None,
     max_attempts: int = 10,
 ) -> ShorResult:
-    """Factor N using Shor's algorithm.
+    """Factor an integer N using Shor's algorithm.
 
-    Args:
-        N: Number to factor (must be composite, not a prime power).
-        a: Base for order finding. If None, tries several values.
-        num_counting_qubits: Precision qubits for QPE. Default 2*ceil(log2(N))+1.
-        max_attempts: Maximum attempts with different bases.
+    Implements the full Shor's factoring pipeline: check for trivial factors
+    (even N, gcd), then use quantum order-finding via QPE to extract factors.
+    Supports small numbers (N <= 21) due to the explicit unitary construction.
 
-    Returns:
-        ShorResult with factors if successful.
+    Parameters
+    ----------
+    N : int
+        The composite number to factor. Must be >= 4 and should not be
+        a prime or prime power for meaningful results.
+    a : int or None, optional
+        Base for order finding. If None, tries values from 2 up to
+        ``min(N, max_attempts + 2)``.
+    num_counting_qubits : int or None, optional
+        Number of precision qubits for QPE. Defaults to
+        ``2 * ceil(log2(N)) + 1``.
+    max_attempts : int, optional
+        Maximum number of bases to try (default 10).
+
+    Returns
+    -------
+    ShorResult
+        Contains the factors if successful (``success=True``), or
+        ``factors=None`` if all attempts failed.
+
+    Raises
+    ------
+    ValueError
+        If ``N < 4``.
     """
     if N < 4:
         raise ValueError(f"N must be >= 4, got {N}")

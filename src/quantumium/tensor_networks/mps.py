@@ -34,6 +34,11 @@ class MPS:
     max_bond_dim: int | None = None
 
     def copy(self) -> MPS:
+        """Create a deep copy of this MPS.
+
+        Returns:
+            MPS: A new MPS instance with independently copied tensor data.
+        """
         return MPS(
             tensors=[t.copy() for t in self.tensors],
             num_qubits=self.num_qubits,
@@ -45,6 +50,12 @@ class MPS:
         return [self.tensors[i].shape[2] for i in range(self.num_qubits - 1)]
 
     def max_bond(self) -> int:
+        """Return the maximum bond dimension across all bonds.
+
+        Returns:
+            int: The largest bond dimension in the MPS, or 1 if there are
+                no internal bonds (single-qubit MPS).
+        """
         dims = self.bond_dimensions()
         return max(dims) if dims else 1
 
@@ -89,9 +100,18 @@ class MPS:
 
 
 def mps_zero_state(num_qubits: int, max_bond_dim: int | None = None) -> MPS:
-    """Create an MPS representing |00...0⟩.
+    """Create an MPS representing the all-zeros computational basis state |00...0>.
 
-    Each tensor is shape (1, 2, 1) with A^0 = [[1]], A^1 = [[0]].
+    Each tensor is shape (1, 2, 1) with A^0 = [[1]], A^1 = [[0]],
+    yielding a product state with bond dimension 1.
+
+    Args:
+        num_qubits (int): Number of qubits in the state.
+        max_bond_dim (int | None): Maximum bond dimension for subsequent
+            truncation during gate application. None means no truncation.
+
+    Returns:
+        MPS: An MPS representing the |00...0> state.
     """
     tensors = []
     for _ in range(num_qubits):
@@ -108,9 +128,20 @@ def mps_product_state(
 ) -> MPS:
     """Create an MPS from a list of single-qubit states.
 
+    Each qubit is initialized independently, producing a product state
+    with bond dimension 1.
+
     Args:
-        states: List of n two-element arrays [α, β] for each qubit.
-        max_bond_dim: Maximum bond dimension for truncation.
+        states: List of n two-element arrays [alpha, beta] representing
+            alpha|0> + beta|1> for each qubit.
+        max_bond_dim (int | None): Maximum bond dimension for subsequent
+            truncation during gate application. None means no truncation.
+
+    Returns:
+        MPS: A product-state MPS with bond dimension 1.
+
+    Raises:
+        ValueError: If any state array does not have exactly 2 elements.
     """
     tensors = []
     for s in states:

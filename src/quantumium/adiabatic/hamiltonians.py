@@ -18,10 +18,19 @@ I2 = np.eye(2, dtype=complex)
 def transverse_field_hamiltonian(
     num_qubits: int,
 ) -> NDArray[np.complexfloating]:
-    """Transverse field Hamiltonian H_init = -Σ X_i.
+    """Construct the transverse field Hamiltonian H_init = -sum_i X_i.
 
-    The ground state is |+...+>, the uniform superposition.
-    Used as the initial Hamiltonian in adiabatic evolution.
+    The ground state of this Hamiltonian is |+...+>, the uniform
+    superposition over all computational basis states. It is commonly
+    used as the initial Hamiltonian in adiabatic quantum computation
+    because its ground state is easy to prepare.
+
+    Args:
+        num_qubits (int): Number of qubits.
+
+    Returns:
+        NDArray[np.complexfloating]: The transverse field Hamiltonian
+            matrix of shape (2^num_qubits, 2^num_qubits).
     """
     dim = 2**num_qubits
     H = np.zeros((dim, dim), dtype=complex)
@@ -35,15 +44,26 @@ def ising_hamiltonian(
     J: NDArray[np.floating] | None = None,
     h: NDArray[np.floating] | None = None,
 ) -> NDArray[np.complexfloating]:
-    """Ising model Hamiltonian H = -Σ J_{ij} Z_i Z_j - Σ h_i Z_i.
+    """Construct the classical Ising model Hamiltonian.
+
+    H = -sum_{i<j} J_{ij} Z_i Z_j - sum_i h_i Z_i
+
+    The ground state of this Hamiltonian encodes the solution to the
+    corresponding optimization problem. Only the upper triangle of
+    the coupling matrix J is used (J[i,j] for i < j).
 
     Args:
-        num_qubits: Number of qubits.
-        J: Coupling matrix (num_qubits × num_qubits). Only upper triangle used.
-        h: Local field strengths (num_qubits,).
+        num_qubits (int): Number of qubits (spins).
+        J (NDArray[np.floating] | None): Coupling matrix of shape
+            (num_qubits, num_qubits). Only entries J[i,j] with i < j
+            are used. If None, no coupling terms are included.
+        h (NDArray[np.floating] | None): Local field strengths, array
+            of shape (num_qubits,). If None, no local field terms
+            are included.
 
     Returns:
-        Ising Hamiltonian as a matrix.
+        NDArray[np.complexfloating]: Ising Hamiltonian matrix of shape
+            (2^num_qubits, 2^num_qubits).
     """
     dim = 2**num_qubits
     H = np.zeros((dim, dim), dtype=complex)

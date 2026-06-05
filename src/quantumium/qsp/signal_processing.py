@@ -37,7 +37,18 @@ from ..core.gate import Gate
 
 @dataclass
 class QSPResult:
-    """Result from a QSP computation."""
+    """Result from a Quantum Signal Processing computation.
+
+    Attributes:
+        polynomial_values (NDArray[np.complexfloating]): The QSP
+            polynomial P(a) evaluated at each signal value.
+        angles (NDArray[np.floating]): The QSP processing angles
+            [phi_0, phi_1, ..., phi_d] that define the polynomial.
+        degree (int): Degree of the QSP polynomial (number of signal
+            rotations).
+        signal_values (NDArray[np.floating]): The signal values a
+            at which the polynomial was evaluated.
+    """
     polynomial_values: NDArray[np.complexfloating]
     angles: NDArray[np.floating]
     degree: int

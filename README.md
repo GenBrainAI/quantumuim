@@ -1,6 +1,25 @@
 # Quantumium
 
-Quantum computing SDK for Python — simulation, algorithms, hardware backends, error mitigation, and quantum applications for NISQ and beyond.
+[![Python 3.10+](https://img.shields.io/badge/python-3.10%2B-blue.svg)](https://www.python.org/downloads/)
+[![License: MIT](https://img.shields.io/badge/License-MIT-green.svg)](LICENSE)
+[![Tests](https://img.shields.io/badge/tests-877%20passed-brightgreen.svg)](tests/)
+
+A comprehensive quantum computing SDK for Python. Build quantum circuits, run
+algorithms, simulate noise, and execute on real hardware from IBM, Google, and
+Amazon — all through a single, clean API.
+
+**23 modules** | **12 algorithms** | **4 hardware backends** | **877+ tests**
+
+### Key Features
+
+- **Write once, run anywhere** — unified backend interface for IBM Quantum, Google Quantum AI, and Amazon Braket
+- **Full algorithm library** — Grover, VQE, QAOA, Shor, HHL, QPE, QFT, and more
+- **Realistic simulation** — density matrix evolution with depolarizing, amplitude damping, and custom noise models
+- **Domain applications** — quantum chemistry, finance, optimization, cryptography, and machine learning
+- **Advanced simulation** — tensor networks (MPS), stabilizer tableaux, open quantum systems, adiabatic computing
+- **Production tooling** — transpiler, OpenQASM 2.0 import/export, error correction, error mitigation, benchmarking
+
+> **New to Quantumium?** Start with the [Getting Started tutorial](docs/getting-started.md).
 
 ## Installation
 
@@ -109,6 +128,11 @@ qc = pqc.bind({theta: 1.57})
 - **BB84**: Quantum key distribution protocol simulation
 - **QRNG**: Cryptographic quantum random number generation
 
+### Finance (`quantumium.finance`)
+- **Option Pricing**: Quantum amplitude estimation for European options
+- **Risk Analysis**: Value-at-Risk (VaR) and Conditional VaR
+- **Portfolio Optimization**: Quantum-enhanced portfolio selection
+
 ### Transpiler (`quantumium.transpiler`)
 - **Optimization passes**: Inverse cancellation, gate merging, CNOT cancellation, commutation, SWAP decomposition
 - **OpenQASM 2.0**: Import/export with round-trip fidelity
@@ -123,8 +147,20 @@ qc = pqc.bind({theta: 1.57})
 ### Tomography (`quantumium.tomography`)
 - State tomography via linear inversion and maximum likelihood estimation (MLE)
 
+### Quantum Information (`quantumium.quantum_info`)
+- Quantum channels (Kraus, Choi, superoperator), distance measures (trace distance, fidelity), process tomography
+
 ### Benchmarks (`quantumium.benchmarks`)
 - Randomized benchmarking, quantum volume, fidelity estimation
+
+### Advanced Simulation
+- **Tensor Networks** (`quantumium.tensor_networks`): Matrix Product State (MPS) simulation
+- **Stabilizer** (`quantumium.stabilizer`): Clifford tableau for efficient Clifford circuit simulation
+- **Open Systems** (`quantumium.open_systems`): Lindblad master equation for dissipative dynamics
+- **Adiabatic** (`quantumium.adiabatic`): Adiabatic quantum computing with customizable Hamiltonians
+- **Quantum Walks** (`quantumium.quantum_walks`): Discrete and continuous walks on arbitrary graphs
+- **QSP/QSVT** (`quantumium.qsp`): Quantum Signal Processing and Quantum Singular Value Transformation
+- **Optimal Control** (`quantumium.optimal_control`): GRAPE pulse optimization for gate synthesis
 
 ### Utilities (`quantumium.utils`)
 - **Entanglement**: Partial trace, von Neumann entropy, purity, concurrence, negativity, Schmidt decomposition
@@ -161,8 +197,14 @@ python examples/algorithms/ising_simulation.py
 ## Testing
 
 ```bash
-python -m pytest tests/ -q    # 500+ tests
+python -m pytest tests/ -q    # 877+ tests
 ```
+
+## Documentation
+
+- [Getting Started Tutorial](docs/getting-started.md) — step-by-step introduction
+- [Contributing Guide](CONTRIBUTING.md) — development setup and workflow
+- [Changelog](CHANGELOG.md) — version history
 
 ## Knowledge Base
 

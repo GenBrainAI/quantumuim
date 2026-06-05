@@ -32,16 +32,38 @@ class ControlHamiltonian:
 
     @property
     def dim(self) -> int:
+        """Return the Hilbert space dimension of the control system.
+
+        Returns:
+            int: Dimension d of the drift Hamiltonian (d x d).
+        """
         return self.drift.shape[0]
 
     @property
     def num_controls(self) -> int:
+        """Return the number of control channels.
+
+        Returns:
+            int: Number of control Hamiltonians.
+        """
         return len(self.controls)
 
     def total_hamiltonian(
         self, amplitudes: NDArray[np.floating],
     ) -> NDArray[np.complexfloating]:
-        """Compute H(t) = H_drift + Σ u_k H_k for given amplitudes."""
+        """Compute the total Hamiltonian for given control amplitudes.
+
+        Evaluates H(t) = H_drift + sum_k u_k * H_k where u_k are
+        the control amplitudes.
+
+        Args:
+            amplitudes (NDArray[np.floating]): Array of control amplitudes
+                [u_0, u_1, ..., u_{m-1}], one per control channel.
+
+        Returns:
+            NDArray[np.complexfloating]: The total Hamiltonian matrix
+                (dim x dim).
+        """
         H = self.drift.copy()
         for k, u_k in enumerate(amplitudes):
             H = H + u_k * self.controls[k]
@@ -109,7 +131,19 @@ def control_hamiltonian_y(
     qubit: int = 0,
     num_qubits: int = 1,
 ) -> NDArray[np.complexfloating]:
-    """Control Hamiltonian for Y-drive: H_y = σ_y / 2."""
+    """Construct the Y-drive control Hamiltonian H_y = sigma_y / 2.
+
+    For multi-qubit systems, the operator acts on the specified qubit
+    with identity on all others.
+
+    Args:
+        qubit (int): Target qubit index (0-indexed). Defaults to 0.
+        num_qubits (int): Total number of qubits. Defaults to 1.
+
+    Returns:
+        NDArray[np.complexfloating]: The Y-drive control Hamiltonian
+            matrix of shape (2^num_qubits, 2^num_qubits).
+    """
     Y = np.array([[0, -1j], [1j, 0]], dtype=complex)
     I2 = np.eye(2, dtype=complex)
 

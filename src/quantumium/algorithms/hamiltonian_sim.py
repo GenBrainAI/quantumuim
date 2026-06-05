@@ -17,7 +17,20 @@ from ..core.gate import Gate
 
 
 def exact_evolution(hamiltonian: NDArray[np.complexfloating], time: float) -> NDArray[np.complexfloating]:
-    """Compute exact time evolution operator U = e^{-iHt} via diagonalization."""
+    """Compute the exact time evolution operator U = exp(-iHt) via eigendecomposition.
+
+    Parameters
+    ----------
+    hamiltonian : NDArray[np.complexfloating]
+        A Hermitian matrix representing the Hamiltonian.
+    time : float
+        Evolution time t.
+
+    Returns
+    -------
+    NDArray[np.complexfloating]
+        The unitary matrix U = exp(-i * H * t).
+    """
     eigenvalues, eigenvectors = np.linalg.eigh(hamiltonian)
     exp_diag = np.diag(np.exp(-1j * eigenvalues * time))
     return eigenvectors @ exp_diag @ eigenvectors.conj().T
@@ -28,16 +41,26 @@ def first_order_trotter(
     time: float,
     steps: int,
 ) -> NDArray[np.complexfloating]:
-    """First-order Trotter decomposition.
+    """First-order Trotter (Lie-Trotter) decomposition.
 
-    e^{-i(H1+H2+...)t} ≈ (e^{-iH1 dt} e^{-iH2 dt} ...)^n
+    Approximates exp(-i*(H1+H2+...)*t) as the product
+    (exp(-i*H1*dt) * exp(-i*H2*dt) * ...)^n, where dt = t/n.
 
-    Error: O(t²/n) for each step, O(t²/n) total.
+    The approximation error scales as O(t^2 / n).
 
-    Args:
-        terms: List of Hamiltonian term matrices (must all be same size).
-        time: Total evolution time.
-        steps: Number of Trotter steps (higher = more accurate).
+    Parameters
+    ----------
+    terms : list[NDArray[np.complexfloating]]
+        List of Hamiltonian term matrices. All must have the same dimensions.
+    time : float
+        Total evolution time.
+    steps : int
+        Number of Trotter steps n. More steps yield higher accuracy.
+
+    Returns
+    -------
+    NDArray[np.complexfloating]
+        The approximate unitary evolution operator.
     """
     dt = time / steps
     dim = terms[0].shape[0]
@@ -56,11 +79,28 @@ def second_order_trotter(
     time: float,
     steps: int,
 ) -> NDArray[np.complexfloating]:
-    """Second-order (symmetric) Trotter decomposition.
+    """Second-order (symmetric) Trotter-Suzuki decomposition.
 
-    e^{-iHt} ≈ (e^{-iH1 dt/2} e^{-iH2 dt/2} ... e^{-iH_n dt} ... e^{-iH2 dt/2} e^{-iH1 dt/2})^n
+    Approximates exp(-i*H*t) using the symmetric (Strang) splitting:
+    (exp(-i*H1*dt/2) * ... * exp(-i*H_{n-1}*dt/2) * exp(-i*H_n*dt) *
+     exp(-i*H_{n-1}*dt/2) * ... * exp(-i*H1*dt/2))^steps
 
-    Error: O(t³/n²) — significantly better than first-order.
+    The approximation error scales as O(t^3 / n^2), significantly better
+    than the first-order decomposition.
+
+    Parameters
+    ----------
+    terms : list[NDArray[np.complexfloating]]
+        List of Hamiltonian term matrices. All must have the same dimensions.
+    time : float
+        Total evolution time.
+    steps : int
+        Number of Trotter steps. More steps yield higher accuracy.
+
+    Returns
+    -------
+    NDArray[np.complexfloating]
+        The approximate unitary evolution operator.
     """
     dt = time / steps
     dim = terms[0].shape[0]
@@ -86,9 +126,32 @@ def trotter_error(
     steps: int,
     order: int = 1,
 ) -> float:
-    """Compute the operator norm error of a Trotter approximation.
+    """Compute the spectral norm error of a Trotter approximation.
 
-    Returns ‖U_exact - U_trotter‖ (spectral norm).
+    Calculates ||U_exact - U_trotter||_2 where U_exact = exp(-i*H*t) is the
+    exact evolution and U_trotter is the Trotter approximation.
+
+    Parameters
+    ----------
+    terms : list[NDArray[np.complexfloating]]
+        List of Hamiltonian term matrices.
+    time : float
+        Total evolution time.
+    steps : int
+        Number of Trotter steps.
+    order : int, optional
+        Trotter order: 1 for first-order, 2 for second-order (default 1).
+
+    Returns
+    -------
+    float
+        The spectral (operator) norm of the difference between the exact
+        and Trotter evolution operators.
+
+    Raises
+    ------
+    ValueError
+        If ``order`` is not 1 or 2.
     """
     H_full = sum(terms)
     U_exact = exact_evolution(H_full, time)
@@ -110,17 +173,36 @@ def simulate_evolution(
     steps: int = 10,
     order: int = 1,
 ) -> QuantumCircuit:
-    """Build a quantum circuit that simulates Hamiltonian evolution.
+    """Build a quantum circuit that simulates Hamiltonian time evolution.
 
-    Creates a circuit implementing e^{-iHt} via Trotter decomposition,
-    where H = Σ_k hamiltonian_terms[k].
+    Creates a circuit implementing U = exp(-i*H*t) via Trotter decomposition,
+    where H = sum_k hamiltonian_terms[k]. The full Trotter-approximated
+    unitary is packaged as a single multi-qubit gate.
 
-    Args:
-        num_qubits: Number of qubits.
-        hamiltonian_terms: List of Hamiltonian term matrices.
-        time: Evolution time.
-        steps: Number of Trotter steps.
-        order: Trotter order (1 or 2).
+    Parameters
+    ----------
+    num_qubits : int
+        Number of qubits in the system.
+    hamiltonian_terms : list[NDArray[np.complexfloating]]
+        List of Hamiltonian term matrices, each of size 2^num_qubits x 2^num_qubits.
+    time : float
+        Total evolution time.
+    steps : int, optional
+        Number of Trotter steps (default 10). More steps improve accuracy.
+    order : int, optional
+        Trotter decomposition order: 1 for first-order (Lie-Trotter),
+        2 for second-order (Suzuki-Trotter). Default is 1.
+
+    Returns
+    -------
+    QuantumCircuit
+        A quantum circuit applying the Trotter-approximated evolution
+        operator to all qubits.
+
+    Raises
+    ------
+    ValueError
+        If ``order`` is not 1 or 2.
     """
     if order == 1:
         U = first_order_trotter(hamiltonian_terms, time, steps)
@@ -138,7 +220,23 @@ def simulate_evolution(
 # Common Hamiltonian terms for spin systems
 
 def pauli_x(qubit: int, num_qubits: int) -> NDArray[np.complexfloating]:
-    """Single-qubit Pauli X operator on specified qubit."""
+    """Build the full-system Pauli-X operator acting on a single qubit.
+
+    Constructs I (x) ... (x) X (x) ... (x) I where X is placed at the
+    specified qubit position and I is the 2x2 identity on all other qubits.
+
+    Parameters
+    ----------
+    qubit : int
+        Index of the qubit on which X acts (0-indexed).
+    num_qubits : int
+        Total number of qubits in the system.
+
+    Returns
+    -------
+    NDArray[np.complexfloating]
+        A 2^num_qubits x 2^num_qubits matrix.
+    """
     X = np.array([[0, 1], [1, 0]], dtype=complex)
     I = np.eye(2, dtype=complex)
     result = np.array([[1]], dtype=complex)
@@ -148,7 +246,23 @@ def pauli_x(qubit: int, num_qubits: int) -> NDArray[np.complexfloating]:
 
 
 def pauli_z(qubit: int, num_qubits: int) -> NDArray[np.complexfloating]:
-    """Single-qubit Pauli Z operator on specified qubit."""
+    """Build the full-system Pauli-Z operator acting on a single qubit.
+
+    Constructs I (x) ... (x) Z (x) ... (x) I where Z is placed at the
+    specified qubit position.
+
+    Parameters
+    ----------
+    qubit : int
+        Index of the qubit on which Z acts (0-indexed).
+    num_qubits : int
+        Total number of qubits in the system.
+
+    Returns
+    -------
+    NDArray[np.complexfloating]
+        A 2^num_qubits x 2^num_qubits diagonal matrix.
+    """
     Z = np.array([[1, 0], [0, -1]], dtype=complex)
     I = np.eye(2, dtype=complex)
     result = np.array([[1]], dtype=complex)
@@ -158,16 +272,53 @@ def pauli_z(qubit: int, num_qubits: int) -> NDArray[np.complexfloating]:
 
 
 def zz_interaction(qubit_i: int, qubit_j: int, num_qubits: int) -> NDArray[np.complexfloating]:
-    """Z_i Z_j interaction term."""
+    """Build the Z_i Z_j two-qubit interaction term.
+
+    Constructs the tensor product of Pauli-Z on qubits i and j with
+    identity on all other qubits.
+
+    Parameters
+    ----------
+    qubit_i : int
+        Index of the first qubit (0-indexed).
+    qubit_j : int
+        Index of the second qubit (0-indexed).
+    num_qubits : int
+        Total number of qubits in the system.
+
+    Returns
+    -------
+    NDArray[np.complexfloating]
+        A 2^num_qubits x 2^num_qubits diagonal matrix representing Z_i Z_j.
+    """
     return pauli_z(qubit_i, num_qubits) @ pauli_z(qubit_j, num_qubits)
 
 
 def transverse_field_ising(num_qubits: int, J: float = 1.0, h: float = 0.5) -> list[NDArray[np.complexfloating]]:
-    """Transverse-field Ising model Hamiltonian terms.
+    """Build the transverse-field Ising model Hamiltonian as separate terms.
 
-    H = -J Σ_{i} Z_i Z_{i+1} - h Σ_i X_i
+    The Hamiltonian is H = -J * sum_i Z_i Z_{i+1} - h * sum_i X_i,
+    representing nearest-neighbor Ising interactions with a transverse
+    magnetic field. Open boundary conditions are used.
 
-    Returns separate terms suitable for Trotter decomposition.
+    The terms are returned separately (one matrix per Z_i Z_{i+1} term and
+    one per X_i term) to enable Trotter decomposition.
+
+    Parameters
+    ----------
+    num_qubits : int
+        Number of qubits (spin sites) in the chain.
+    J : float, optional
+        Ising coupling strength (default 1.0).
+    h : float, optional
+        Transverse field strength (default 0.5).
+
+    Returns
+    -------
+    list[NDArray[np.complexfloating]]
+        A list of Hamiltonian term matrices. The first ``num_qubits - 1``
+        entries are the -J * Z_i Z_{i+1} terms, followed by ``num_qubits``
+        entries for the -h * X_i terms.
     """
     terms = []
     for i in range(num_qubits - 1):

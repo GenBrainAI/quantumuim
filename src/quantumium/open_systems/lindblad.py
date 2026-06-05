@@ -31,6 +31,11 @@ class LindbladSystem:
 
     @property
     def dim(self) -> int:
+        """Return the Hilbert space dimension of the system.
+
+        Returns:
+            int: Dimension d of the system Hamiltonian (d x d).
+        """
         H = self._get_hamiltonian(0.0)
         return H.shape[0]
 

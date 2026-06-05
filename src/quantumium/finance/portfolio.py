@@ -28,7 +28,22 @@ from ..core.gate import Gate, H
 
 @dataclass
 class PortfolioResult:
-    """Result from quantum portfolio optimization."""
+    """Result from quantum portfolio optimization.
+
+    Attributes:
+        selection: Indices of the selected assets (0-based).
+        expected_return: Expected portfolio return ``mu^T x`` for the
+            chosen binary allocation vector *x*.
+        risk: Portfolio variance ``x^T Sigma x`` for the chosen
+            allocation.
+        objective_value: Value of the mean-variance objective
+            ``risk_factor * risk - expected_return``.
+        num_assets: Total number of candidate assets.
+        budget: Number of assets that were requested for selection.
+        risk_factor: Risk aversion parameter *q* used in the objective.
+        optimal_bitstring: Binary string of length *num_assets* where
+            ``'1'`` at position *i* means asset *i* is selected.
+    """
     selection: list[int]
     expected_return: float
     risk: float
@@ -86,7 +101,20 @@ def _portfolio_qubo(
 
 
 def _qubo_cost_diagonal(Q: NDArray[np.floating], n: int) -> NDArray[np.floating]:
-    """Evaluate the QUBO cost for all 2^n binary strings."""
+    """Evaluate the QUBO cost for all 2^n binary strings.
+
+    Brute-force computes ``x^T Q x`` for every possible binary vector
+    *x* of length *n*. Used to build the diagonal cost operator for QAOA.
+
+    Args:
+        Q: QUBO matrix of shape ``(n, n)``.
+        n: Number of binary variables (assets).
+
+    Returns:
+        NDArray[np.floating]: Cost array of length ``2**n`` where entry
+            *i* is the objective value for the binary vector encoded by
+            integer *i* (MSB-first).
+    """
     dim = 2**n
     costs = np.zeros(dim)
     for state in range(dim):
@@ -105,17 +133,26 @@ def _qaoa_for_qubo(
 ) -> tuple[str, float]:
     """Run QAOA to minimize a QUBO cost function.
 
-    Uses a simple parameter sweep for small problem sizes, since
-    classical optimization of QAOA angles is the standard approach.
+    Performs a random-restart parameter sweep over QAOA angles,
+    evaluating each candidate by evolving the uniform superposition
+    through *p* alternating cost and mixer unitaries. For small problem
+    sizes the brute-force optimum is also checked and returned if
+    superior.
 
     Args:
-        cost_diag: Cost diagonal (2^n,) for each basis state.
-        num_qubits: Number of qubits (= number of assets).
-        p: Number of QAOA layers.
-        num_iterations: Number of random parameter restarts.
+        cost_diag: Cost diagonal of length ``2**num_qubits``, giving
+            the objective value for each computational basis state.
+        num_qubits: Number of qubits (equal to the number of binary
+            decision variables).
+        p: Number of QAOA layers (alternating cost/mixer rounds).
+        num_iterations: Number of random ``(gamma, beta)`` parameter
+            initializations to try.
 
     Returns:
-        (best_bitstring, best_cost) tuple.
+        tuple[str, float]: A 2-tuple ``(best_bitstring, best_cost)``
+            where *best_bitstring* is a binary string of length
+            *num_qubits* and *best_cost* is the corresponding QUBO
+            objective value.
     """
     dim = 2**num_qubits
     pauli_x = np.array([[0, 1], [1, 0]], dtype=complex)

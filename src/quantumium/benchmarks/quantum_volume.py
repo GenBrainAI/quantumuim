@@ -26,7 +26,18 @@ from ..core.gate import Gate
 
 
 def _random_su4(rng: np.random.Generator) -> NDArray[np.complexfloating]:
-    """Generate a random SU(4) matrix (Haar-random 2-qubit gate)."""
+    """Generate a Haar-random SU(4) matrix (random 2-qubit gate).
+
+    Uses QR decomposition of a random complex Gaussian matrix with
+    phase correction to ensure Haar measure, then normalizes the
+    determinant to 1.
+
+    Args:
+        rng: NumPy random generator instance.
+
+    Returns:
+        A (4 x 4) unitary matrix with determinant 1.
+    """
     # Use QR decomposition of a random complex matrix
     Z = (rng.standard_normal((4, 4)) + 1j * rng.standard_normal((4, 4))) / np.sqrt(2)
     Q, R = np.linalg.qr(Z)
@@ -47,7 +58,16 @@ def _build_qv_circuit(
 ) -> QuantumCircuit:
     """Build a random model circuit for quantum volume estimation.
 
-    Each layer applies random SU(4) gates to random qubit pairs.
+    Each layer randomly permutes the qubits and applies independent
+    Haar-random SU(4) gates to consecutive pairs.
+
+    Args:
+        num_qubits: Number of qubits (circuit width).
+        depth: Number of layers (circuit depth).
+        rng: NumPy random generator instance.
+
+    Returns:
+        A QuantumCircuit containing the random model circuit.
     """
     qc = QuantumCircuit(num_qubits)
 
@@ -69,10 +89,19 @@ def _heavy_output_probability(
     ideal_probs: NDArray[np.floating],
     noisy_probs: NDArray[np.floating],
 ) -> float:
-    """Compute the heavy output probability.
+    """Compute the heavy output probability for a single circuit.
 
-    Heavy outputs are bitstrings whose ideal probability exceeds
-    the median of the ideal distribution.
+    Heavy outputs are bitstrings whose ideal probability exceeds the
+    median of the ideal distribution. The heavy output probability is
+    the total noisy probability mass on those heavy bitstrings.
+
+    Args:
+        ideal_probs: Ideal output probability distribution (1-D array of
+            length 2^n).
+        noisy_probs: Noisy output probability distribution (same shape).
+
+    Returns:
+        Heavy output probability in [0, 1].
     """
     median = float(np.median(ideal_probs))
     heavy_mask = ideal_probs > median
@@ -81,6 +110,18 @@ def _heavy_output_probability(
 
 @dataclass
 class QVResult:
+    """Container for quantum volume estimation results.
+
+    Attributes:
+        num_qubits: Number of qubits used in the QV test.
+        quantum_volume: Estimated quantum volume (2^n if passed, 2^(n-1)
+            otherwise).
+        heavy_output_prob: Average heavy output probability across all
+            random circuits.
+        passed: Whether the heavy output probability exceeded the threshold.
+        num_circuits: Number of random model circuits averaged over.
+        threshold: Heavy output probability threshold used (typically 2/3).
+    """
     num_qubits: int
     quantum_volume: int
     heavy_output_prob: float

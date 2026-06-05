@@ -31,7 +31,21 @@ from ..core.gate import Gate
 
 @dataclass
 class QSVTResult:
-    """Result from a QSVT computation."""
+    """Result from a Quantum Singular Value Transformation computation.
+
+    Attributes:
+        transformed_matrix (NDArray[np.complexfloating]): The matrix
+            after polynomial transformation of its singular values,
+            extracted from the upper-left block of the QSVT unitary.
+        original_matrix (NDArray[np.complexfloating]): The input matrix
+            before transformation.
+        block_encoding_norm (float): The normalization factor alpha
+            used in the block encoding (A_encoded = A / alpha).
+        angles (NDArray[np.floating]): The QSP/QSVT phase angles
+            that define the polynomial transformation.
+        degree (int): Degree of the polynomial transformation
+            (len(angles) - 1).
+    """
     transformed_matrix: NDArray[np.complexfloating]
     original_matrix: NDArray[np.complexfloating]
     block_encoding_norm: float

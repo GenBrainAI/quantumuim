@@ -27,23 +27,29 @@ def qsvt_matrix_inversion(
     degree: int = 15,
     alpha: float | None = None,
 ) -> QSVTResult:
-    """Approximate matrix inversion A⁻¹ via QSVT.
+    """Approximate matrix inversion via QSVT (HHL-like algorithm).
 
     Applies a polynomial approximation of 1/x to the singular values
-    of A. Small singular values below kappa_cutoff are regularized
+    of A using Quantum Singular Value Transformation. Small singular
+    values below kappa_cutoff are regularized with a smooth transition
     to avoid divergence.
 
-    The polynomial P(x) ≈ 1/(α·x) for |x| > kappa_cutoff,
-    smoothly goes to 0 for |x| < kappa_cutoff/2.
+    The polynomial P(x) approximates 1/(alpha*x) for |x| > kappa_cutoff
+    and smoothly transitions to 0 for |x| < kappa_cutoff/2.
 
     Args:
-        A: Input matrix to invert.
-        kappa_cutoff: Regularization threshold for small singular values.
-        degree: Polynomial degree (higher = better approximation).
-        alpha: Block-encoding norm. Auto-computed if None.
+        A (NDArray[np.complexfloating]): Input matrix to invert (n x n).
+        kappa_cutoff (float): Regularization threshold below which
+            singular values are suppressed. Defaults to 0.1.
+        degree (int): Polynomial degree for the approximation. Higher
+            values improve accuracy but increase circuit depth.
+            Defaults to 15.
+        alpha (float | None): Block-encoding normalization factor.
+            If None, automatically set to 1.01 * ||A||_op.
 
     Returns:
-        QSVTResult where transformed_matrix ≈ A⁻¹/α (up to normalization).
+        QSVTResult: Result where transformed_matrix approximates
+            A^{-1}/alpha (up to normalization from the polynomial fit).
     """
     A = np.asarray(A, dtype=complex)
 
@@ -82,21 +88,27 @@ def qsvt_hamiltonian_sim(
     time: float = 1.0,
     degree: int = 15,
 ) -> QSVTResult:
-    """Hamiltonian simulation e^{-iHt} via QSVT.
+    """Simulate Hamiltonian time-evolution e^{-iHt} via QSVT.
 
-    Approximates cos(Ht) + i·sin(Ht) applied to the eigenvalues
-    of H using a Jacobi-Anger expansion in Chebyshev polynomials.
-
-    For Hermitian H with ‖H‖ ≤ 1 (after normalization by alpha),
-    this realizes a polynomial approximation to e^{-iαt·x}.
+    Approximates the cosine component cos(H*t) applied to the
+    eigenvalues of H using a Chebyshev polynomial fit. After
+    normalization by alpha = 1.01 * ||H||_op, the polynomial
+    approximates cos(alpha * t * x) for x in [-1, 1].
 
     Args:
-        H: Hermitian Hamiltonian matrix.
-        time: Evolution time.
-        degree: Polynomial degree (higher = longer time or better accuracy).
+        H (NDArray[np.complexfloating]): Hermitian Hamiltonian matrix
+            (n x n). Must be Hermitian (H = H^dagger).
+        time (float): Evolution time. Defaults to 1.0.
+        degree (int): Polynomial degree for the Chebyshev approximation.
+            Higher values support longer evolution times or better
+            accuracy. Defaults to 15.
 
     Returns:
-        QSVTResult where transformed_matrix ≈ e^{-iHt}.
+        QSVTResult: Result where transformed_matrix approximates
+            e^{-iHt} (specifically the cos(Ht) component).
+
+    Raises:
+        ValueError: If H is not Hermitian.
     """
     H = np.asarray(H, dtype=complex)
 
@@ -126,22 +138,26 @@ def qsvt_amplitude_amplification(
     A: NDArray[np.complexfloating],
     num_iterations: int = 3,
 ) -> QSVTResult:
-    """Amplitude amplification as a special case of QSVT.
+    """Perform amplitude amplification as a special case of QSVT.
 
-    Applies a Chebyshev polynomial T_d(x) to the singular values,
-    which amplifies values near 0 toward 1 (the core of Grover-like
-    speedup).
+    Applies a Chebyshev polynomial T_d(x) to the singular values of
+    the block-encoded matrix, which amplifies small singular values
+    toward 1. This is the core mechanism underlying the quadratic
+    Grover-like speedup.
 
-    For d iterations of Grover, the effective polynomial is
-    T_d(x) = cos(d·arccos(x)), which maps small x to values
-    oscillating between -1 and 1.
+    The effective polynomial T_d(x) = cos(d * arccos(x)) maps small
+    x values to oscillating values between -1 and 1.
 
     Args:
-        A: Input matrix (block-encoded operator).
-        num_iterations: Number of amplification rounds (= Chebyshev degree).
+        A (NDArray[np.complexfloating]): Input matrix to amplify
+            (block-encoded operator, n x n).
+        num_iterations (int): Number of amplification rounds. The
+            Chebyshev polynomial degree is 2 * num_iterations + 1.
+            Defaults to 3.
 
     Returns:
-        QSVTResult with amplified singular values.
+        QSVTResult: Result with amplified singular values in the
+            transformed_matrix.
     """
     A = np.asarray(A, dtype=complex)
     d = 2 * num_iterations + 1

@@ -23,7 +23,18 @@ from numpy.typing import NDArray
 
 
 def _pauli_basis(num_qubits: int) -> list[NDArray[np.complexfloating]]:
-    """Build normalized n-qubit Pauli basis {I, X, Y, Z}^⊗n / sqrt(d)."""
+    """Build the normalized n-qubit Pauli basis {I, X, Y, Z}^{otimes n} / sqrt(d).
+
+    Each element is a (d x d) matrix normalized so that the set forms an
+    orthonormal basis under the Hilbert-Schmidt inner product.
+
+    Args:
+        num_qubits: Number of qubits.
+
+    Returns:
+        A list of d^2 normalized Pauli matrices, each of shape (d, d)
+        where d = 2^num_qubits.
+    """
     I = np.eye(2, dtype=complex)
     X = np.array([[0, 1], [1, 0]], dtype=complex)
     Y = np.array([[0, -1j], [1j, 0]], dtype=complex)
@@ -232,7 +243,17 @@ def channel_fidelity(
 class QuantumChannel:
     """A quantum channel with lazy conversion between representations.
 
-    Create from any representation; others are computed on demand.
+    Wraps a completely positive trace-preserving (CPTP) map and provides
+    on-demand conversion between Kraus, Choi, superoperator, and Pauli
+    Transfer Matrix (PTM) representations. Create an instance via one of
+    the factory class methods (``from_kraus``, ``from_choi``,
+    ``from_superoperator``, ``from_unitary``) and access any representation
+    through the corresponding property; conversions are cached after first
+    computation.
+
+    Attributes:
+        dim: Hilbert space dimension d (e.g., 2 for a single-qubit channel).
+        name: Optional human-readable name for the channel.
     """
 
     _kraus: list[NDArray[np.complexfloating]] | None = field(default=None, repr=False)
@@ -243,6 +264,7 @@ class QuantumChannel:
     name: str = ""
 
     def __post_init__(self) -> None:
+        """Infer and set the Hilbert space dimension from the provided representation."""
         if self._kraus is not None:
             self.dim = self._kraus[0].shape[0]
         elif self._choi is not None:
@@ -254,28 +276,79 @@ class QuantumChannel:
     def from_kraus(
         cls, kraus_ops: list[NDArray[np.complexfloating]], name: str = ""
     ) -> QuantumChannel:
+        """Create a QuantumChannel from a list of Kraus operators.
+
+        Args:
+            kraus_ops: List of (d x d) Kraus operator matrices satisfying
+                sum_k K_k^dag K_k = I.
+            name: Optional channel name.
+
+        Returns:
+            A new QuantumChannel instance.
+        """
         return cls(_kraus=kraus_ops, name=name)
 
     @classmethod
     def from_choi(
         cls, choi: NDArray[np.complexfloating], name: str = ""
     ) -> QuantumChannel:
+        """Create a QuantumChannel from a Choi matrix.
+
+        Args:
+            choi: (d^2 x d^2) Choi-Jamiolkowski matrix of the channel.
+            name: Optional channel name.
+
+        Returns:
+            A new QuantumChannel instance.
+        """
         return cls(_choi=choi, name=name)
 
     @classmethod
     def from_superoperator(
         cls, superop: NDArray[np.complexfloating], name: str = ""
     ) -> QuantumChannel:
+        """Create a QuantumChannel from a superoperator (Liouville) matrix.
+
+        Args:
+            superop: (d^2 x d^2) superoperator matrix acting on vectorized
+                density matrices.
+            name: Optional channel name.
+
+        Returns:
+            A new QuantumChannel instance.
+        """
         return cls(_superop=superop, name=name)
 
     @classmethod
     def from_unitary(
         cls, U: NDArray[np.complexfloating], name: str = ""
     ) -> QuantumChannel:
+        """Create a QuantumChannel from a single unitary matrix.
+
+        The channel is represented as a single Kraus operator equal to U.
+
+        Args:
+            U: (d x d) unitary matrix.
+            name: Optional channel name.
+
+        Returns:
+            A new QuantumChannel instance.
+        """
         return cls(_kraus=[np.asarray(U, dtype=complex)], name=name)
 
     @property
     def kraus(self) -> list[NDArray[np.complexfloating]]:
+        """The Kraus operator representation of this channel.
+
+        Lazily converted from the Choi or superoperator representation
+        if not directly available.
+
+        Returns:
+            List of (d x d) Kraus operator matrices.
+
+        Raises:
+            ValueError: If no representation is available to convert from.
+        """
         if self._kraus is None:
             if self._choi is not None:
                 self._kraus = choi_to_kraus(self._choi)
@@ -287,51 +360,107 @@ class QuantumChannel:
 
     @property
     def choi(self) -> NDArray[np.complexfloating]:
+        """The Choi-Jamiolkowski matrix of this channel.
+
+        Lazily converted from the Kraus representation if not directly available.
+
+        Returns:
+            (d^2 x d^2) Choi matrix.
+        """
         if self._choi is None:
             self._choi = kraus_to_choi(self.kraus)
         return self._choi
 
     @property
     def superoperator(self) -> NDArray[np.complexfloating]:
+        """The superoperator (Liouville) matrix of this channel.
+
+        Lazily converted from the Kraus representation if not directly available.
+
+        Returns:
+            (d^2 x d^2) superoperator matrix.
+        """
         if self._superop is None:
             self._superop = kraus_to_superoperator(self.kraus)
         return self._superop
 
     @property
     def ptm(self) -> NDArray[np.floating]:
+        """The Pauli Transfer Matrix (PTM) of this channel.
+
+        Lazily converted from the Kraus representation if not directly available.
+
+        Returns:
+            (d^2 x d^2) real-valued PTM matrix.
+        """
         if self._ptm is None:
             self._ptm = kraus_to_ptm(self.kraus)
         return self._ptm
 
     def apply(self, rho: NDArray[np.complexfloating]) -> NDArray[np.complexfloating]:
-        """Apply this channel to a density matrix."""
+        """Apply this channel to a density matrix.
+
+        Computes E(rho) = sum_k K_k rho K_k^dag using the Kraus representation.
+
+        Args:
+            rho: Input density matrix of shape (d, d).
+
+        Returns:
+            Output density matrix of shape (d, d).
+        """
         return sum(K @ rho @ K.conj().T for K in self.kraus)
 
     def compose(self, other: QuantumChannel) -> QuantumChannel:
-        """Return self ∘ other (other applied first)."""
+        """Compose this channel with another: (self . other)(rho) = self(other(rho)).
+
+        Args:
+            other: The channel to apply first.
+
+        Returns:
+            A new QuantumChannel representing the composed map.
+        """
         return QuantumChannel.from_kraus(
             compose_channels(other.kraus, self.kraus),
             name=f"{self.name}∘{other.name}" if self.name and other.name else "",
         )
 
     def tensor(self, other: QuantumChannel) -> QuantumChannel:
-        """Return self ⊗ other."""
+        """Compute the tensor product of this channel with another: self (x) other.
+
+        Args:
+            other: The channel to tensor with.
+
+        Returns:
+            A new QuantumChannel acting on the joint Hilbert space.
+        """
         return QuantumChannel.from_kraus(
             tensor_channels(self.kraus, other.kraus),
             name=f"{self.name}⊗{other.name}" if self.name and other.name else "",
         )
 
     def average_fidelity(self) -> float:
-        """Average fidelity with the identity channel."""
+        """Compute the average fidelity of this channel with the identity channel.
+
+        Returns:
+            Average gate fidelity in [0, 1].
+        """
         return channel_fidelity(self.kraus)
 
     def is_unital(self, tol: float = 1e-10) -> bool:
-        """Check if E(I) = I (channel preserves the identity)."""
+        """Check whether this channel is unital, i.e., E(I) = I.
+
+        Args:
+            tol: Absolute tolerance for the comparison.
+
+        Returns:
+            True if the channel preserves the identity matrix within tolerance.
+        """
         d = self.dim
         I = np.eye(d, dtype=complex)
         result = self.apply(I)
         return bool(np.allclose(result, I, atol=tol))
 
     def __repr__(self) -> str:
+        """Return a human-readable string representation of the channel."""
         label = f"'{self.name}'" if self.name else "unnamed"
         return f"QuantumChannel({label}, dim={self.dim})"

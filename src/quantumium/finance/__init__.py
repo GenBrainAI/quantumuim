@@ -1,7 +1,13 @@
 """Quantum finance applications.
 
-Option pricing, risk analysis, and portfolio optimization using
-quantum amplitude estimation, QAOA, and variational methods.
+Provides quantum-accelerated financial computations:
+
+- **option_pricing**: European option pricing via quantum amplitude
+  estimation, with a classical Black-Scholes benchmark for comparison.
+- **risk_analysis**: Value at Risk (VaR) and Conditional VaR (CVaR)
+  using quantum amplitude estimation on discretized loss distributions.
+- **portfolio**: Mean-variance portfolio optimization formulated as a
+  QUBO and solved with QAOA.
 """
 
 from .option_pricing import (

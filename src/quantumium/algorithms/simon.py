@@ -23,6 +23,19 @@ from ..core.gate import Gate, H
 
 @dataclass
 class SimonResult:
+    """Result container for Simon's algorithm.
+
+    Attributes
+    ----------
+    secret : str
+        The recovered hidden string s as a binary string of length n.
+        ``"000...0"`` indicates that f is one-to-one (no nontrivial period).
+    equations : list[str]
+        The collected linear equations z such that z . s = 0 (mod 2),
+        each represented as a binary string of length n.
+    num_queries : int
+        Total number of quantum oracle queries used.
+    """
     secret: str
     equations: list[str]
     num_queries: int
@@ -59,9 +72,23 @@ def _simon_oracle(n: int, secret: str) -> Gate:
 
 
 def simon_query(n: int, secret: str) -> str:
-    """Run one iteration of Simon's algorithm to get one equation.
+    """Run one iteration of Simon's algorithm to obtain a single linear equation.
 
-    Returns a bitstring z such that z · s = 0 (mod 2).
+    Prepares a uniform superposition on the input register, applies the Simon
+    oracle, and measures the input register to obtain a bitstring z satisfying
+    z . s = 0 (mod 2).
+
+    Parameters
+    ----------
+    n : int
+        Number of input bits (each register has n qubits; total circuit uses 2n qubits).
+    secret : str
+        The hidden string s as a binary string of length n.
+
+    Returns
+    -------
+    str
+        A bitstring z of length n such that z . s = 0 (mod 2).
     """
     total = 2 * n
     qc = QuantumCircuit(total)
@@ -84,7 +111,21 @@ def simon_query(n: int, secret: str) -> str:
 
 
 def _solve_linear_system(equations: list[str], n: int) -> str | None:
-    """Solve z · s = 0 system over GF(2) to find s."""
+    """Solve the system z . s = 0 over GF(2) via Gaussian elimination to find s.
+
+    Parameters
+    ----------
+    equations : list[str]
+        List of binary strings, each of length n, representing linear equations.
+    n : int
+        Number of bits in the secret string s.
+
+    Returns
+    -------
+    str or None
+        The nontrivial solution s as a binary string, or ``None`` if no
+        solution could be determined.
+    """
     if not equations:
         return None
 
@@ -136,15 +177,34 @@ def simon_algorithm(
     secret: str,
     max_queries: int | None = None,
 ) -> SimonResult:
-    """Run Simon's algorithm to find the hidden string s.
+    """Run Simon's algorithm to find the hidden period string s.
 
-    Args:
-        n: Number of input bits.
-        secret: The hidden string s as a binary string of length n.
-        max_queries: Maximum queries before giving up. Default 3n.
+    Repeatedly queries the oracle to collect linear equations z . s = 0 (mod 2),
+    then solves the resulting linear system over GF(2) via Gaussian elimination
+    to recover the secret string s.
 
-    Returns:
-        SimonResult with the found secret string.
+    Parameters
+    ----------
+    n : int
+        Number of input bits. Each register has n qubits; the oracle maps
+        {0,1}^n to {0,1}^n.
+    secret : str
+        The hidden string s as a binary string of length n. If s = "000...0",
+        the function f is one-to-one (no period).
+    max_queries : int or None, optional
+        Maximum number of quantum queries before giving up. Defaults to 3*n,
+        which is sufficient with high probability.
+
+    Returns
+    -------
+    SimonResult
+        A result object containing the recovered secret string, the collected
+        equations, and the total number of queries performed.
+
+    Raises
+    ------
+    ValueError
+        If ``len(secret) != n``.
     """
     if len(secret) != n:
         raise ValueError(f"Secret must be {n} bits, got {len(secret)}")
