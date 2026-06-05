@@ -54,4 +54,36 @@ Quantumium operates as an AI-native organization on [agent.ceo](https://agent.ce
 
 ## Getting Started
 
-See `kb/foundations/` for mathematical prerequisites and `examples/basic/` for first quantum programs.
+```bash
+pip install -e ".[dev]"
+python examples/bell_state.py
+```
+
+### Quick Example
+
+```python
+from quantumium.core.circuit import QuantumCircuit
+from quantumium.core.gate import H, CNOT
+
+qc = QuantumCircuit(2)
+qc.apply(H, 0)
+qc.apply(CNOT, 0, 1)
+print(qc.measure_all(shots=1000))
+# {'00': ~500, '11': ~500}
+```
+
+### What's Implemented
+
+**Core** (`src/quantumium/core/`): Qubit, Gate, QuantumCircuit with statevector simulation
+
+**Algorithms** (`src/quantumium/algorithms/`):
+- Grover's search
+- Deutsch-Jozsa
+- Bernstein-Vazirani
+
+**Circuit Templates** (`src/quantumium/circuits/`):
+- Bell pair, GHZ state
+- Quantum teleportation
+- QFT / inverse QFT
+
+Run `python -m pytest tests/ -p no:logfire` to verify (55 tests).
