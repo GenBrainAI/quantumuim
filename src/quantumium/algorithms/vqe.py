@@ -123,19 +123,19 @@ def vqe(
     hamiltonian: NDArray[np.complexfloating],
     ansatz_depth: int = 2,
     max_iter: int = 200,
-    learning_rate: float = 0.05,
+    learning_rate: float = 0.01,
     num_starts: int = 5,
 ) -> VQEResult:
     """Run VQE with a hardware-efficient ansatz.
 
-    Uses parameter-shift rule for gradient computation.
+    Uses parameter-shift rule for gradient computation and the Adam optimizer.
 
     Args:
         num_qubits: Number of qubits.
         hamiltonian: Hamiltonian matrix (2^n × 2^n).
         ansatz_depth: Number of ansatz layers.
         max_iter: Maximum optimization iterations per start.
-        learning_rate: Gradient descent step size.
+        learning_rate: Adam step size.
         num_starts: Number of random initial parameter sets.
     """
     num_params = num_qubits * 2 * ansatz_depth
@@ -144,17 +144,20 @@ def vqe(
     best_params = None
     best_history: list[float] = []
 
+    beta1, beta2, eps = 0.9, 0.999, 1e-8
+
     for _ in range(num_starts):
         params = np.random.uniform(-np.pi, np.pi, size=num_params)
+        m = np.zeros(num_params)
+        v = np.zeros(num_params)
         history: list[float] = []
 
-        for _ in range(max_iter):
+        for t in range(1, max_iter + 1):
             qc = hardware_efficient_ansatz(num_qubits, params, ansatz_depth)
             sv = qc.statevector()
             energy = hamiltonian_expectation(sv, hamiltonian)
             history.append(energy)
 
-            # Parameter-shift gradient
             grad = np.zeros_like(params)
             shift = np.pi / 2
             for i in range(num_params):
@@ -170,7 +173,11 @@ def vqe(
 
                 grad[i] = (e_plus - e_minus) / 2
 
-            params -= learning_rate * grad
+            m = beta1 * m + (1 - beta1) * grad
+            v = beta2 * v + (1 - beta2) * grad**2
+            m_hat = m / (1 - beta1**t)
+            v_hat = v / (1 - beta2**t)
+            params -= learning_rate * m_hat / (np.sqrt(v_hat) + eps)
 
         final_qc = hardware_efficient_ansatz(num_qubits, params, ansatz_depth)
         final_energy = hamiltonian_expectation(final_qc.statevector(), hamiltonian)
