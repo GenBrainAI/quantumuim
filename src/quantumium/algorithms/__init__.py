@@ -3,6 +3,12 @@
 from .qft import qft, inverse_qft
 from .qaoa import qaoa_circuit, qaoa_expectation, qaoa_maxcut, maxcut_cost_operator
 from .vqe import vqe, hardware_efficient_ansatz, h2_hamiltonian, hamiltonian_expectation
+from .hamiltonian_sim import (
+    simulate_evolution,
+    first_order_trotter,
+    second_order_trotter,
+    transverse_field_ising,
+)
 
 __all__ = [
     "qft",
@@ -15,4 +21,8 @@ __all__ = [
     "hardware_efficient_ansatz",
     "h2_hamiltonian",
     "hamiltonian_expectation",
+    "simulate_evolution",
+    "first_order_trotter",
+    "second_order_trotter",
+    "transverse_field_ising",
 ]
