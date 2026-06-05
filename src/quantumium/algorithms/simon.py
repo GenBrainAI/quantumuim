@@ -172,6 +172,18 @@ def _solve_linear_system(equations: list[str], n: int) -> str | None:
     return "".join(str(b) for b in s)
 
 
+def _verify_period(n: int, secret: str, candidate: str) -> bool:
+    """Verify a candidate period by checking f(x) = f(x XOR candidate) for all x."""
+    s = int(secret, 2)
+    c = int(candidate, 2)
+    for x in range(2**n):
+        fx = min(x, x ^ s)
+        fxc = min(x ^ c, (x ^ c) ^ s)
+        if fx != fxc:
+            return False
+    return True
+
+
 def simon_algorithm(
     n: int,
     secret: str,
@@ -192,7 +204,7 @@ def simon_algorithm(
         The hidden string s as a binary string of length n. If s = "000...0",
         the function f is one-to-one (no period).
     max_queries : int or None, optional
-        Maximum number of quantum queries before giving up. Defaults to 3*n,
+        Maximum number of quantum queries before giving up. Defaults to 5*n,
         which is sufficient with high probability.
 
     Returns
@@ -209,7 +221,7 @@ def simon_algorithm(
     if len(secret) != n:
         raise ValueError(f"Secret must be {n} bits, got {len(secret)}")
     if max_queries is None:
-        max_queries = 3 * n
+        max_queries = 5 * n
 
     equations: list[str] = []
     num_queries = 0
@@ -255,11 +267,14 @@ def simon_algorithm(
             if queries_at_full_rank >= n + 2:
                 candidate = _solve_linear_system(equations, n)
                 if candidate is not None and candidate != "0" * n:
-                    return SimonResult(
-                        secret=candidate,
-                        equations=equations,
-                        num_queries=num_queries,
-                    )
+                    if _verify_period(n, secret, candidate):
+                        return SimonResult(
+                            secret=candidate,
+                            equations=equations,
+                            num_queries=num_queries,
+                        )
 
     candidate = _solve_linear_system(equations, n) or "0" * n
+    if candidate != "0" * n and not _verify_period(n, secret, candidate):
+        candidate = "0" * n
     return SimonResult(secret=candidate, equations=equations, num_queries=num_queries)
