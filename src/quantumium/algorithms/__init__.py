@@ -9,6 +9,7 @@ from .hamiltonian_sim import (
     second_order_trotter,
     transverse_field_ising,
 )
+from .shor import shor_factor, quantum_order_finding
 
 __all__ = [
     "qft",
@@ -25,4 +26,6 @@ __all__ = [
     "first_order_trotter",
     "second_order_trotter",
     "transverse_field_ising",
+    "shor_factor",
+    "quantum_order_finding",
 ]
