@@ -5,26 +5,30 @@ build-backend = "setuptools.build_meta"
 [project]
 name = "quantumium"
 version = "0.1.0"
-description = "Quantum computing SDK — algorithms, hardware backends, and error mitigation for NISQ devices"
+description = "Quantum computing SDK — circuits, algorithms, hardware backends, and error mitigation for NISQ and beyond"
 readme = "README.md"
 license = "MIT"
+license-files = ["LICENSE"]
 requires-python = ">=3.10"
 authors = [
-    { name = "quantumium", email = "info@quantumium.dev" },
+    { name = "Quantumium Contributors", email = "info@quantumium.dev" },
 ]
 classifiers = [
     "Development Status :: 3 - Alpha",
     "Intended Audience :: Science/Research",
     "Intended Audience :: Developers",
+    "Intended Audience :: Education",
+    "Operating System :: OS Independent",
     "Programming Language :: Python :: 3",
     "Programming Language :: Python :: 3.10",
     "Programming Language :: Python :: 3.11",
     "Programming Language :: Python :: 3.12",
     "Topic :: Scientific/Engineering :: Physics",
+    "Topic :: Scientific/Engineering :: Chemistry",
     "Topic :: Software Development :: Libraries :: Python Modules",
     "Typing :: Typed",
 ]
-keywords = ["quantum", "computing", "qubits", "simulation", "algorithms", "NISQ"]
+keywords = ["quantum", "computing", "qubits", "simulation", "algorithms", "NISQ", "VQE", "QAOA", "quantum-machine-learning"]
 dependencies = [
     "numpy>=1.24",
 ]
@@ -50,6 +54,8 @@ dev = [
 [project.urls]
 Homepage = "https://github.com/GenBrainAI/quantumuim"
 Repository = "https://github.com/GenBrainAI/quantumuim"
+Documentation = "https://github.com/GenBrainAI/quantumuim/blob/main/docs/getting-started.md"
+Changelog = "https://github.com/GenBrainAI/quantumuim/blob/main/CHANGELOG.md"
 Issues = "https://github.com/GenBrainAI/quantumuim/issues"
 
 [tool.setuptools.packages.find]
