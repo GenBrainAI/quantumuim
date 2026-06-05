@@ -88,7 +88,81 @@ Quantum algorithms that provide speedup over classical counterparts, organized b
 - **Parameterized by depth p** — higher p → better approximation ratio
 - **NISQ-friendly**
 
-## 5. Machine Learning
+## 5. Amplitude Estimation & Counting
+
+### Quantum Counting
+- **Problem:** Count the number of solutions to f(x) = 1 among N items
+- **Method:** QPE on the Grover operator G — eigenvalues encode the solution count M
+- **Classical:** O(N) evaluations
+- **Quantum:** O(√N) evaluations, estimates M to multiplicative error
+- **Applications:** Counting satisfying assignments, estimating set sizes
+
+### Canonical Amplitude Estimation
+- **Problem:** Estimate amplitude a = ⟨ψ|good⟩ to precision ε
+- **Method:** QPE on Grover operator — eigenphase encodes sin⁻¹(√a)
+- **Speedup:** O(1/ε) vs O(1/ε²) classical (quadratic)
+- **Applications:** Monte Carlo integration, option pricing, risk analysis
+- **Limitation:** Requires deep circuits (QPE + Grover iterates)
+
+### Iterative Amplitude Estimation (QPE-Free)
+- **Problem:** Same as canonical AE but without QPE overhead
+- **Method:** Suzuki et al. (2020) — sequence of Grover iterates with classical maximum likelihood
+- **Advantage:** Shallower circuits, more NISQ-friendly, same O(1/ε) scaling
+- **Trade-off:** Requires more classical post-processing
+
+## 6. Quantum Walks
+
+### Discrete-Time Quantum Walk
+- **Coin operator** (Hadamard, Grover, DFT) drives superposition of directions
+- **Shift operator** moves walker based on coin state
+- **Spreading:** Ballistic O(t) vs classical random walk O(√t) — quadratic speedup
+- **Graphs:** Line, cycle, hypercube, 2D grid, arbitrary adjacency
+
+### Continuous-Time Quantum Walk
+- **Hamiltonian:** H = γA (adjacency matrix) or H = γL (Laplacian)
+- **Evolution:** |ψ(t)⟩ = e^{-iHt}|ψ(0)⟩
+- **Applications:** Spatial search (O(√N) on many graphs), graph isomorphism heuristics, transport in biological systems
+
+### Quantum Walk Search (Szegedy)
+- Quantization of classical Markov chains
+- Quadratic speedup for finding marked elements: O(1/√δ) hitting time vs O(1/δ) classical
+- General framework encompassing Grover as special case
+
+## 7. Adiabatic & Annealing
+
+### Adiabatic Quantum Computing
+- **Principle:** Slowly evolve from easy ground state to problem ground state
+- **H(s) = (1-s)H_init + s·H_final** with s: 0→1
+- **Adiabatic theorem:** If evolution is slow enough (T ∝ 1/Δ²_min), system stays in ground state
+- **Spectral gap Δ_min** determines required evolution time
+- **Equivalent to gate model** in computational power (polynomially)
+
+### Quantum Annealing
+- Practical implementation of adiabatic QC on specialized hardware (D-Wave)
+- Thermal fluctuations + quantum tunneling for optimization
+- No error correction, finite temperature — heuristic, not provably optimal
+- **Advantage:** Thousands of qubits, native Ising model support
+
+## 8. Quantum Signal Processing & QSVT
+
+### Quantum Signal Processing (QSP)
+- Implements polynomial transformations P(x) of a signal embedded in a unitary
+- Signal operator W(x) + processing operator S(φ) → polynomial evaluation
+- **Angle finding:** Given target polynomial, find processing angles
+- **Universality:** Any bounded polynomial achievable with correct angles
+
+### Quantum Singular Value Transformation (QSVT)
+- Generalization of QSP to block-encoded matrices
+- Applies polynomial to singular values of block-encoded A
+- **Unifying framework** — subsumes as special cases:
+  - Hamiltonian simulation (odd polynomial approximating e^{-ix})
+  - Amplitude amplification (step function polynomial)
+  - Matrix inversion / HHL (1/x polynomial)
+  - QPE (Chebyshev-based phase discrimination)
+- **Optimal query complexity** for many problems
+- Considered the "grand unified theory" of quantum algorithms
+
+## 9. Machine Learning
 
 ### Quantum Support Vector Machine (QSVM)
 - Uses quantum kernel estimation for classification
@@ -101,7 +175,7 @@ Quantum algorithms that provide speedup over classical counterparts, organized b
 ### Quantum Boltzmann Machine
 - Quantum-enhanced sampling for generative models
 
-## 6. Cryptography
+## 10. Cryptography
 
 ### Quantum Key Distribution (BB84)
 - Not an algorithm per se, but a protocol
