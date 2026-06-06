@@ -42,8 +42,21 @@ All notable changes to the Quantumium SDK are documented in this file.
 - Surface codes guide, ZX-calculus guide, quantum networking guide
 - Hardware validation guide, SDK benchmarking methodology, v0.3.0 roadmap candidates
 
+### Documentation Site & Community (Phase 30)
+- MkDocs documentation site with Material theme (dark/light toggle)
+- Auto-generated API reference via mkdocstrings for all 26 modules
+- Example gallery page with 33 runnable scripts organized by category
+- `BenchmarkSuite` for circuit construction and simulation timing
+- GitHub contribution templates: bug report, feature request, PR template
+- `mkdocs build --strict` passes with zero warnings
+
+### Knowledge Base
+- Surface codes guide, ZX-calculus guide, quantum networking guide
+- Hardware validation guide, SDK benchmarking methodology, v0.3.0 roadmap candidates
+- Qubit routing & mapping guide, classical shadows guide
+
 ### Stats
-- 28 packages, 1095 tests, 32 examples, 3 notebooks, 21 KB articles
+- 28 packages, 1095 tests, 33 examples, 3 notebooks, 23 KB articles, MkDocs documentation site
 
 ---
 
