@@ -3,14 +3,14 @@
 [![CI](https://github.com/GenBrainAI/quantumuim/actions/workflows/ci.yml/badge.svg)](https://github.com/GenBrainAI/quantumuim/actions/workflows/ci.yml)
 [![Python 3.10+](https://img.shields.io/badge/python-3.10%2B-blue.svg)](https://www.python.org/downloads/)
 [![License: MIT](https://img.shields.io/badge/License-MIT-green.svg)](LICENSE)
-[![Tests](https://img.shields.io/badge/tests-933%20passed-brightgreen.svg)](tests/)
+[![Tests](https://img.shields.io/badge/tests-974%20passed-brightgreen.svg)](tests/)
 [![Coverage](https://img.shields.io/badge/coverage-report-yellow.svg)](https://github.com/GenBrainAI/quantumuim/actions/workflows/ci.yml)
 
 A comprehensive quantum computing SDK for Python. Build quantum circuits, run
 algorithms, simulate noise, and execute on real hardware from IBM, Google, and
 Amazon — all through a single, clean API.
 
-**24 modules** | **12 algorithms** | **4 hardware backends** | **933+ tests**
+**25 modules** | **12 algorithms** | **4 hardware backends** | **974+ tests**
 
 ### Key Features
 
@@ -148,6 +148,12 @@ qc = pqc.bind({theta: 1.57})
 - MWPM decoder (self-contained, no external dependencies)
 - Logical X/Z operators, syndrome extraction, Monte Carlo threshold estimation
 
+### ZX-Calculus Optimization (`quantumium.zx`)
+- ZXDiagram graph representation with spider fusion, identity removal, color change rules
+- Circuit-to-ZX and ZX-to-circuit round-trip conversion
+- T-count reduction through phase gadget optimization
+- One-liner API: `zx_optimize(circuit)` for automatic circuit simplification
+
 ### Error Mitigation (`quantumium.mitigation`)
 - Zero-Noise Extrapolation (ZNE), measurement error mitigation, Pauli twirling
 
@@ -219,7 +225,7 @@ See `examples/` for the full list.
 ## Testing
 
 ```bash
-python -m pytest tests/ -q    # 933 tests
+python -m pytest tests/ -q    # 974 tests
 ```
 
 ## Documentation

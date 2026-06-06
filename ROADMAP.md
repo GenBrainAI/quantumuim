@@ -125,11 +125,14 @@ Build the most comprehensive, multi-platform quantum computing SDK — enabling 
 - Monte Carlo threshold estimation
 - 56 tests, example demo, KB article (surface codes guide)
 
-### Phase 27: ZX-Calculus Optimization
-- ZX-diagram representation of quantum circuits
-- Graph-like ZX simplification rules
-- Circuit extraction from optimized ZX-diagrams
-- Integration with existing transpiler pipeline
+### Phase 27: ZX-Calculus Optimization — COMPLETE
+- ZXDiagram graph representation with Z/X spiders and regular/Hadamard edges
+- Circuit-to-ZX and ZX-to-circuit bidirectional conversion (round-trip verified)
+- Simplification rules: spider fusion, identity removal, color change, Hadamard cancellation
+- Phase gadget optimization reducing T-count (T-CNOT-T patterns: 2→0)
+- Constraint-propagated circuit extraction with correct gate ordering
+- One-liner API: `zx_optimize(circuit)` → optimized circuit
+- 58 tests, example demo, KB article (ZX-calculus guide)
 
 ### Phase 28: Quantum Networking
 - Quantum repeater simulation (entanglement swapping)
