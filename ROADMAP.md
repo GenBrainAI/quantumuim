@@ -80,7 +80,7 @@ Build the most comprehensive, multi-platform quantum computing SDK — enabling 
 - Adiabatic evolution, annealing schedules, spectral gap analysis
 
 ## Current Stats (v0.1.0)
-- **27 packages** | **991 tests** | **30 examples** | **3 Jupyter notebooks** | **20 KB articles**
+- **28 packages** | **1041 tests** | **31 examples** | **3 Jupyter notebooks** | **20 KB articles**
 
 ### Phase 19: Documentation & Developer Experience — COMPLETE
 - docs/getting-started.md — 10-section tutorial
