@@ -1,6 +1,6 @@
 # Example Gallery
 
-33 runnable example scripts covering every module in Quantumium.
+35 runnable example scripts covering every module in Quantumium.
 
 ## Core Concepts
 
@@ -73,3 +73,10 @@
 |---------|-------------|---------|
 | [Quantum Networking](https://github.com/GenBrainAI/quantumuim/blob/main/examples/networking_demo.py) | Entanglement distribution, repeater chains | `python examples/networking_demo.py` |
 | [Hardware Validation](https://github.com/GenBrainAI/quantumuim/blob/main/examples/hardware_validation_demo.py) | Cross-backend statistical validation | `python examples/hardware_validation_demo.py` |
+| [Qubit Routing](https://github.com/GenBrainAI/quantumuim/blob/main/examples/routing_demo.py) | SABRE routing on coupling maps | `python examples/routing_demo.py` |
+
+## State Characterization
+
+| Example | Description | Command |
+|---------|-------------|---------|
+| [Classical Shadows](https://github.com/GenBrainAI/quantumuim/blob/main/examples/classical_shadows_demo.py) | Efficient state property estimation | `python examples/classical_shadows_demo.py` |
