@@ -150,6 +150,13 @@ qc = pqc.bind({theta: 1.57})
 - **Fidelity estimation**: Overlap integral with arbitrary noise spectra S(omega) for coherence prediction
 - Configurable gate durations, minimum idle window thresholds, and pulse insertion strategies
 
+### Resource Estimation (`quantumium.resource_estimation`)
+- **CircuitAnalyzer**: T-gate counting, T-depth, Clifford counting, rotation gate decomposition costs
+- **ResourceEstimator**: End-to-end pipeline from circuit to physical qubit/runtime estimates
+- **MagicStateFactory**: 15-to-1 distillation cost model with multi-round support
+- **Surface code model**: Distance selection from target error rate, physical qubit scaling (2d^2-1)
+- Configurable physical error rates, code cycle times, and routing overhead
+
 ### Classical Shadows (`quantumium.shadows`)
 - Random Pauli measurement protocol for efficient state property estimation
 - Median-of-means estimation, shadow norms, sample complexity bounds

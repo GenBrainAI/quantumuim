@@ -133,6 +133,13 @@
       show_root_heading: true
       members_order: source
 
+## Resource Estimation
+
+::: quantumium.resource_estimation
+    options:
+      show_root_heading: true
+      members_order: source
+
 ## Circuit Templates
 
 ::: quantumium.circuits.templates

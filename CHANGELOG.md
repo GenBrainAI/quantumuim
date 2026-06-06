@@ -49,8 +49,18 @@ All notable changes to the Quantumium SDK are documented in this file.
 - XY-8 achieves >99% fidelity under 1/f noise; UDD fidelity scales with pulse count
 - 50 new tests, example demo with 7 sections
 
+### Resource Estimation (Phase 35)
+- `CircuitAnalyzer`: T-gate counting, T-depth, Clifford counting, rotation decomposition costs
+- `LogicalResources`: logical qubit count, circuit depth, T-gate budget with rotation synthesis
+- `PhysicalEstimate`: surface code distance, physical qubit count, runtime, factory allocation
+- `ResourceEstimator`: end-to-end pipeline from circuit to physical cost report
+- `MagicStateFactory`: 15-to-1 distillation cost model with multi-round support
+- Surface code distance selection from target error rate and physical error rate
+- Toffoli = 7T verified, rotation synthesis O(log(1/ε)) T-cost scaling confirmed
+- 52 new tests, example demo with 7 sections
+
 ### Stats
-- 32 packages, 1312 tests, 37 examples, 3 notebooks, 23 KB articles, MkDocs documentation site
+- 33 packages, 1364 tests, 38 examples, 3 notebooks, 23 KB articles, MkDocs documentation site
 
 ---
 

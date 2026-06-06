@@ -207,6 +207,16 @@ Build the most comprehensive, multi-platform quantum computing SDK — enabling 
 - XY-8 achieves >99% fidelity under 1/f noise; UDD scales with pulse count
 - 50 tests, example demo with 7 sections
 
+### Phase 35: Resource Estimation — COMPLETE
+- CircuitAnalyzer: T-count, T-depth, Clifford counting, rotation gate decomposition costs
+- LogicalResources: logical qubit count, circuit depth, T-gate budget with rotation synthesis
+- PhysicalEstimate: surface code distance, physical qubit count, runtime, factory allocation
+- ResourceEstimator: end-to-end pipeline from circuit to physical cost report
+- MagicStateFactory: 15-to-1 distillation cost model, multi-round support, throughput calculation
+- Surface code distance: d selection from p_L = 0.1 * (p_phys/p_threshold)^((d+1)/2)
+- Toffoli = 7T verified, rotation synthesis O(log(1/ε)) T-cost scaling
+- 52 tests, example demo with 7 sections
+
 ## Architecture Principles
 
 1. **Backend-agnostic:** Write circuits once, run anywhere
