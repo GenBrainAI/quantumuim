@@ -79,58 +79,74 @@ Build the most comprehensive, multi-platform quantum computing SDK — enabling 
 ### Phase 18: Adiabatic Computing — COMPLETE
 - Adiabatic evolution, annealing schedules, spectral gap analysis
 
-## Current Stats
-- **25 packages** | **~850 tests** | **24+ runnable examples** | **158 Python files**
+## Current Stats (v0.1.0)
+- **25 packages** | **877 tests** | **28 examples** | **3 Jupyter notebooks** | **15 KB articles**
 
-## Active Work
+### Phase 19: Documentation & Developer Experience — COMPLETE
+- docs/getting-started.md — 10-section tutorial
+- CONTRIBUTING.md, CHANGELOG.md
+- Enhanced README.md with badges, full module coverage
+- Comprehensive docstrings across all 23 packages (78 files, +5122 lines)
 
-### Phase 19: Documentation & Developer Experience — IN PROGRESS (CTO)
-| Deliverable | Owner | Status |
-|------------|-------|--------|
-| Comprehensive README.md | CTO | In progress |
-| docs/ getting-started tutorial | CTO | In progress |
-| API docstrings across all packages | CTO | In progress |
-| CONTRIBUTING.md | CTO | Planned |
-| CHANGELOG.md | CTO | Planned |
+### Phase 20: Knowledge Base Expansion — COMPLETE
+- 15 articles across 6 categories: math, algorithms, hardware, QML, crypto, finance, simulation
+- Platform KB ingestion blocked on Neo4j dependency
 
-### Phase 20: Knowledge Base Expansion — IN PROGRESS (CEO)
-| Deliverable | Owner | Status |
-|------------|-------|--------|
-| QML applications article | CEO | Done |
-| Quantum optimization article | CEO | Done |
-| Quantum cryptography article | CEO | Done |
-| Quantum finance article | CEO | Done |
-| Quantum simulation article | CEO | Done |
-| Platform KB ingestion | CEO | Blocked (Neo4j) |
+### Phase 21: PyPI Publication Prep — COMPLETE
+- LICENSE (MIT), MANIFEST.in, finalized pyproject.toml
+- .github/workflows/publish.yml (build → test → TestPyPI → PyPI)
+- Package builds cleanly: wheel 183KB, sdist 238KB
+- **Blocked:** Awaiting PyPI trusted publisher secrets on GitHub
 
-## Upcoming Phases
+### Phase 22: Simon Fix + Jupyter Notebooks — COMPLETE
+- Fixed flaky Simon's algorithm test with classical verification
+- 3 notebooks: intro-to-quantum, quantum-algorithms, quantum-finance
 
-### Phase 21: PyPI Publication
-- Publish quantumium to PyPI for `pip install quantumium`
-- Versioning strategy (semver)
-- Release automation
+### Phase 23: Additional Examples — COMPLETE
+- 4 new examples: adiabatic, stabilizer, benchmarking, tomography
 
-### Phase 22: Real Hardware Validation
+### Phase 24: CI Hardening + Coverage — COMPLETE
+- ci.yml: lint, type-check, test matrix (3.10/3.11/3.12) with coverage
+- Fixed logfire import issue in publish workflow
+
+### Phase 25: Programming Knowledge Base — COMPLETE
+- Quantum programming patterns guide (10 patterns + anti-patterns)
+- Variational algorithms deep-dive (VQE, QAOA, ADAPT-VQE)
+
+---
+
+## v0.2.0 Roadmap
+
+### Phase 26: Advanced Error Correction
+- Surface code (rotated planar code)
+- Color codes (triangular)
+- Minimum-weight perfect matching (MWPM) decoder
+- Logical qubit operations and transversal gates
+- Threshold estimation
+
+### Phase 27: ZX-Calculus Optimization
+- ZX-diagram representation of quantum circuits
+- Graph-like ZX simplification rules
+- Circuit extraction from optimized ZX-diagrams
+- Integration with existing transpiler pipeline
+
+### Phase 28: Quantum Networking
+- Quantum repeater simulation (entanglement swapping)
+- Entanglement distribution protocols (BBPSSW purification)
+- Quantum teleportation over noisy channels
+- Simple quantum internet protocol stack
+
+### Phase 29: Real Hardware Validation
 - Integration tests against IBM Quantum free tier
-- Backend compatibility verification
-- Performance benchmarks (simulator vs hardware)
+- Backend compatibility verification across all 4 providers
+- Noise model calibration from hardware data
+- Performance benchmarks: simulator vs hardware
 
-### Phase 23: Advanced Error Correction
-- Surface codes
-- Topological codes (color codes)
-- Logical qubit operations
-- Decoder implementations
-
-### Phase 24: Quantum Networking
-- Quantum repeater simulation
-- Entanglement distribution protocols
-- Quantum internet protocol stack
-
-### Phase 25: Community & Ecosystem
-- Jupyter notebook tutorials
-- Documentation site (Sphinx/MkDocs)
-- Example gallery with visualizations
-- Benchmarking against Qiskit, Cirq, PennyLane
+### Phase 30: Documentation Site & Community
+- MkDocs documentation site with API reference
+- Interactive example gallery
+- Benchmarking suite vs Qiskit, Cirq, PennyLane
+- Contribution templates and issue labels
 
 ## Architecture Principles
 
@@ -152,9 +168,19 @@ Build the most comprehensive, multi-platform quantum computing SDK — enabling 
 
 ## Success Metrics
 
-- Algorithm count: 13+ implemented and tested (ACHIEVED)
-- Backend count: 4 hardware platforms connected (ACHIEVED)
-- Test coverage: ~850 tests (ACHIEVED)
-- Package count: 25 packages (ACHIEVED)
-- Documentation: API reference + tutorial for every algorithm (IN PROGRESS)
-- Community: PyPI publication (UPCOMING)
+### v0.1.0 (ACHIEVED)
+- Algorithm count: 13+ implemented and tested
+- Backend count: 4 hardware platforms connected
+- Test coverage: 877 tests passing
+- Package count: 25 packages
+- Documentation: API reference + tutorial for every algorithm
+- Examples: 28 runnable scripts + 3 Jupyter notebooks
+- Knowledge base: 15 articles across 6 categories
+- CI/CD: Lint, type-check, test matrix, PyPI publish pipeline
+
+### v0.2.0 (TARGET)
+- Error correction: surface codes with MWPM decoder
+- Optimization: ZX-calculus circuit simplification
+- Networking: entanglement distribution simulation
+- Hardware: validated on IBM Quantum free tier
+- Community: documentation site, benchmark suite
