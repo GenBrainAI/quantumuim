@@ -1,115 +1,82 @@
-"""Rotated planar surface code lattice construction.
-
-The rotated surface code arranges data qubits on a d×d grid with X-type and
-Z-type stabilizer plaquettes. For code distance d, there are d² data qubits,
-(d²-1)/2 X stabilizers, and (d²-1)/2 Z stabilizers.
-
-Boundary convention:
-    - Z stabilizers have rough boundaries on LEFT and RIGHT
-    - X stabilizers have rough boundaries on TOP and BOTTOM
-    - Logical X is a vertical chain (column 0)
-    - Logical Z is a horizontal chain (row 0)
-"""
+"""Rotated planar surface code lattice construction."""
 
 from __future__ import annotations
 
 import numpy as np
-from numpy.typing import NDArray
 
 
-class SurfaceCodeLattice:
-    """Rotated planar surface code lattice for a given code distance.
+class SurfaceCode:
+    """Rotated planar surface code for a given odd distance d >= 3.
 
-    Attributes:
-        d: Code distance (must be odd, >= 3).
-        num_data: Number of data qubits (d²).
-        data_qubits: List of (row, col) coordinates for data qubits.
-        x_stabilizers: List of X-type stabilizer plaquettes, each a list of
-            data qubit indices.
-        z_stabilizers: List of Z-type stabilizer plaquettes, each a list of
-            data qubit indices.
-        data_index: Mapping from (row, col) to qubit index.
+    Data qubits sit on a d x d grid. X stabilizers (plaquettes) detect
+    Z errors; Z stabilizers (vertices) detect X errors. Encodes 1 logical qubit.
     """
 
-    def __init__(self, d: int) -> None:
-        if d < 3 or d % 2 == 0:
-            raise ValueError(f"Code distance must be odd and >= 3, got {d}")
-        self.d = d
-        self.num_data = d * d
-
-        self.data_qubits: list[tuple[int, int]] = []
-        self.data_index: dict[tuple[int, int], int] = {}
-        idx = 0
-        for r in range(d):
-            for c in range(d):
-                self.data_qubits.append((r, c))
-                self.data_index[(r, c)] = idx
-                idx += 1
-
-        self.x_stabilizers: list[list[int]] = []
-        self.z_stabilizers: list[list[int]] = []
+    def __init__(self, distance: int) -> None:
+        if distance < 3 or distance % 2 == 0:
+            raise ValueError("Distance must be an odd integer >= 3")
+        self.distance = distance
+        self.n_data = distance * distance
         self._build_stabilizers()
+        self.error_x = np.zeros(self.n_data, dtype=int)
+        self.error_z = np.zeros(self.n_data, dtype=int)
 
     def _build_stabilizers(self) -> None:
-        d = self.d
+        d = self.distance
+        x_stabs: list[list[int]] = []
+        z_stabs: list[list[int]] = []
 
+        # Interior stabilizers from the (d-1) x (d-1) grid of cells.
+        # Cell (r,c) covers data qubits at grid positions
+        # (r,c), (r,c+1), (r+1,c), (r+1,c+1).
         for r in range(d - 1):
             for c in range(d - 1):
-                corners = [
-                    self.data_index[(r, c)],
-                    self.data_index[(r, c + 1)],
-                    self.data_index[(r + 1, c)],
-                    self.data_index[(r + 1, c + 1)],
-                ]
+                qubits = [r * d + c, r * d + c + 1,
+                          (r + 1) * d + c, (r + 1) * d + c + 1]
                 if (r + c) % 2 == 0:
-                    self.x_stabilizers.append(corners)
+                    x_stabs.append(qubits)
                 else:
-                    self.z_stabilizers.append(corners)
+                    z_stabs.append(qubits)
 
-        for r in range(0, d - 1, 2):
-            self.z_stabilizers.append([
-                self.data_index[(r, 0)],
-                self.data_index[(r + 1, 0)],
-            ])
-
-        for r in range(1, d - 1, 2):
-            self.z_stabilizers.append([
-                self.data_index[(r, d - 1)],
-                self.data_index[(r + 1, d - 1)],
-            ])
-
+        # Boundary stabilizers (weight 2).
+        # Top boundary: missing row above row 0.
         for c in range(1, d - 1, 2):
-            self.x_stabilizers.append([
-                self.data_index[(0, c)],
-                self.data_index[(0, c + 1)],
-            ])
+            x_stabs.append([c, c + 1])
 
+        # Bottom boundary: missing row below row d-1.
         for c in range(0, d - 1, 2):
-            self.x_stabilizers.append([
-                self.data_index[(d - 1, c)],
-                self.data_index[(d - 1, c + 1)],
-            ])
+            x_stabs.append([(d - 1) * d + c, (d - 1) * d + c + 1])
+
+        # Left boundary: missing column left of col 0.
+        for r in range(0, d - 1, 2):
+            z_stabs.append([r * d, (r + 1) * d])
+
+        # Right boundary: missing column right of col d-1.
+        for r in range(1, d - 1, 2):
+            z_stabs.append([r * d + d - 1, (r + 1) * d + d - 1])
+
+        self.x_stabilizers = x_stabs
+        self.z_stabilizers = z_stabs
+
+        self.h_x = np.zeros((len(x_stabs), self.n_data), dtype=int)
+        for i, stab in enumerate(x_stabs):
+            for q in stab:
+                self.h_x[i, q] = 1
+
+        self.h_z = np.zeros((len(z_stabs), self.n_data), dtype=int)
+        for i, stab in enumerate(z_stabs):
+            for q in stab:
+                self.h_z[i, q] = 1
+
+    def reset(self) -> None:
+        """Clear all errors."""
+        self.error_x = np.zeros(self.n_data, dtype=int)
+        self.error_z = np.zeros(self.n_data, dtype=int)
 
     @property
-    def num_x_stabilizers(self) -> int:
+    def n_x_stabilizers(self) -> int:
         return len(self.x_stabilizers)
 
     @property
-    def num_z_stabilizers(self) -> int:
+    def n_z_stabilizers(self) -> int:
         return len(self.z_stabilizers)
-
-    def stabilizer_matrix_x(self) -> NDArray[np.int8]:
-        """Return the X-stabilizer parity check matrix (num_x_stab x num_data)."""
-        H = np.zeros((self.num_x_stabilizers, self.num_data), dtype=np.int8)
-        for i, stab in enumerate(self.x_stabilizers):
-            for q in stab:
-                H[i, q] = 1
-        return H
-
-    def stabilizer_matrix_z(self) -> NDArray[np.int8]:
-        """Return the Z-stabilizer parity check matrix (num_z_stab x num_data)."""
-        H = np.zeros((self.num_z_stabilizers, self.num_data), dtype=np.int8)
-        for i, stab in enumerate(self.z_stabilizers):
-            for q in stab:
-                H[i, q] = 1
-        return H

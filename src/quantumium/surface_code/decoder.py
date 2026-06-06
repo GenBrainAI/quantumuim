@@ -1,262 +1,272 @@
-"""Minimum-weight perfect matching (MWPM) decoder for the surface code.
-
-Uses a self-contained greedy matching implementation — no external
-dependencies beyond numpy. For each syndrome, the decoder finds pairs
-of defects (syndrome bits = 1) with minimum total weight matching,
-where weight is the graph distance between defect positions on the
-stabilizer adjacency graph. Unpaired defects are matched to the nearest
-boundary.
-"""
+"""Minimum-weight perfect matching (MWPM) decoder for surface codes."""
 
 from __future__ import annotations
 
 from collections import deque
 
 import numpy as np
-from numpy.typing import NDArray
 
-from .lattice import SurfaceCodeLattice
+from quantumium.surface_code.lattice import SurfaceCode
 
 
-class MWPMDecoder:
-    """Minimum-weight perfect matching decoder for surface codes.
+def _build_adjacency(stabilizers: list[list[int]]) -> dict[int, list[int]]:
+    """Build stabilizer adjacency graph: two stabilizers are adjacent if they share a data qubit."""
+    qubit_to_stabs: dict[int, list[int]] = {}
+    for idx, stab in enumerate(stabilizers):
+        for q in stab:
+            qubit_to_stabs.setdefault(q, []).append(idx)
+    adj: dict[int, list[int]] = {i: [] for i in range(len(stabilizers))}
+    for stab_list in qubit_to_stabs.values():
+        for i in range(len(stab_list)):
+            for j in range(i + 1, len(stab_list)):
+                a, b = stab_list[i], stab_list[j]
+                if b not in adj[a]:
+                    adj[a].append(b)
+                    adj[b].append(a)
+    return adj
 
-    Decodes X-error syndromes (detected by Z stabilizers) and Z-error
-    syndromes (detected by X stabilizers) independently.
+
+def _find_boundary_stabs(
+    stabilizers: list[list[int]], d: int, use_columns: bool,
+) -> set[int]:
+    """Find stabilizers adjacent to the rough boundary.
+
+    For X stabilizers: rough boundaries are left/right (columns 0, d-1).
+    For Z stabilizers: rough boundaries are top/bottom (rows 0, d-1).
     """
-
-    def __init__(self, lattice: SurfaceCodeLattice) -> None:
-        self.lattice = lattice
-        self._z_adj, self._z_shared = self._build_adjacency(lattice.z_stabilizers)
-        self._x_adj, self._x_shared = self._build_adjacency(lattice.x_stabilizers)
-        self._z_exclusive = self._find_exclusive_qubits(lattice.z_stabilizers)
-        self._x_exclusive = self._find_exclusive_qubits(lattice.x_stabilizers)
-        self._z_boundary_dists = self._bfs_boundary_distances(
-            self._z_adj, self._z_exclusive
-        )
-        self._x_boundary_dists = self._bfs_boundary_distances(
-            self._x_adj, self._x_exclusive
-        )
-
-    @staticmethod
-    def _build_adjacency(
-        stabilizers: list[list[int]],
-    ) -> tuple[list[list[int]], dict[tuple[int, int], int]]:
-        n = len(stabilizers)
-        adj: list[list[int]] = [[] for _ in range(n)]
-        shared: dict[tuple[int, int], int] = {}
-        for i in range(n):
-            si = set(stabilizers[i])
-            for j in range(i + 1, n):
-                common = si & set(stabilizers[j])
-                if common:
-                    adj[i].append(j)
-                    adj[j].append(i)
-                    q = min(common)
-                    shared[(i, j)] = q
-                    shared[(j, i)] = q
-        return adj, shared
-
-    @staticmethod
-    def _find_exclusive_qubits(
-        stabilizers: list[list[int]],
-    ) -> list[int | None]:
-        qubit_count: dict[int, int] = {}
-        for stab in stabilizers:
-            for q in stab:
-                qubit_count[q] = qubit_count.get(q, 0) + 1
-        result: list[int | None] = []
-        for stab in stabilizers:
-            excl = None
-            for q in stab:
-                if qubit_count[q] == 1:
-                    excl = q
+    boundary_stabs = set()
+    for idx, stab in enumerate(stabilizers):
+        for q in stab:
+            if use_columns:
+                col = q % d
+                if col == 0 or col == d - 1:
+                    boundary_stabs.add(idx)
                     break
-            result.append(excl)
-        return result
-
-    @staticmethod
-    def _bfs_boundary_distances(
-        adj: list[list[int]], exclusive: list[int | None]
-    ) -> list[float]:
-        n = len(adj)
-        dist = [float("inf")] * n
-        queue: deque[int] = deque()
-        for i in range(n):
-            if exclusive[i] is not None:
-                dist[i] = 1.0
-                queue.append(i)
-        while queue:
-            u = queue.popleft()
-            for v in adj[u]:
-                if dist[v] > dist[u] + 1:
-                    dist[v] = dist[u] + 1
-                    queue.append(v)
-        return dist
-
-    def _greedy_match(
-        self,
-        defect_indices: list[int],
-        adj: list[list[int]],
-        boundary_dists: list[float],
-    ) -> list[tuple[int, int | None]]:
-        if not defect_indices:
-            return []
-
-        n = len(defect_indices)
-        matched = [False] * n
-        pairs: list[tuple[int, int | None]] = []
-
-        edges: list[tuple[float, int, int | None]] = []
-        for i in range(n):
-            di = defect_indices[i]
-            edges.append((boundary_dists[di], i, None))
-            for j in range(i + 1, n):
-                dj = defect_indices[j]
-                dist = self._graph_distance(di, dj, adj)
-                edges.append((dist, i, j))
-
-        edges.sort(key=lambda e: (e[0], e[2] is None))
-
-        for dist, i, j in edges:
-            if matched[i]:
-                continue
-            if j is None:
-                matched[i] = True
-                pairs.append((defect_indices[i], None))
-            elif not matched[j]:
-                matched[i] = True
-                matched[j] = True
-                pairs.append((defect_indices[i], defect_indices[j]))
-
-        return pairs
-
-    @staticmethod
-    def _graph_distance(s1: int, s2: int, adj: list[list[int]]) -> float:
-        if s1 == s2:
-            return 0
-        visited = {s1}
-        queue: deque[tuple[int, int]] = deque([(s1, 0)])
-        while queue:
-            u, d = queue.popleft()
-            for v in adj[u]:
-                if v == s2:
-                    return d + 1
-                if v not in visited:
-                    visited.add(v)
-                    queue.append((v, d + 1))
-        return float("inf")
-
-    def decode_x_errors(self, syndrome: NDArray[np.int8]) -> NDArray[np.int8]:
-        return self._decode(
-            syndrome,
-            self.lattice.z_stabilizers,
-            self._z_adj,
-            self._z_shared,
-            self._z_exclusive,
-            self._z_boundary_dists,
-        )
-
-    def decode_z_errors(self, syndrome: NDArray[np.int8]) -> NDArray[np.int8]:
-        return self._decode(
-            syndrome,
-            self.lattice.x_stabilizers,
-            self._x_adj,
-            self._x_shared,
-            self._x_exclusive,
-            self._x_boundary_dists,
-        )
-
-    def _decode(
-        self,
-        syndrome: NDArray[np.int8],
-        stabilizers: list[list[int]],
-        adj: list[list[int]],
-        shared: dict[tuple[int, int], int],
-        exclusive: list[int | None],
-        boundary_dists: list[float],
-    ) -> NDArray[np.int8]:
-        defect_indices = [i for i, s in enumerate(syndrome) if s == 1]
-        correction = np.zeros(self.lattice.num_data, dtype=np.int8)
-        if not defect_indices:
-            return correction
-
-        pairs = self._greedy_match(defect_indices, adj, boundary_dists)
-
-        for d1, d2 in pairs:
-            if d2 is None:
-                path = self._path_to_boundary(d1, adj, shared, exclusive)
             else:
-                path = self._path_between(d1, d2, adj, shared)
-            for q in path:
-                correction[q] ^= 1
+                row = q // d
+                if row == 0 or row == d - 1:
+                    boundary_stabs.add(idx)
+                    break
+    return boundary_stabs
 
+
+def _bfs_distances(
+    adj: dict[int, list[int]],
+    sources: list[int],
+    n_nodes: int,
+) -> dict[int, int]:
+    """BFS from multiple sources, return distance to each reachable node."""
+    dist: dict[int, int] = {}
+    queue = deque()
+    for s in sources:
+        dist[s] = 0
+        queue.append(s)
+    while queue:
+        u = queue.popleft()
+        for v in adj.get(u, []):
+            if v not in dist:
+                dist[v] = dist[u] + 1
+                queue.append(v)
+    return dist
+
+
+def _shared_qubit(stab_a: list[int], stab_b: list[int]) -> int | None:
+    """Return a qubit shared by both stabilizers, or None."""
+    for q in stab_a:
+        if q in stab_b:
+            return q
+    return None
+
+
+def _correction_path(
+    stab_a_idx: int,
+    stab_b_idx: int | None,
+    stabilizers: list[list[int]],
+    adj: dict[int, list[int]],
+    boundary_stabs: set[int],
+    d: int,
+    use_columns: bool,
+) -> list[int]:
+    """Find the correction qubits for a matched pair.
+
+    If stab_b_idx is None, match stab_a to the boundary.
+    """
+    if stab_b_idx is not None:
+        # Match two defects: find shortest path and pick one shared qubit per step.
+        path = _bfs_path(adj, stab_a_idx, stab_b_idx)
+        if path is None:
+            return []
+        correction = []
+        for i in range(len(path) - 1):
+            sq = _shared_qubit(stabilizers[path[i]], stabilizers[path[i + 1]])
+            if sq is not None:
+                correction.append(sq)
         return correction
 
-    def _path_between(
-        self,
-        s1: int,
-        s2: int,
-        adj: list[list[int]],
-        shared: dict[tuple[int, int], int],
-    ) -> list[int]:
-        if s1 == s2:
-            return []
-        if (s1, s2) in shared:
-            return [shared[(s1, s2)]]
+    # Match to boundary: find path to nearest boundary-adjacent stabilizer.
+    stab_a = stabilizers[stab_a_idx]
+    if stab_a_idx in boundary_stabs:
+        # Already at boundary — pick the qubit on the boundary edge.
+        if use_columns:
+            boundary_qs = [q for q in stab_a if q % d == 0 or q % d == d - 1]
+        else:
+            boundary_qs = [q for q in stab_a if q // d == 0 or q // d == d - 1]
+        return [boundary_qs[0]] if boundary_qs else [stab_a[0]]
 
-        prev: dict[int, int] = {s1: -1}
-        queue: deque[int] = deque([s1])
-        while queue:
-            u = queue.popleft()
-            if u == s2:
-                break
-            for v in adj[u]:
-                if v not in prev:
-                    prev[v] = u
-                    queue.append(v)
+    # BFS to a boundary stabilizer.
+    path = _bfs_path_to_set(adj, stab_a_idx, boundary_stabs)
+    if path is None:
+        return []
+    correction = []
+    for i in range(len(path) - 1):
+        sq = _shared_qubit(stabilizers[path[i]], stabilizers[path[i + 1]])
+        if sq is not None:
+            correction.append(sq)
+    # Also add the boundary exit qubit from the last stabilizer.
+    last_stab = stabilizers[path[-1]]
+    if use_columns:
+        boundary_qs = [q for q in last_stab if q % d == 0 or q % d == d - 1]
+    else:
+        boundary_qs = [q for q in last_stab if q // d == 0 or q // d == d - 1]
+    if boundary_qs:
+        correction.append(boundary_qs[0])
+    return correction
 
-        path_qubits: list[int] = []
-        cur = s2
-        while prev.get(cur, -1) != -1:
-            p = prev[cur]
-            path_qubits.append(shared[(p, cur)])
-            cur = p
-        path_qubits.reverse()
-        return path_qubits
 
-    def _path_to_boundary(
-        self,
-        s: int,
-        adj: list[list[int]],
-        shared: dict[tuple[int, int], int],
-        exclusive: list[int | None],
-    ) -> list[int]:
-        if exclusive[s] is not None:
-            return [exclusive[s]]
+def _bfs_path(adj: dict[int, list[int]], start: int, end: int) -> list[int] | None:
+    """BFS shortest path from start to end."""
+    if start == end:
+        return [start]
+    visited = {start}
+    parent: dict[int, int] = {}
+    queue = deque([start])
+    while queue:
+        u = queue.popleft()
+        for v in adj.get(u, []):
+            if v not in visited:
+                visited.add(v)
+                parent[v] = u
+                if v == end:
+                    path = [v]
+                    while path[-1] != start:
+                        path.append(parent[path[-1]])
+                    return list(reversed(path))
+                queue.append(v)
+    return None
 
-        prev: dict[int, int] = {s: -1}
-        queue: deque[int] = deque([s])
-        target = -1
-        while queue:
-            u = queue.popleft()
-            if u != s and exclusive[u] is not None:
-                target = u
-                break
-            for v in adj[u]:
-                if v not in prev:
-                    prev[v] = u
-                    queue.append(v)
 
-        if target == -1:
-            return []
+def _bfs_path_to_set(
+    adj: dict[int, list[int]], start: int, targets: set[int],
+) -> list[int] | None:
+    """BFS shortest path from start to any node in targets."""
+    if start in targets:
+        return [start]
+    visited = {start}
+    parent: dict[int, int] = {}
+    queue = deque([start])
+    while queue:
+        u = queue.popleft()
+        for v in adj.get(u, []):
+            if v not in visited:
+                visited.add(v)
+                parent[v] = u
+                if v in targets:
+                    path = [v]
+                    while path[-1] != start:
+                        path.append(parent[path[-1]])
+                    return list(reversed(path))
+                queue.append(v)
+    return None
 
-        chain: list[int] = []
-        cur = target
-        while prev.get(cur, -1) != -1:
-            p = prev[cur]
-            chain.append(shared[(p, cur)])
-            cur = p
-        chain.reverse()
-        chain.append(exclusive[target])
-        return chain
+
+def _greedy_matching(
+    defects: list[int],
+    adj: dict[int, list[int]],
+    boundary_stabs: set[int],
+) -> list[tuple[int, int | None]]:
+    """Greedy minimum-weight matching of defects."""
+    if not defects:
+        return []
+
+    n = len(defects)
+
+    # Compute pairwise distances via BFS.
+    pair_dist: dict[tuple[int, int], int] = {}
+    bndry_dist: dict[int, int] = {}
+
+    for i, d_i in enumerate(defects):
+        dists = _bfs_distances(adj, [d_i], len(adj))
+        for j in range(i + 1, n):
+            d_j = defects[j]
+            if d_j in dists:
+                pair_dist[(i, j)] = dists[d_j]
+
+        # Boundary distance.
+        min_bd = float("inf")
+        for bs in boundary_stabs:
+            if bs in dists:
+                bd = dists[bs] + 1  # +1 for the boundary exit qubit
+                if bd < min_bd:
+                    min_bd = bd
+        if d_i in boundary_stabs:
+            min_bd = 1  # already at boundary, just 1 exit qubit
+        bndry_dist[i] = int(min_bd) if min_bd < float("inf") else 999
+
+    # Build edge list.
+    edges: list[tuple[int, int, int | None]] = []
+    for i in range(n):
+        edges.append((bndry_dist[i], i, None))
+        for j in range(i + 1, n):
+            if (i, j) in pair_dist:
+                edges.append((pair_dist[(i, j)], i, j))
+    edges.sort(key=lambda e: (e[0], e[2] is None, e[2] if e[2] is not None else 0))
+
+    matched = [False] * n
+    pairs: list[tuple[int, int | None]] = []
+    for dist, i, j in edges:
+        if matched[i]:
+            continue
+        if j is None:
+            matched[i] = True
+            pairs.append((defects[i], None))
+        elif not matched[j]:
+            matched[i] = True
+            matched[j] = True
+            pairs.append((defects[i], defects[j]))
+
+    return pairs
+
+
+def mwpm_decode(
+    code: SurfaceCode,
+    x_syndrome: np.ndarray,
+    z_syndrome: np.ndarray,
+) -> tuple[np.ndarray, np.ndarray]:
+    """Decode syndromes and return (x_correction, z_correction) vectors."""
+    d = code.distance
+
+    # --- Z errors → X syndrome → correct with Z ---
+    x_adj = _build_adjacency(code.x_stabilizers)
+    x_boundary = _find_boundary_stabs(code.x_stabilizers, d, use_columns=True)
+    x_defects = list(np.where(x_syndrome)[0])
+
+    z_correction = np.zeros(code.n_data, dtype=int)
+    pairs = _greedy_matching(x_defects, x_adj, x_boundary)
+    for idx_a, idx_b in pairs:
+        for q in _correction_path(idx_a, idx_b, code.x_stabilizers, x_adj,
+                                  x_boundary, d, use_columns=True):
+            z_correction[q] ^= 1
+
+    # --- X errors → Z syndrome → correct with X ---
+    z_adj = _build_adjacency(code.z_stabilizers)
+    z_boundary = _find_boundary_stabs(code.z_stabilizers, d, use_columns=False)
+    z_defects = list(np.where(z_syndrome)[0])
+
+    x_correction = np.zeros(code.n_data, dtype=int)
+    pairs = _greedy_matching(z_defects, z_adj, z_boundary)
+    for idx_a, idx_b in pairs:
+        for q in _correction_path(idx_a, idx_b, code.z_stabilizers, z_adj,
+                                  z_boundary, d, use_columns=False):
+            x_correction[q] ^= 1
+
+    return x_correction, z_correction

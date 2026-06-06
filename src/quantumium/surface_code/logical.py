@@ -1,104 +1,51 @@
-"""Logical operators for the surface code.
-
-For the rotated planar surface code of distance d:
-- Logical X (X_L): a chain of X operators along a row (top-to-bottom path).
-- Logical Z (Z_L): a chain of Z operators along a column (left-to-right path).
-
-These operators commute with all stabilizers but anticommute with each other.
-"""
+"""Logical operators for the surface code."""
 
 from __future__ import annotations
 
 import numpy as np
-from numpy.typing import NDArray
 
-from .lattice import SurfaceCodeLattice
+from quantumium.surface_code.lattice import SurfaceCode
 
 
-def logical_x(lattice: SurfaceCodeLattice) -> NDArray[np.int8]:
-    """Return the logical X operator as a binary vector.
+def logical_x(code: SurfaceCode) -> np.ndarray:
+    """Return the logical X operator as a binary vector over data qubits.
 
-    The logical X operator is a vertical chain of X operators along column 0.
-
-    Returns:
-        Binary vector of length num_data with 1s on the logical X support.
+    Logical X is a chain of X operators along column 0 (left-to-right rough boundary).
     """
-    op = np.zeros(lattice.num_data, dtype=np.int8)
-    for r in range(lattice.d):
-        op[lattice.data_index[(r, 0)]] = 1
+    op = np.zeros(code.n_data, dtype=int)
+    d = code.distance
+    for r in range(d):
+        op[r * d] = 1
     return op
 
 
-def logical_z(lattice: SurfaceCodeLattice) -> NDArray[np.int8]:
-    """Return the logical Z operator as a binary vector.
+def logical_z(code: SurfaceCode) -> np.ndarray:
+    """Return the logical Z operator as a binary vector over data qubits.
 
-    The logical Z operator is a horizontal chain of Z operators along row 0.
-
-    Returns:
-        Binary vector of length num_data with 1s on the logical Z support.
+    Logical Z is a chain of Z operators along row 0 (top-to-bottom smooth boundary).
     """
-    op = np.zeros(lattice.num_data, dtype=np.int8)
-    for c in range(lattice.d):
-        op[lattice.data_index[(0, c)]] = 1
+    op = np.zeros(code.n_data, dtype=int)
+    d = code.distance
+    for c in range(d):
+        op[c] = 1
     return op
 
 
-def apply_logical_x(
-    error: NDArray[np.int8], lattice: SurfaceCodeLattice
-) -> NDArray[np.int8]:
-    """Apply a logical X to an existing X-error vector.
+def has_logical_error(code: SurfaceCode, x_correction: np.ndarray,
+                      z_correction: np.ndarray) -> bool:
+    """Check if the net effect of errors + correction is a non-trivial logical operator."""
+    lx = logical_x(code)
+    lz = logical_z(code)
 
-    Returns a new error vector with the logical X toggled.
-    """
-    lx = logical_x(lattice)
-    return ((error + lx) % 2).astype(np.int8)
+    # Total X operator = original X errors XOR X correction.
+    total_x = (code.error_x + x_correction) % 2
+    # Total Z operator = original Z errors XOR Z correction.
+    total_z = (code.error_z + z_correction) % 2
 
+    # A logical X error: total_x anticommutes with logical Z.
+    # Anticommutation check: dot product of total_x with logical_z support (mod 2).
+    logical_x_error = (np.dot(total_x, lz) % 2) == 1
+    # A logical Z error: total_z anticommutes with logical X.
+    logical_z_error = (np.dot(total_z, lx) % 2) == 1
 
-def apply_logical_z(
-    error: NDArray[np.int8], lattice: SurfaceCodeLattice
-) -> NDArray[np.int8]:
-    """Apply a logical Z to an existing Z-error vector.
-
-    Returns a new error vector with the logical Z toggled.
-    """
-    lz = logical_z(lattice)
-    return ((error + lz) % 2).astype(np.int8)
-
-
-def has_logical_error(
-    error: NDArray[np.int8],
-    correction: NDArray[np.int8],
-    lattice: SurfaceCodeLattice,
-    error_type: str,
-) -> bool:
-    """Check whether the residual error (error + correction) is a logical error.
-
-    A logical error occurs when the residual is a nontrivial logical operator,
-    i.e., it commutes with all stabilizers but is not itself a stabilizer.
-    We check this by computing the overlap with the conjugate logical operator.
-
-    For X errors: residual is a logical X error if it has odd overlap with
-    the logical Z chain (anticommutation check).
-    For Z errors: residual is a logical Z error if it has odd overlap with
-    the logical X chain.
-
-    Args:
-        error: Original error vector.
-        correction: Decoder-proposed correction vector.
-        lattice: Surface code lattice.
-        error_type: "X" or "Z".
-
-    Returns:
-        True if a logical error occurred.
-    """
-    residual = (error + correction) % 2
-
-    if error_type == "X":
-        check = logical_z(lattice)
-    elif error_type == "Z":
-        check = logical_x(lattice)
-    else:
-        raise ValueError(f"error_type must be 'X' or 'Z', got '{error_type}'")
-
-    overlap = int(np.sum(residual * check)) % 2
-    return overlap == 1
+    return logical_x_error or logical_z_error

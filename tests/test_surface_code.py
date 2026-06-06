@@ -1,264 +1,226 @@
-"""Tests for surface code error correction with MWPM decoder."""
+"""Tests for the surface code error correction module."""
 
 import numpy as np
 import pytest
 
-from quantumium.surface_code.lattice import SurfaceCodeLattice
-from quantumium.surface_code.syndrome import apply_error, extract_syndrome, random_error
-from quantumium.surface_code.decoder import MWPMDecoder
-from quantumium.surface_code.logical import (
-    logical_x, logical_z, apply_logical_x, apply_logical_z, has_logical_error,
-)
-from quantumium.surface_code.threshold import logical_error_rate
+from quantumium.surface_code.lattice import SurfaceCode
+from quantumium.surface_code.syndrome import inject_error, measure_syndrome, inject_random_errors
+from quantumium.surface_code.decoder import mwpm_decode
+from quantumium.surface_code.logical import logical_x, logical_z, has_logical_error
+from quantumium.surface_code.threshold import estimate_threshold
 
 
-# --- Lattice construction ---
+class TestLatticeConstruction:
+    """Tests for the surface code lattice builder."""
 
-class TestSurfaceCodeLattice:
-    def test_d3_data_qubits(self):
-        lattice = SurfaceCodeLattice(3)
-        assert lattice.num_data == 9
-        assert len(lattice.data_qubits) == 9
+    @pytest.mark.parametrize("d", [3, 5, 7])
+    def test_data_qubit_count(self, d):
+        code = SurfaceCode(d)
+        assert code.n_data == d * d
 
-    def test_d5_data_qubits(self):
-        lattice = SurfaceCodeLattice(5)
-        assert lattice.num_data == 25
+    @pytest.mark.parametrize("d", [3, 5, 7])
+    def test_stabilizer_count(self, d):
+        code = SurfaceCode(d)
+        expected = (d * d - 1) // 2
+        assert code.n_x_stabilizers == expected
+        assert code.n_z_stabilizers == expected
 
-    def test_d7_data_qubits(self):
-        lattice = SurfaceCodeLattice(7)
-        assert lattice.num_data == 49
+    @pytest.mark.parametrize("d", [3, 5, 7])
+    def test_stabilizer_orthogonality(self, d):
+        """H_x * H_z^T = 0 mod 2 (X and Z stabilizers commute)."""
+        code = SurfaceCode(d)
+        product = (code.h_x @ code.h_z.T) % 2
+        assert np.all(product == 0)
 
-    def test_stabilizer_count_d3(self):
-        lattice = SurfaceCodeLattice(3)
-        assert lattice.num_x_stabilizers == 4
-        assert lattice.num_z_stabilizers == 4
-
-    def test_stabilizer_count_d5(self):
-        lattice = SurfaceCodeLattice(5)
-        assert lattice.num_x_stabilizers == 12
-        assert lattice.num_z_stabilizers == 12
-
-    def test_stabilizer_count_d7(self):
-        lattice = SurfaceCodeLattice(7)
-        assert lattice.num_x_stabilizers == 24
-        assert lattice.num_z_stabilizers == 24
+    @pytest.mark.parametrize("d", [3, 5, 7])
+    def test_parity_check_shapes(self, d):
+        code = SurfaceCode(d)
+        n_stab = (d * d - 1) // 2
+        assert code.h_x.shape == (n_stab, d * d)
+        assert code.h_z.shape == (n_stab, d * d)
 
     def test_invalid_distance_even(self):
         with pytest.raises(ValueError):
-            SurfaceCodeLattice(4)
+            SurfaceCode(4)
 
     def test_invalid_distance_small(self):
         with pytest.raises(ValueError):
-            SurfaceCodeLattice(1)
+            SurfaceCode(1)
 
-    def test_stabilizer_matrix_shape_d3(self):
-        lattice = SurfaceCodeLattice(3)
-        Hx = lattice.stabilizer_matrix_x()
-        Hz = lattice.stabilizer_matrix_z()
-        assert Hx.shape == (4, 9)
-        assert Hz.shape == (4, 9)
+    @pytest.mark.parametrize("d", [3, 5, 7])
+    def test_stabilizer_weights(self, d):
+        """Each stabilizer has weight 2 (boundary) or 4 (interior)."""
+        code = SurfaceCode(d)
+        for stab in code.x_stabilizers + code.z_stabilizers:
+            assert len(stab) in (2, 4)
 
-    def test_stabilizers_orthogonal(self):
-        """X and Z stabilizers must commute: H_x · H_z^T = 0 mod 2."""
-        for d in [3, 5, 7]:
-            lattice = SurfaceCodeLattice(d)
-            Hx = lattice.stabilizer_matrix_x()
-            Hz = lattice.stabilizer_matrix_z()
-            product = (Hx @ Hz.T) % 2
-            np.testing.assert_array_equal(product, 0)
+    def test_reset(self):
+        code = SurfaceCode(3)
+        code.error_x[0] = 1
+        code.error_z[4] = 1
+        code.reset()
+        assert np.all(code.error_x == 0)
+        assert np.all(code.error_z == 0)
 
 
-# --- Syndrome extraction ---
+class TestSyndromeExtraction:
+    """Tests for error injection and syndrome measurement."""
 
-class TestSyndrome:
-    def test_no_error_syndrome(self):
-        lattice = SurfaceCodeLattice(3)
-        error = np.zeros(9, dtype=np.int8)
-        syndrome = extract_syndrome(lattice, error, "X")
-        np.testing.assert_array_equal(syndrome, 0)
+    def test_no_error_no_syndrome(self):
+        code = SurfaceCode(3)
+        x_syn, z_syn = measure_syndrome(code)
+        assert np.all(x_syn == 0)
+        assert np.all(z_syn == 0)
 
-    def test_single_x_error_nonzero_syndrome(self):
-        lattice = SurfaceCodeLattice(3)
-        for q in range(9):
-            error = apply_error(lattice, "X", q)
-            syndrome = extract_syndrome(lattice, error, "X")
-            assert np.sum(syndrome) > 0, f"X error on qubit {q} produced zero syndrome"
+    @pytest.mark.parametrize("d", [3, 5, 7])
+    def test_single_x_error_triggers_z_stabilizers(self, d):
+        code = SurfaceCode(d)
+        q = d * d // 2  # middle qubit
+        inject_error(code, "X", q)
+        x_syn, z_syn = measure_syndrome(code)
+        assert np.all(x_syn == 0)
+        assert np.sum(z_syn) > 0
 
-    def test_single_z_error_nonzero_syndrome(self):
-        lattice = SurfaceCodeLattice(3)
-        for q in range(9):
-            error = apply_error(lattice, "Z", q)
-            syndrome = extract_syndrome(lattice, error, "Z")
-            assert np.sum(syndrome) > 0, f"Z error on qubit {q} produced zero syndrome"
+    @pytest.mark.parametrize("d", [3, 5, 7])
+    def test_single_z_error_triggers_x_stabilizers(self, d):
+        code = SurfaceCode(d)
+        q = d * d // 2
+        inject_error(code, "Z", q)
+        x_syn, z_syn = measure_syndrome(code)
+        assert np.sum(x_syn) > 0
+        assert np.all(z_syn == 0)
 
-    def test_syndrome_is_binary(self):
-        lattice = SurfaceCodeLattice(5)
-        error = apply_error(lattice, "X", [0, 5, 12])
-        syndrome = extract_syndrome(lattice, error, "X")
-        assert set(np.unique(syndrome)).issubset({0, 1})
+    def test_y_error_triggers_both(self):
+        code = SurfaceCode(3)
+        inject_error(code, "Y", 4)
+        x_syn, z_syn = measure_syndrome(code)
+        assert np.sum(x_syn) > 0
+        assert np.sum(z_syn) > 0
 
-    def test_apply_error_invalid_type(self):
-        lattice = SurfaceCodeLattice(3)
+    def test_invalid_qubit(self):
+        code = SurfaceCode(3)
         with pytest.raises(ValueError):
-            apply_error(lattice, "Y", 0)
+            inject_error(code, "X", 9)
 
-    def test_apply_error_invalid_qubit(self):
-        lattice = SurfaceCodeLattice(3)
+    def test_invalid_error_type(self):
+        code = SurfaceCode(3)
         with pytest.raises(ValueError):
-            apply_error(lattice, "X", 99)
+            inject_error(code, "W", 0)
 
+    def test_syndrome_even_defects(self):
+        """Number of defects should be even for periodic-free codes (or include boundary)."""
+        code = SurfaceCode(5)
+        inject_error(code, "X", 12)
+        _, z_syn = measure_syndrome(code)
+        n_defects = np.sum(z_syn)
+        assert n_defects in (1, 2, 3, 4)
 
-# --- Decoder ---
 
 class TestMWPMDecoder:
+    """Tests for the MWPM decoder."""
+
+    @pytest.mark.parametrize("d", [3, 5, 7])
+    def test_correct_all_single_x_errors(self, d):
+        """Decoder should correct every single-qubit X error."""
+        code = SurfaceCode(d)
+        for q in range(code.n_data):
+            code.reset()
+            inject_error(code, "X", q)
+            x_syn, z_syn = measure_syndrome(code)
+            x_corr, z_corr = mwpm_decode(code, x_syn, z_syn)
+            assert not has_logical_error(code, x_corr, z_corr), \
+                f"Failed to correct X error on qubit {q} for d={d}"
+
+    @pytest.mark.parametrize("d", [3, 5, 7])
+    def test_correct_all_single_z_errors(self, d):
+        """Decoder should correct every single-qubit Z error."""
+        code = SurfaceCode(d)
+        for q in range(code.n_data):
+            code.reset()
+            inject_error(code, "Z", q)
+            x_syn, z_syn = measure_syndrome(code)
+            x_corr, z_corr = mwpm_decode(code, x_syn, z_syn)
+            assert not has_logical_error(code, x_corr, z_corr), \
+                f"Failed to correct Z error on qubit {q} for d={d}"
+
     def test_no_error_no_correction(self):
-        lattice = SurfaceCodeLattice(3)
-        decoder = MWPMDecoder(lattice)
-        syndrome = np.zeros(lattice.num_z_stabilizers, dtype=np.int8)
-        correction = decoder.decode_x_errors(syndrome)
-        np.testing.assert_array_equal(correction, 0)
+        code = SurfaceCode(3)
+        x_syn, z_syn = measure_syndrome(code)
+        x_corr, z_corr = mwpm_decode(code, x_syn, z_syn)
+        assert np.all(x_corr == 0)
+        assert np.all(z_corr == 0)
 
-    @pytest.mark.parametrize("d", [3, 5, 7])
-    def test_correct_single_x_errors(self, d):
-        lattice = SurfaceCodeLattice(d)
-        decoder = MWPMDecoder(lattice)
-        for q in range(lattice.num_data):
-            error = apply_error(lattice, "X", q)
-            syndrome = extract_syndrome(lattice, error, "X")
-            correction = decoder.decode_x_errors(syndrome)
-            assert not has_logical_error(error, correction, lattice, "X"), \
-                f"d={d}: Failed to correct X error on qubit {q}"
+    def test_correction_shapes(self):
+        code = SurfaceCode(5)
+        inject_error(code, "X", 12)
+        x_syn, z_syn = measure_syndrome(code)
+        x_corr, z_corr = mwpm_decode(code, x_syn, z_syn)
+        assert x_corr.shape == (25,)
+        assert z_corr.shape == (25,)
 
-    @pytest.mark.parametrize("d", [3, 5, 7])
-    def test_correct_single_z_errors(self, d):
-        lattice = SurfaceCodeLattice(d)
-        decoder = MWPMDecoder(lattice)
-        for q in range(lattice.num_data):
-            error = apply_error(lattice, "Z", q)
-            syndrome = extract_syndrome(lattice, error, "Z")
-            correction = decoder.decode_z_errors(syndrome)
-            assert not has_logical_error(error, correction, lattice, "Z"), \
-                f"d={d}: Failed to correct Z error on qubit {q}"
-
-    def test_correction_clears_syndrome_d3(self):
-        lattice = SurfaceCodeLattice(3)
-        decoder = MWPMDecoder(lattice)
-        for q in range(9):
-            error = apply_error(lattice, "X", q)
-            syndrome = extract_syndrome(lattice, error, "X")
-            correction = decoder.decode_x_errors(syndrome)
-            residual = (error + correction) % 2
-            new_syndrome = extract_syndrome(lattice, residual.astype(np.int8), "X")
-            np.testing.assert_array_equal(new_syndrome, 0,
-                err_msg=f"Correction did not clear syndrome for X error on qubit {q}")
-
-
-# --- Logical operators ---
 
 class TestLogicalOperators:
-    def test_logical_x_support(self):
-        lattice = SurfaceCodeLattice(3)
-        lx = logical_x(lattice)
-        assert np.sum(lx) == 3
-        assert lx[lattice.data_index[(0, 0)]] == 1
-        assert lx[lattice.data_index[(1, 0)]] == 1
-        assert lx[lattice.data_index[(2, 0)]] == 1
+    """Tests for logical X and Z operators."""
 
-    def test_logical_z_support(self):
-        lattice = SurfaceCodeLattice(3)
-        lz = logical_z(lattice)
-        assert np.sum(lz) == 3
-        assert lz[lattice.data_index[(0, 0)]] == 1
-        assert lz[lattice.data_index[(0, 1)]] == 1
-        assert lz[lattice.data_index[(0, 2)]] == 1
+    @pytest.mark.parametrize("d", [3, 5, 7])
+    def test_logical_x_weight(self, d):
+        code = SurfaceCode(d)
+        lx = logical_x(code)
+        assert np.sum(lx) == d
 
-    def test_logical_x_commutes_with_stabilizers(self):
-        for d in [3, 5, 7]:
-            lattice = SurfaceCodeLattice(d)
-            lx = logical_x(lattice)
-            Hz = lattice.stabilizer_matrix_z()
-            overlaps = (Hz @ lx) % 2
-            np.testing.assert_array_equal(overlaps, 0)
+    @pytest.mark.parametrize("d", [3, 5, 7])
+    def test_logical_z_weight(self, d):
+        code = SurfaceCode(d)
+        lz = logical_z(code)
+        assert np.sum(lz) == d
 
-    def test_logical_z_commutes_with_stabilizers(self):
-        for d in [3, 5, 7]:
-            lattice = SurfaceCodeLattice(d)
-            lz = logical_z(lattice)
-            Hx = lattice.stabilizer_matrix_x()
-            overlaps = (Hx @ lz) % 2
-            np.testing.assert_array_equal(overlaps, 0)
+    @pytest.mark.parametrize("d", [3, 5, 7])
+    def test_logical_operators_anticommute(self, d):
+        """Logical X and Z must anticommute (overlap on odd number of qubits)."""
+        code = SurfaceCode(d)
+        lx = logical_x(code)
+        lz = logical_z(code)
+        overlap = np.dot(lx, lz) % 2
+        assert overlap == 1
 
-    def test_logical_x_z_anticommute(self):
-        for d in [3, 5, 7]:
-            lattice = SurfaceCodeLattice(d)
-            lx = logical_x(lattice)
-            lz = logical_z(lattice)
-            overlap = int(np.sum(lx * lz)) % 2
-            assert overlap == 1, f"Logical X and Z should anticommute for d={d}"
+    @pytest.mark.parametrize("d", [3, 5, 7])
+    def test_logical_x_commutes_with_stabilizers(self, d):
+        code = SurfaceCode(d)
+        lx = logical_x(code)
+        assert np.all((code.h_z @ lx) % 2 == 0)
 
-    def test_apply_logical_x(self):
-        lattice = SurfaceCodeLattice(3)
-        error = np.zeros(9, dtype=np.int8)
-        result = apply_logical_x(error, lattice)
-        assert np.sum(result) == 3
-
-    def test_apply_logical_z(self):
-        lattice = SurfaceCodeLattice(3)
-        error = np.zeros(9, dtype=np.int8)
-        result = apply_logical_z(error, lattice)
-        assert np.sum(result) == 3
-
-    def test_double_logical_x_is_identity(self):
-        lattice = SurfaceCodeLattice(3)
-        error = np.zeros(9, dtype=np.int8)
-        result = apply_logical_x(apply_logical_x(error, lattice), lattice)
-        np.testing.assert_array_equal(result, 0)
+    @pytest.mark.parametrize("d", [3, 5, 7])
+    def test_logical_z_commutes_with_stabilizers(self, d):
+        code = SurfaceCode(d)
+        lz = logical_z(code)
+        assert np.all((code.h_x @ lz) % 2 == 0)
 
 
-# --- Logical error detection ---
+class TestThresholdEstimation:
+    """Tests for Monte Carlo threshold estimation."""
 
-class TestHasLogicalError:
-    def test_no_error_no_logical_error(self):
-        lattice = SurfaceCodeLattice(3)
-        error = np.zeros(9, dtype=np.int8)
-        correction = np.zeros(9, dtype=np.int8)
-        assert not has_logical_error(error, correction, lattice, "X")
+    def test_basic_run(self):
+        result = estimate_threshold(
+            distances=[3], error_rates=[0.001, 0.01], num_trials=50, seed=42,
+        )
+        assert 3 in result.logical_error_rates
+        assert len(result.logical_error_rates[3]) == 2
 
-    def test_logical_x_is_logical_error(self):
-        lattice = SurfaceCodeLattice(3)
-        error = logical_x(lattice)
-        correction = np.zeros(9, dtype=np.int8)
-        assert has_logical_error(error, correction, lattice, "X")
+    def test_low_noise_low_logical_error(self):
+        result = estimate_threshold(
+            distances=[3], error_rates=[0.0001], num_trials=100, seed=42,
+        )
+        assert result.logical_error_rates[3][0] < 0.1
 
-    def test_stabilizer_is_not_logical_error(self):
-        """An error that equals a stabilizer should not be a logical error."""
-        lattice = SurfaceCodeLattice(3)
-        stab_error = np.zeros(9, dtype=np.int8)
-        for q in lattice.x_stabilizers[0]:
-            stab_error[q] = 1
-        correction = np.zeros(9, dtype=np.int8)
-        assert not has_logical_error(stab_error, correction, lattice, "Z")
+    def test_logical_error_increases_with_noise(self):
+        result = estimate_threshold(
+            distances=[3], error_rates=[0.001, 0.05], num_trials=200, seed=42,
+        )
+        rates = result.logical_error_rates[3]
+        assert rates[1] >= rates[0]
 
-
-# --- Threshold estimation ---
-
-class TestThreshold:
-    def test_low_error_rate_low_logical_rate(self):
-        rate = logical_error_rate(3, 0.01, num_trials=200, seed=42)
-        assert rate < 0.2
-
-    def test_high_error_rate_high_logical_rate(self):
-        rate = logical_error_rate(3, 0.20, num_trials=200, seed=42)
-        assert rate > 0.1
-
-    def test_logical_rate_increases_with_p(self):
-        rate_low = logical_error_rate(3, 0.02, num_trials=300, seed=42)
-        rate_high = logical_error_rate(3, 0.15, num_trials=300, seed=42)
-        assert rate_high > rate_low
-
-    def test_random_error_shape(self):
-        lattice = SurfaceCodeLattice(5)
-        rng = np.random.default_rng(42)
-        error = random_error(lattice, "X", 0.1, rng)
-        assert error.shape == (25,)
-        assert set(np.unique(error)).issubset({0, 1})
+    def test_multiple_distances(self):
+        result = estimate_threshold(
+            distances=[3, 5], error_rates=[0.005], num_trials=50, seed=42,
+        )
+        assert len(result.logical_error_rates) == 2

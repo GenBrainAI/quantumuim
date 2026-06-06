@@ -80,7 +80,7 @@ Build the most comprehensive, multi-platform quantum computing SDK — enabling 
 - Adiabatic evolution, annealing schedules, spectral gap analysis
 
 ## Current Stats (v0.1.0)
-- **25 packages** | **877 tests** | **28 examples** | **3 Jupyter notebooks** | **17 KB articles**
+- **26 packages** | **933 tests** | **29 examples** | **3 Jupyter notebooks** | **18 KB articles**
 
 ### Phase 19: Documentation & Developer Experience — COMPLETE
 - docs/getting-started.md — 10-section tutorial
@@ -89,7 +89,7 @@ Build the most comprehensive, multi-platform quantum computing SDK — enabling 
 - Comprehensive docstrings across all 23 packages (78 files, +5122 lines)
 
 ### Phase 20: Knowledge Base Expansion — COMPLETE
-- 17 articles across 6 categories: math, algorithms, hardware, QML, crypto, finance, simulation
+- 18 articles across 6 categories: math, algorithms, hardware, QML, crypto, finance, simulation
 - Platform KB ingestion blocked on Neo4j dependency
 
 ### Phase 21: PyPI Publication Prep — COMPLETE
@@ -117,12 +117,13 @@ Build the most comprehensive, multi-platform quantum computing SDK — enabling 
 
 ## v0.2.0 Roadmap
 
-### Phase 26: Advanced Error Correction
-- Surface code (rotated planar code)
-- Color codes (triangular)
-- Minimum-weight perfect matching (MWPM) decoder
-- Logical qubit operations and transversal gates
-- Threshold estimation
+### Phase 26: Advanced Error Correction — COMPLETE
+- Rotated planar surface code (d=3,5,7) with verified stabilizer orthogonality
+- Self-contained MWPM decoder using BFS-based graph distances
+- Syndrome extraction for X, Z, and Y errors
+- Logical X/Z operators with anticommutation verification
+- Monte Carlo threshold estimation
+- 56 tests, example demo, KB article (surface codes guide)
 
 ### Phase 27: ZX-Calculus Optimization
 - ZX-diagram representation of quantum circuits
@@ -175,7 +176,7 @@ Build the most comprehensive, multi-platform quantum computing SDK — enabling 
 - Package count: 25 packages
 - Documentation: API reference + tutorial for every algorithm
 - Examples: 28 runnable scripts + 3 Jupyter notebooks
-- Knowledge base: 17 articles across 6 categories
+- Knowledge base: 18 articles across 6 categories
 - CI/CD: Lint, type-check, test matrix, PyPI publish pipeline
 
 ### v0.2.0 (TARGET)

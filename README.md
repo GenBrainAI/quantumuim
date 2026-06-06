@@ -3,14 +3,14 @@
 [![CI](https://github.com/GenBrainAI/quantumuim/actions/workflows/ci.yml/badge.svg)](https://github.com/GenBrainAI/quantumuim/actions/workflows/ci.yml)
 [![Python 3.10+](https://img.shields.io/badge/python-3.10%2B-blue.svg)](https://www.python.org/downloads/)
 [![License: MIT](https://img.shields.io/badge/License-MIT-green.svg)](LICENSE)
-[![Tests](https://img.shields.io/badge/tests-877%20passed-brightgreen.svg)](tests/)
+[![Tests](https://img.shields.io/badge/tests-933%20passed-brightgreen.svg)](tests/)
 [![Coverage](https://img.shields.io/badge/coverage-report-yellow.svg)](https://github.com/GenBrainAI/quantumuim/actions/workflows/ci.yml)
 
 A comprehensive quantum computing SDK for Python. Build quantum circuits, run
 algorithms, simulate noise, and execute on real hardware from IBM, Google, and
 Amazon — all through a single, clean API.
 
-**23 modules** | **12 algorithms** | **4 hardware backends** | **877+ tests**
+**24 modules** | **12 algorithms** | **4 hardware backends** | **933+ tests**
 
 ### Key Features
 
@@ -143,6 +143,11 @@ qc = pqc.bind({theta: 1.57})
 ### Error Correction (`quantumium.error_correction`)
 - Bit-flip code, phase-flip code, Shor 9-qubit code
 
+### Surface Code (`quantumium.surface_code`)
+- Rotated planar surface code (d=3, 5, 7) with stabilizer orthogonality verification
+- MWPM decoder (self-contained, no external dependencies)
+- Logical X/Z operators, syndrome extraction, Monte Carlo threshold estimation
+
 ### Error Mitigation (`quantumium.mitigation`)
 - Zero-Noise Extrapolation (ZNE), measurement error mitigation, Pauli twirling
 
@@ -191,7 +196,7 @@ jupyter notebook notebooks/quantum-finance.ipynb        # Option pricing, portfo
 
 ## Examples
 
-28 runnable example scripts covering every module:
+29 runnable example scripts covering every module:
 
 ```bash
 python examples/bell_state.py               # Bell state basics
@@ -204,6 +209,7 @@ python examples/stabilizer_demo.py          # Clifford simulation
 python examples/benchmarking_demo.py        # Hardware benchmarking
 python examples/tomography_demo.py          # State reconstruction
 python examples/tensor_network_demo.py      # MPS simulation
+python examples/surface_code_demo.py        # Surface code QEC
 python examples/algorithms/vqe_h2_example.py    # VQE for H2
 python examples/algorithms/qaoa_maxcut_example.py  # QAOA MaxCut
 ```
@@ -213,7 +219,7 @@ See `examples/` for the full list.
 ## Testing
 
 ```bash
-python -m pytest tests/ -q    # 877 tests
+python -m pytest tests/ -q    # 933 tests
 ```
 
 ## Documentation
@@ -225,14 +231,14 @@ python -m pytest tests/ -q    # 877 tests
 
 ## Knowledge Base
 
-The `kb/` directory contains 17 reference articles on quantum computing:
+The `kb/` directory contains 18 reference articles on quantum computing:
 - Quantum mechanics primer, linear algebra essentials
 - Quantum information theory, complexity theory
 - Error correction deep-dive, surface codes guide, ZX-calculus guide
 - Algorithm catalog, variational algorithms guide
 - Quantum programming patterns
 - Hardware platform comparison
-- Domain guides: QML, cryptography, finance, optimization, simulation
+- Domain guides: QML, cryptography, finance, optimization, simulation, networking
 
 ## License
 

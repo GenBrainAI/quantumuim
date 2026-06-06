@@ -1,94 +1,51 @@
-"""Syndrome extraction and error application for surface codes.
-
-Works with classical error vectors (binary arrays) rather than full
-statevectors, since surface code simulation at scale requires Pauli frame
-tracking rather than exponential-size state vectors.
-"""
+"""Syndrome extraction and error injection for surface codes."""
 
 from __future__ import annotations
 
 import numpy as np
-from numpy.typing import NDArray
 
-from .lattice import SurfaceCodeLattice
+from quantumium.surface_code.lattice import SurfaceCode
 
 
-def apply_error(
-    lattice: SurfaceCodeLattice,
-    error_type: str,
-    qubit_indices: list[int] | int,
-) -> NDArray[np.int8]:
-    """Create a Pauli error vector on specified data qubits.
+def inject_error(code: SurfaceCode, error_type: str, qubit: int) -> None:
+    """Apply a Pauli error to a data qubit.
 
     Args:
-        lattice: The surface code lattice.
-        error_type: "X" or "Z" — the type of Pauli error.
-        qubit_indices: Index or list of indices of data qubits to flip.
-
-    Returns:
-        Binary error vector of length num_data.
+        error_type: 'X', 'Z', or 'Y' (Y = X then Z).
     """
-    if error_type not in ("X", "Z"):
-        raise ValueError(f"error_type must be 'X' or 'Z', got '{error_type}'")
-
-    if isinstance(qubit_indices, int):
-        qubit_indices = [qubit_indices]
-
-    error = np.zeros(lattice.num_data, dtype=np.int8)
-    for q in qubit_indices:
-        if q < 0 or q >= lattice.num_data:
-            raise ValueError(f"Qubit index {q} out of range [0, {lattice.num_data})")
-        error[q] ^= 1
-    return error
+    if qubit < 0 or qubit >= code.n_data:
+        raise ValueError(f"Qubit index {qubit} out of range [0, {code.n_data})")
+    if error_type in ("X", "Y"):
+        code.error_x[qubit] ^= 1
+    if error_type in ("Z", "Y"):
+        code.error_z[qubit] ^= 1
+    if error_type not in ("X", "Y", "Z"):
+        raise ValueError(f"Unknown error type: {error_type}")
 
 
-def extract_syndrome(
-    lattice: SurfaceCodeLattice,
-    error: NDArray[np.int8],
-    error_type: str,
-) -> NDArray[np.int8]:
-    """Extract the syndrome from a Pauli error vector.
-
-    X errors are detected by Z stabilizers and vice versa.
-
-    Args:
-        lattice: The surface code lattice.
-        error: Binary error vector of length num_data.
-        error_type: "X" or "Z" — the type of error that was applied.
-
-    Returns:
-        Binary syndrome vector. Length = num_z_stabilizers for X errors,
-        num_x_stabilizers for Z errors.
-    """
-    if error_type == "X":
-        H = lattice.stabilizer_matrix_z()
-    elif error_type == "Z":
-        H = lattice.stabilizer_matrix_x()
-    else:
-        raise ValueError(f"error_type must be 'X' or 'Z', got '{error_type}'")
-
-    syndrome = (H @ error) % 2
-    return syndrome.astype(np.int8)
-
-
-def random_error(
-    lattice: SurfaceCodeLattice,
-    error_type: str,
-    p: float,
-    rng: np.random.Generator | None = None,
-) -> NDArray[np.int8]:
-    """Generate a random i.i.d. Pauli error on each data qubit with probability p.
-
-    Args:
-        lattice: The surface code lattice.
-        error_type: "X" or "Z".
-        p: Per-qubit error probability.
-        rng: Optional random number generator for reproducibility.
-
-    Returns:
-        Binary error vector of length num_data.
-    """
+def inject_random_errors(
+    code: SurfaceCode, p: float, rng: np.random.Generator | None = None,
+) -> None:
+    """Apply independent depolarizing noise at rate p to every data qubit."""
     if rng is None:
         rng = np.random.default_rng()
-    error = (rng.random(lattice.num_data) < p).astype(np.int8)
-    return error
+    for q in range(code.n_data):
+        r = rng.random()
+        if r < p / 3:
+            code.error_x[q] ^= 1
+        elif r < 2 * p / 3:
+            code.error_z[q] ^= 1
+        elif r < p:
+            code.error_x[q] ^= 1
+            code.error_z[q] ^= 1
+
+
+def measure_syndrome(code: SurfaceCode) -> tuple[np.ndarray, np.ndarray]:
+    """Return (x_syndrome, z_syndrome) binary vectors.
+
+    x_syndrome[i] = 1 means X-stabilizer i is triggered (detected a Z error).
+    z_syndrome[i] = 1 means Z-stabilizer i is triggered (detected an X error).
+    """
+    x_syn = (code.h_x @ code.error_z) % 2
+    z_syn = (code.h_z @ code.error_x) % 2
+    return x_syn.astype(int), z_syn.astype(int)
