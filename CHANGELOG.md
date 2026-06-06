@@ -2,6 +2,24 @@
 
 All notable changes to the Quantumium SDK are documented in this file.
 
+## [0.3.0] - Unreleased
+
+### Qubit Routing & Mapping (Phase 31)
+- `CouplingMap`: physical qubit connectivity graph with BFS distance matrix
+- Factory constructors for linear, grid, and heavy-hex topologies
+- `Layout`: bidirectional logical↔physical qubit mapping with SWAP tracking
+- `SABRERouter`: SABRE algorithm with forward+backward passes and extended-set lookahead scoring
+- `route(circuit, coupling_map)` one-liner API returning `RoutingResult`
+- Coupling compliance: all 2Q gates operate on connected physical qubits after routing
+- Measurement preservation verified through layout permutation remapping
+- Integration with existing transpiler (`decompose_swap` pass)
+- 44 new tests, example demo
+
+### Stats
+- 29 packages, 1139 tests, 34 examples, 3 notebooks, 23 KB articles, MkDocs documentation site
+
+---
+
 ## [0.2.0] - Unreleased
 
 ### Surface Code Error Correction (Phase 26)
@@ -57,6 +75,7 @@ All notable changes to the Quantumium SDK are documented in this file.
 
 ### Stats
 - 28 packages, 1095 tests, 33 examples, 3 notebooks, 23 KB articles, MkDocs documentation site
+- v0.2.0 milestone: Phases 26-30 complete
 
 ---
 
