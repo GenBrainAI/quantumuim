@@ -80,7 +80,7 @@ Build the most comprehensive, multi-platform quantum computing SDK — enabling 
 - Adiabatic evolution, annealing schedules, spectral gap analysis
 
 ## Current Stats (v0.1.0)
-- **26 packages** | **933 tests** | **29 examples** | **3 Jupyter notebooks** | **18 KB articles**
+- **26 packages** | **933 tests** | **29 examples** | **3 Jupyter notebooks** | **19 KB articles**
 
 ### Phase 19: Documentation & Developer Experience — COMPLETE
 - docs/getting-started.md — 10-section tutorial
@@ -89,7 +89,7 @@ Build the most comprehensive, multi-platform quantum computing SDK — enabling 
 - Comprehensive docstrings across all 23 packages (78 files, +5122 lines)
 
 ### Phase 20: Knowledge Base Expansion — COMPLETE
-- 18 articles across 6 categories: math, algorithms, hardware, QML, crypto, finance, simulation
+- 19 articles across 6 categories: math, algorithms, hardware, QML, crypto, finance, simulation
 - Platform KB ingestion blocked on Neo4j dependency
 
 ### Phase 21: PyPI Publication Prep — COMPLETE
