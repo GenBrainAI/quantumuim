@@ -29,12 +29,21 @@ All notable changes to the Quantumium SDK are documented in this file.
 - `distribute_entanglement(network, source, target)` one-liner API
 - 50 new tests
 
+### Real Hardware Validation (Phase 29)
+- Comprehensive `LocalSimulatorBackend` tests: Bell, GHZ, Grover, QFT round-trip, Toffoli, edge cases
+- Backend-specific tests for Qiskit, Cirq, Braket with graceful skip when SDK not installed
+- Cross-backend statistical validation: chi-squared goodness-of-fit, Hellinger fidelity
+- Noise model calibration tests: depolarizing degradation monotonicity, gate-specific noise
+- Self-contained chi-squared CDF implementation (no scipy dependency)
+- Shared test fixtures via `conftest.py` with skip markers and statistical helpers
+- 96 new tests (70 pass locally, 26 skip for absent vendor SDKs)
+
 ### Knowledge Base
 - Surface codes guide, ZX-calculus guide, quantum networking guide
-- Hardware validation guide, SDK benchmarking methodology
+- Hardware validation guide, SDK benchmarking methodology, v0.3.0 roadmap candidates
 
 ### Stats
-- 28 packages, 1041 tests, 31 examples, 3 notebooks, 20 KB articles
+- 28 packages, 1095 tests, 32 examples, 3 notebooks, 21 KB articles
 
 ---
 
