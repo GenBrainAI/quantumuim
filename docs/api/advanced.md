@@ -119,6 +119,13 @@
       show_root_heading: true
       members_order: source
 
+## Fermionic Simulation
+
+::: quantumium.fermion
+    options:
+      show_root_heading: true
+      members_order: source
+
 ## Circuit Templates
 
 ::: quantumium.circuits.templates

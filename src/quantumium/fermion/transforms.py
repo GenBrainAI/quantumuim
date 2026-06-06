@@ -116,9 +116,9 @@ def _bk_ladder(mode: int, n_qubits: int, is_creation: bool) -> QubitOperator:
     return a_term + b_term
 
 
-def _bk_update_set(mode: int, n_qubits: int) -> set:
+def _bk_update_set(mode: int, n_qubits: int) -> set[int]:
     """Qubits whose parity includes mode — ancestors in Fenwick tree (elements > mode)."""
-    result = set()
+    result: set[int] = set()
     j = mode | (mode + 1)
     while j < n_qubits:
         result.add(j)
@@ -126,9 +126,9 @@ def _bk_update_set(mode: int, n_qubits: int) -> set:
     return result
 
 
-def _bk_parity_set(mode: int) -> set:
+def _bk_parity_set(mode: int) -> set[int]:
     """Qubits that store partial parity needed for mode (elements < mode)."""
-    result = set()
+    result: set[int] = set()
     if mode == 0:
         return result
     j = mode - 1
@@ -138,13 +138,13 @@ def _bk_parity_set(mode: int) -> set:
     return result
 
 
-def _bk_children_set(mode: int) -> set:
+def _bk_children_set(mode: int) -> set[int]:
     """Qubits covering [g(mode), mode-1] where g(mode) = (mode & (mode+1)).
 
     These are the children in the Fenwick tree whose ranges are
     subsumed by mode's range.
     """
-    result = set()
+    result: set[int] = set()
     g = mode & (mode + 1)
     if g == mode:
         return result

@@ -3,7 +3,7 @@
 from __future__ import annotations
 
 import numpy as np
-from typing import Dict, Tuple, Optional
+from typing import Any, Dict, Tuple, Optional, Union
 
 
 class FermionOperator:
@@ -13,8 +13,8 @@ class FermionOperator:
     Example: a†_0 a_1 -> key ((0, True), (1, False))
     """
 
-    def __init__(self, terms: Optional[Dict[Tuple, complex]] = None):
-        self._terms: Dict[Tuple, complex] = {}
+    def __init__(self, terms: Optional[Dict[Tuple[Tuple[int, bool], ...], complex]] = None):
+        self._terms: Dict[Tuple[Tuple[int, bool], ...], complex] = {}
         if terms:
             for key, coeff in terms.items():
                 if abs(coeff) > 1e-15:
@@ -37,7 +37,7 @@ class FermionOperator:
         return FermionOperator()
 
     @property
-    def terms(self) -> Dict[Tuple, complex]:
+    def terms(self) -> Dict[Tuple[Tuple[int, bool], ...], complex]:
         return dict(self._terms)
 
     @property
@@ -54,7 +54,7 @@ class FermionOperator:
         return all(abs(v) < 1e-10 for v in diff._terms.values())
 
     def dagger(self) -> FermionOperator:
-        result = {}
+        result: Dict[Tuple[Tuple[int, bool], ...], complex] = {}
         for key, coeff in self._terms.items():
             new_key = tuple((mode, not is_creation) for mode, is_creation in reversed(key))
             result[new_key] = result.get(new_key, 0) + np.conj(coeff)
@@ -82,11 +82,11 @@ class FermionOperator:
             result[key] = result.get(key, 0) - coeff
         return FermionOperator(result)
 
-    def __mul__(self, other) -> FermionOperator:
+    def __mul__(self, other: Union[int, float, complex, FermionOperator]) -> FermionOperator:
         if isinstance(other, (int, float, complex)):
             return FermionOperator({k: v * other for k, v in self._terms.items()})
         if isinstance(other, FermionOperator):
-            result = {}
+            result: Dict[Tuple[Tuple[int, bool], ...], complex] = {}
             for k1, c1 in self._terms.items():
                 for k2, c2 in other._terms.items():
                     key = k1 + k2
@@ -94,7 +94,7 @@ class FermionOperator:
             return FermionOperator(result)
         return NotImplemented
 
-    def __rmul__(self, other) -> FermionOperator:
+    def __rmul__(self, other: Union[int, float, complex]) -> FermionOperator:
         if isinstance(other, (int, float, complex)):
             return self.__mul__(other)
         return NotImplemented
@@ -102,7 +102,7 @@ class FermionOperator:
     def __neg__(self) -> FermionOperator:
         return self * (-1)
 
-    def __eq__(self, other) -> bool:
+    def __eq__(self, other: object) -> bool:
         if not isinstance(other, FermionOperator):
             return NotImplemented
         s = self.compress()
@@ -126,7 +126,7 @@ class FermionOperator:
         return " + ".join(parts)
 
 
-def _normal_order_term(key: Tuple, coeff: complex) -> FermionOperator:
+def _normal_order_term(key: Tuple[Tuple[int, bool], ...], coeff: complex) -> FermionOperator:
     """Normal-order a single term using bubble sort with anti-commutation."""
     ops = list(key)
     result = FermionOperator()
@@ -198,7 +198,7 @@ def _multiply_pauli_strings(s1: str, s2: str) -> Tuple[str, complex]:
     s1 = s1.ljust(n, "I")
     s2 = s2.ljust(n, "I")
     result = []
-    phase = 1
+    phase: complex = 1
     for a, b in zip(s1, s2):
         r, p = PAULI_MULT[(a, b)]
         result.append(r)
@@ -238,7 +238,7 @@ class QubitOperator:
         return max(len(k) for k in self._terms)
 
     def compress(self, tol: float = 1e-15) -> QubitOperator:
-        result = {}
+        result: Dict[str, complex] = {}
         for key, coeff in self._terms.items():
             stripped = key.rstrip("I")
             if not stripped:
@@ -284,11 +284,11 @@ class QubitOperator:
             result[key] = result.get(key, 0) - coeff
         return QubitOperator(result)
 
-    def __mul__(self, other) -> QubitOperator:
+    def __mul__(self, other: Union[int, float, complex, QubitOperator]) -> QubitOperator:
         if isinstance(other, (int, float, complex)):
             return QubitOperator({k: v * other for k, v in self._terms.items()})
         if isinstance(other, QubitOperator):
-            result = {}
+            result: Dict[str, complex] = {}
             for k1, c1 in self._terms.items():
                 for k2, c2 in other._terms.items():
                     key, phase = _multiply_pauli_strings(k1, k2)
@@ -296,7 +296,7 @@ class QubitOperator:
             return QubitOperator(result)
         return NotImplemented
 
-    def __rmul__(self, other) -> QubitOperator:
+    def __rmul__(self, other: Union[int, float, complex]) -> QubitOperator:
         if isinstance(other, (int, float, complex)):
             return self.__mul__(other)
         return NotImplemented
@@ -304,7 +304,7 @@ class QubitOperator:
     def __neg__(self) -> QubitOperator:
         return self * (-1)
 
-    def __eq__(self, other) -> bool:
+    def __eq__(self, other: object) -> bool:
         if not isinstance(other, QubitOperator):
             return NotImplemented
         s = self.compress()
