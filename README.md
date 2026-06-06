@@ -3,14 +3,14 @@
 [![CI](https://github.com/GenBrainAI/quantumuim/actions/workflows/ci.yml/badge.svg)](https://github.com/GenBrainAI/quantumuim/actions/workflows/ci.yml)
 [![Python 3.10+](https://img.shields.io/badge/python-3.10%2B-blue.svg)](https://www.python.org/downloads/)
 [![License: MIT](https://img.shields.io/badge/License-MIT-green.svg)](LICENSE)
-[![Tests](https://img.shields.io/badge/tests-1095%20passed-brightgreen.svg)](tests/)
+[![Tests](https://img.shields.io/badge/tests-1139%20passed-brightgreen.svg)](tests/)
 [![Coverage](https://img.shields.io/badge/coverage-report-yellow.svg)](https://github.com/GenBrainAI/quantumuim/actions/workflows/ci.yml)
 
 A comprehensive quantum computing SDK for Python. Build quantum circuits, run
 algorithms, simulate noise, and execute on real hardware from IBM, Google, and
 Amazon — all through a single, clean API.
 
-**26 modules** | **12 algorithms** | **4 hardware backends** | **1095+ tests**
+**26 modules** | **12 algorithms** | **4 hardware backends** | **1139+ tests**
 
 ### Key Features
 
@@ -137,6 +137,7 @@ qc = pqc.bind({theta: 1.57})
 
 ### Transpiler (`quantumium.transpiler`)
 - **Optimization passes**: Inverse cancellation, gate merging, CNOT cancellation, commutation, SWAP decomposition
+- **Qubit routing**: SABRE algorithm for topology-aware SWAP insertion (linear, grid, heavy-hex coupling maps)
 - **OpenQASM 2.0**: Import/export with round-trip fidelity
 - **JSON serialization**: Save/load circuits to file
 
@@ -215,7 +216,7 @@ jupyter notebook notebooks/quantum-finance.ipynb        # Option pricing, portfo
 
 ## Examples
 
-31 runnable example scripts covering every module:
+34 runnable example scripts covering every module:
 
 ```bash
 python examples/bell_state.py               # Bell state basics
@@ -232,6 +233,7 @@ python examples/surface_code_demo.py        # Surface code QEC
 python examples/zx_calculus_demo.py         # ZX-calculus optimization
 python examples/networking_demo.py          # Quantum networking
 python examples/hardware_validation_demo.py # Backend validation
+python examples/routing_demo.py            # Qubit routing (SABRE)
 python examples/algorithms/vqe_h2_example.py    # VQE for H2
 python examples/algorithms/qaoa_maxcut_example.py  # QAOA MaxCut
 ```
@@ -241,7 +243,7 @@ See `examples/` for the full list.
 ## Testing
 
 ```bash
-python -m pytest tests/ -q    # 1095 tests
+python -m pytest tests/ -q    # 1139 tests
 ```
 
 ## Documentation

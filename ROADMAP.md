@@ -79,8 +79,8 @@ Build the most comprehensive, multi-platform quantum computing SDK — enabling 
 ### Phase 18: Adiabatic Computing — COMPLETE
 - Adiabatic evolution, annealing schedules, spectral gap analysis
 
-## Current Stats (v0.2.0)
-- **28 packages** | **1095 tests** | **33 examples** | **3 Jupyter notebooks** | **23 KB articles** | **MkDocs site**
+## Current Stats (v0.3.0-dev)
+- **28 packages** | **1139 tests** | **34 examples** | **3 Jupyter notebooks** | **23 KB articles** | **MkDocs site**
 
 ### Phase 19: Documentation & Developer Experience — COMPLETE
 - docs/getting-started.md — 10-section tutorial
@@ -160,6 +160,20 @@ Build the most comprehensive, multi-platform quantum computing SDK — enabling 
 - GitHub contribution templates: bug report, feature request, PR template
 - docs/ optional dependency in pyproject.toml (mkdocs, mkdocs-material, mkdocstrings)
 - `mkdocs build --strict` passes with zero warnings
+
+---
+
+## v0.3.0 Roadmap
+
+### Phase 31: Qubit Routing & Mapping — COMPLETE
+- CouplingMap: physical qubit connectivity graph with BFS distance, linear/grid/heavy-hex factories
+- Layout: bidirectional logical↔physical qubit mapping with SWAP tracking
+- SABRERouter: SABRE algorithm (forward+backward pass, lookahead scoring, extended set)
+- `route(circuit, coupling_map)` one-liner API
+- Coupling compliance: all 2Q gates on connected physical qubits after routing
+- Measurement preservation verified through layout permutation
+- Integration with existing transpiler (decompose_swap pass)
+- 44 tests, example demo
 
 ## Architecture Principles
 
