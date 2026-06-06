@@ -197,6 +197,16 @@ Build the most comprehensive, multi-platform quantum computing SDK — enabling 
 - JW and BK produce identical eigenspectra across all test Hamiltonians
 - 69 tests, example demo with 7 sections
 
+### Phase 34: Dynamical Decoupling — COMPLETE
+- DDSequence: pulse sequence dataclass with normalized spacings and pulse times
+- Factory methods: spin_echo, cpmg(n), xy4, xy8, udd(n) with sin^2 spacing
+- DDScheduler: identifies idle windows in circuits and inserts DD pulses automatically
+- Configurable gate durations and minimum idle window thresholds
+- Filter function |F(omega)|^2: noise frequency suppression analysis
+- Fidelity estimation via overlap integral with noise spectrum S(omega)
+- XY-8 achieves >99% fidelity under 1/f noise; UDD scales with pulse count
+- 50 tests, example demo with 7 sections
+
 ## Architecture Principles
 
 1. **Backend-agnostic:** Write circuits once, run anywhere

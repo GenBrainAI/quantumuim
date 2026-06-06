@@ -143,6 +143,13 @@ qc = pqc.bind({theta: 1.57})
 - **Hamiltonian builders**: Fermi-Hubbard model, molecular Hamiltonian from one/two-body integrals
 - JW and BK produce identical eigenspectra for all Hamiltonians
 
+### Dynamical Decoupling (`quantumium.dd`)
+- **DDSequence**: Pulse sequence definitions — spin echo, CPMG, XY-4, XY-8, UDD with arbitrary order
+- **DDScheduler**: Identifies idle windows in quantum circuits and inserts DD pulse sequences automatically
+- **Filter function**: Computes |F(omega)|^2 to analyze noise frequency suppression per sequence
+- **Fidelity estimation**: Overlap integral with arbitrary noise spectra S(omega) for coherence prediction
+- Configurable gate durations, minimum idle window thresholds, and pulse insertion strategies
+
 ### Classical Shadows (`quantumium.shadows`)
 - Random Pauli measurement protocol for efficient state property estimation
 - Median-of-means estimation, shadow norms, sample complexity bounds

@@ -39,8 +39,18 @@ All notable changes to the Quantumium SDK are documented in this file.
 - JW and BK produce identical eigenspectra across all test Hamiltonians
 - 69 new tests, example demo with 7 sections
 
+### Dynamical Decoupling (Phase 34)
+- `DDSequence`: pulse sequence dataclass with normalized spacings and pulse times
+- Factory methods: `spin_echo()`, `cpmg(n)`, `xy4()`, `xy8()`, `udd(n)` with sin^2 spacing
+- `DDScheduler`: identifies idle windows in quantum circuits and inserts DD pulses
+- Configurable gate durations (`DEFAULT_DURATIONS`) and minimum idle window thresholds
+- `filter_function()`: computes |F(omega)|^2 for noise frequency suppression analysis
+- `dd_fidelity()`: overlap integral with arbitrary noise spectra S(omega)
+- XY-8 achieves >99% fidelity under 1/f noise; UDD fidelity scales with pulse count
+- 50 new tests, example demo with 7 sections
+
 ### Stats
-- 31 packages, 1262 tests, 36 examples, 3 notebooks, 23 KB articles, MkDocs documentation site
+- 32 packages, 1312 tests, 37 examples, 3 notebooks, 23 KB articles, MkDocs documentation site
 
 ---
 

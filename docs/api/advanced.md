@@ -126,6 +126,13 @@
       show_root_heading: true
       members_order: source
 
+## Dynamical Decoupling
+
+::: quantumium.dd
+    options:
+      show_root_heading: true
+      members_order: source
+
 ## Circuit Templates
 
 ::: quantumium.circuits.templates
