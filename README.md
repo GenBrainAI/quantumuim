@@ -246,10 +246,19 @@ python -m pytest tests/ -q    # 1095 tests
 
 ## Documentation
 
+- [Documentation Site](https://genbrainai.github.io/quantumuim) — full API reference and guides
 - [Getting Started Tutorial](docs/getting-started.md) — step-by-step introduction
+- [Example Gallery](docs/examples.md) — 33 runnable scripts organized by category
 - [Jupyter Notebooks](notebooks/) — interactive tutorials
 - [Contributing Guide](CONTRIBUTING.md) — development setup and workflow
 - [Changelog](CHANGELOG.md) — version history
+
+Build the docs locally:
+
+```bash
+pip install quantumium[docs]
+mkdocs serve
+```
 
 ## Knowledge Base
 

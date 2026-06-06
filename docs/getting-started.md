@@ -461,5 +461,5 @@ scaled = noise_scaled_circuits(qc, scale_factors)
 - Browse the `examples/` directory for 24 runnable demos
 - Explore domain applications: chemistry, finance, optimization, cryptography
 - Read the `kb/` directory for quantum computing theory and references
-- Check the [README](../README.md) for the full module reference
+- Check the [API Reference](api/core.md) for the full module documentation
 - Run the test suite: `python -m pytest tests/ -q`

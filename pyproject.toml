@@ -50,11 +50,16 @@ dev = [
     "ruff>=0.4",
     "mypy>=1.0",
 ]
+docs = [
+    "mkdocs>=1.5",
+    "mkdocs-material>=9.0",
+    "mkdocstrings[python]>=0.24",
+]
 
 [project.urls]
 Homepage = "https://github.com/GenBrainAI/quantumuim"
 Repository = "https://github.com/GenBrainAI/quantumuim"
-Documentation = "https://github.com/GenBrainAI/quantumuim/blob/main/docs/getting-started.md"
+Documentation = "https://genbrainai.github.io/quantumuim"
 Changelog = "https://github.com/GenBrainAI/quantumuim/blob/main/CHANGELOG.md"
 Issues = "https://github.com/GenBrainAI/quantumuim/issues"
 

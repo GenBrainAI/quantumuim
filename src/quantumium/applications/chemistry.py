@@ -225,7 +225,7 @@ def simulate_molecule(
 
 
 def potential_energy_surface(
-    molecule_coeffs_fn,
+    molecule_coeffs_fn: "Callable[[float], dict[str, float]]",
     distances: list[float],
     num_qubits: int,
     ansatz_depth: int = 2,

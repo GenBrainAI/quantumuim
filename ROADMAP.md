@@ -79,8 +79,8 @@ Build the most comprehensive, multi-platform quantum computing SDK — enabling 
 ### Phase 18: Adiabatic Computing — COMPLETE
 - Adiabatic evolution, annealing schedules, spectral gap analysis
 
-## Current Stats (v0.1.0)
-- **28 packages** | **1095 tests** | **32 examples** | **3 Jupyter notebooks** | **23 KB articles**
+## Current Stats (v0.2.0)
+- **28 packages** | **1095 tests** | **33 examples** | **3 Jupyter notebooks** | **23 KB articles** | **MkDocs site**
 
 ### Phase 19: Documentation & Developer Experience — COMPLETE
 - docs/getting-started.md — 10-section tutorial
@@ -152,11 +152,14 @@ Build the most comprehensive, multi-platform quantum computing SDK — enabling 
 - conftest.py with shared fixtures, skip markers, and statistical helpers
 - 96 tests (70 pass, 26 skip when vendor SDKs absent), example demo
 
-### Phase 30: Documentation Site & Community
-- MkDocs documentation site with API reference
-- Interactive example gallery
-- Benchmarking suite vs Qiskit, Cirq, PennyLane
-- Contribution templates and issue labels
+### Phase 30: Documentation Site & Community — COMPLETE
+- MkDocs documentation site with Material theme, dark/light mode, code copy
+- Auto-generated API reference via mkdocstrings for all 26 modules
+- Example gallery page with all 33 runnable scripts organized by category
+- Benchmarking suite: circuit construction + simulation timing (Bell, GHZ, QFT, Clifford)
+- GitHub contribution templates: bug report, feature request, PR template
+- docs/ optional dependency in pyproject.toml (mkdocs, mkdocs-material, mkdocstrings)
+- `mkdocs build --strict` passes with zero warnings
 
 ## Architecture Principles
 
