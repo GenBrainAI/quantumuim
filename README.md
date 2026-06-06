@@ -135,6 +135,14 @@ qc = pqc.bind({theta: 1.57})
 - **Risk Analysis**: Value-at-Risk (VaR) and Conditional VaR
 - **Portfolio Optimization**: Quantum-enhanced portfolio selection
 
+### Fermionic Simulation (`quantumium.fermion`)
+- **FermionOperator**: Ladder operator algebra with complex coefficients, dagger, normal ordering via anti-commutation
+- **QubitOperator**: Pauli string algebra with full matrix construction
+- **Jordan-Wigner transform**: Fermion-to-qubit mapping with O(n) Z-string anti-commutation enforcement
+- **Bravyi-Kitaev transform**: O(log n) Pauli weight via Fenwick tree encoding
+- **Hamiltonian builders**: Fermi-Hubbard model, molecular Hamiltonian from one/two-body integrals
+- JW and BK produce identical eigenspectra for all Hamiltonians
+
 ### Classical Shadows (`quantumium.shadows`)
 - Random Pauli measurement protocol for efficient state property estimation
 - Median-of-means estimation, shadow norms, sample complexity bounds

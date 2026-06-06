@@ -80,7 +80,7 @@ Build the most comprehensive, multi-platform quantum computing SDK — enabling 
 - Adiabatic evolution, annealing schedules, spectral gap analysis
 
 ## Current Stats (v0.3.0-dev)
-- **29 packages** | **1193 tests** | **35 examples** | **3 Jupyter notebooks** | **23 KB articles** | **MkDocs site**
+- **30 packages** | **1262+ tests** | **36 examples** | **3 Jupyter notebooks** | **23 KB articles** | **MkDocs site**
 
 ### Phase 19: Documentation & Developer Experience — COMPLETE
 - docs/getting-started.md — 10-section tutorial
@@ -185,6 +185,17 @@ Build the most comprehensive, multi-platform quantum computing SDK — enabling 
 - Pauli decomposition of general observables
 - Required snapshot count computation for given accuracy targets
 - 54 tests, example demo with 7 sections
+
+### Phase 33: Fermionic Simulation — COMPLETE
+- FermionOperator: sum-of-products algebra with complex coefficients, dagger, normal ordering
+- QubitOperator: Pauli string algebra with to_matrix() for full matrix construction
+- Jordan-Wigner transform: O(n) Z-string anti-commutation enforcement
+- Bravyi-Kitaev transform: O(log n) Pauli weight via Fenwick tree encoding
+- Hamiltonian builders: number_operator, hopping_operator, coulomb_operator
+- Fermi-Hubbard model: 1D chain with spin-up/down, periodic/open boundary
+- Molecular Hamiltonian: from one/two-body integrals (physicist's notation)
+- JW and BK produce identical eigenspectra across all test Hamiltonians
+- 69 tests, example demo with 7 sections
 
 ## Architecture Principles
 

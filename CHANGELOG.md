@@ -27,8 +27,20 @@ All notable changes to the Quantumium SDK are documented in this file.
 - `required_snapshots()`: sample complexity calculator with O(log M) scaling for M observables
 - 54 new tests, example demo
 
+### Fermionic Simulation (Phase 33)
+- `FermionOperator`: sum-of-products ladder operator algebra with complex coefficients
+- Operator algebra: addition, multiplication, dagger, normal ordering via anti-commutation
+- `QubitOperator`: Pauli string algebra with `to_matrix()` for full matrix construction
+- `jordan_wigner()`: fermion-to-qubit mapping with O(n) Z-string anti-commutation
+- `bravyi_kitaev()`: O(log n) Pauli weight via Fenwick tree (update/parity/children sets)
+- `fermi_hubbard()`: 1D Hubbard model with spin-up/down modes, periodic/open boundary
+- `molecular_hamiltonian()`: from one/two-body integrals in physicist's notation
+- `number_operator()`, `hopping_operator()`, `coulomb_operator()` builder functions
+- JW and BK produce identical eigenspectra across all test Hamiltonians
+- 69 new tests, example demo with 7 sections
+
 ### Stats
-- 30 packages, 1193 tests, 35 examples, 3 notebooks, 23 KB articles, MkDocs documentation site
+- 31 packages, 1262 tests, 36 examples, 3 notebooks, 23 KB articles, MkDocs documentation site
 
 ---
 
