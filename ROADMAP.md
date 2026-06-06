@@ -80,7 +80,7 @@ Build the most comprehensive, multi-platform quantum computing SDK — enabling 
 - Adiabatic evolution, annealing schedules, spectral gap analysis
 
 ## Current Stats (v0.3.0-dev)
-- **28 packages** | **1139 tests** | **34 examples** | **3 Jupyter notebooks** | **23 KB articles** | **MkDocs site**
+- **29 packages** | **1193 tests** | **35 examples** | **3 Jupyter notebooks** | **23 KB articles** | **MkDocs site**
 
 ### Phase 19: Documentation & Developer Experience — COMPLETE
 - docs/getting-started.md — 10-section tutorial
@@ -174,6 +174,17 @@ Build the most comprehensive, multi-platform quantum computing SDK — enabling 
 - Measurement preservation verified through layout permutation
 - Integration with existing transpiler (decompose_swap pass)
 - 44 tests, example demo
+
+### Phase 32: Classical Shadows — COMPLETE
+- ClassicalShadow: random Pauli measurement protocol with snapshot storage
+- Efficient Pauli expectation estimation via per-qubit factorization
+- General observable estimation with median-of-means for robust statistics
+- Fidelity estimation with pure states and density matrices
+- Purity estimation via shadow cross-correlations
+- Shadow norm calculation for sample complexity bounds (3^k for k-local Pauli)
+- Pauli decomposition of general observables
+- Required snapshot count computation for given accuracy targets
+- 54 tests, example demo with 7 sections
 
 ## Architecture Principles
 
