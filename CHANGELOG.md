@@ -15,8 +15,20 @@ All notable changes to the Quantumium SDK are documented in this file.
 - Integration with existing transpiler (`decompose_swap` pass)
 - 44 new tests, example demo
 
+### Classical Shadow Tomography (Phase 32)
+- `ClassicalShadow`: random Pauli measurement protocol with inverted channel reconstruction
+- `estimate_pauli()`: efficient per-qubit factorized Pauli expectation estimation
+- `estimate_expectation()`: general observable estimation via Pauli decomposition
+- Median-of-means estimation for robust statistics
+- `shadow_norm_pauli()`: shadow norm calculation (3^k scaling for k-local operators)
+- `estimate_fidelity()`: fidelity estimation between shadow and target state
+- `estimate_purity()`: purity estimation via shadow cross-correlations
+- `pauli_decomposition()`: observable decomposition into Pauli basis
+- `required_snapshots()`: sample complexity calculator with O(log M) scaling for M observables
+- 54 new tests, example demo
+
 ### Stats
-- 29 packages, 1139 tests, 34 examples, 3 notebooks, 23 KB articles, MkDocs documentation site
+- 30 packages, 1193 tests, 35 examples, 3 notebooks, 23 KB articles, MkDocs documentation site
 
 ---
 
