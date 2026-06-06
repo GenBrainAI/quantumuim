@@ -3,14 +3,14 @@
 [![CI](https://github.com/GenBrainAI/quantumuim/actions/workflows/ci.yml/badge.svg)](https://github.com/GenBrainAI/quantumuim/actions/workflows/ci.yml)
 [![Python 3.10+](https://img.shields.io/badge/python-3.10%2B-blue.svg)](https://www.python.org/downloads/)
 [![License: MIT](https://img.shields.io/badge/License-MIT-green.svg)](LICENSE)
-[![Tests](https://img.shields.io/badge/tests-974%20passed-brightgreen.svg)](tests/)
+[![Tests](https://img.shields.io/badge/tests-991%20passed-brightgreen.svg)](tests/)
 [![Coverage](https://img.shields.io/badge/coverage-report-yellow.svg)](https://github.com/GenBrainAI/quantumuim/actions/workflows/ci.yml)
 
 A comprehensive quantum computing SDK for Python. Build quantum circuits, run
 algorithms, simulate noise, and execute on real hardware from IBM, Google, and
 Amazon — all through a single, clean API.
 
-**25 modules** | **12 algorithms** | **4 hardware backends** | **974+ tests**
+**25 modules** | **12 algorithms** | **4 hardware backends** | **991+ tests**
 
 ### Key Features
 
@@ -148,10 +148,10 @@ qc = pqc.bind({theta: 1.57})
 - MWPM decoder (self-contained, no external dependencies)
 - Logical X/Z operators, syndrome extraction, Monte Carlo threshold estimation
 
-### ZX-Calculus Optimization (`quantumium.zx`)
-- ZXDiagram graph representation with spider fusion, identity removal, color change rules
-- Circuit-to-ZX and ZX-to-circuit round-trip conversion
-- T-count reduction through phase gadget optimization
+### ZX-Calculus (`quantumium.zx`)
+- ZX-diagram representation of quantum circuits (Z/X spiders, Hadamard edges)
+- Spider fusion, identity removal, color change simplification rules
+- T-count optimization via phase merging through CNOT controls
 - One-liner API: `zx_optimize(circuit)` for automatic circuit simplification
 
 ### Error Mitigation (`quantumium.mitigation`)
@@ -202,7 +202,7 @@ jupyter notebook notebooks/quantum-finance.ipynb        # Option pricing, portfo
 
 ## Examples
 
-29 runnable example scripts covering every module:
+30 runnable example scripts covering every module:
 
 ```bash
 python examples/bell_state.py               # Bell state basics
@@ -216,6 +216,7 @@ python examples/benchmarking_demo.py        # Hardware benchmarking
 python examples/tomography_demo.py          # State reconstruction
 python examples/tensor_network_demo.py      # MPS simulation
 python examples/surface_code_demo.py        # Surface code QEC
+python examples/zx_calculus_demo.py         # ZX-calculus optimization
 python examples/algorithms/vqe_h2_example.py    # VQE for H2
 python examples/algorithms/qaoa_maxcut_example.py  # QAOA MaxCut
 ```
@@ -225,7 +226,7 @@ See `examples/` for the full list.
 ## Testing
 
 ```bash
-python -m pytest tests/ -q    # 974 tests
+python -m pytest tests/ -q    # 991 tests
 ```
 
 ## Documentation

@@ -80,7 +80,7 @@ Build the most comprehensive, multi-platform quantum computing SDK — enabling 
 - Adiabatic evolution, annealing schedules, spectral gap analysis
 
 ## Current Stats (v0.1.0)
-- **26 packages** | **933 tests** | **29 examples** | **3 Jupyter notebooks** | **20 KB articles**
+- **27 packages** | **991 tests** | **30 examples** | **3 Jupyter notebooks** | **20 KB articles**
 
 ### Phase 19: Documentation & Developer Experience — COMPLETE
 - docs/getting-started.md — 10-section tutorial
@@ -126,12 +126,12 @@ Build the most comprehensive, multi-platform quantum computing SDK — enabling 
 - 56 tests, example demo, KB article (surface codes guide)
 
 ### Phase 27: ZX-Calculus Optimization — COMPLETE
-- ZXDiagram graph representation with Z/X spiders and regular/Hadamard edges
-- Circuit-to-ZX and ZX-to-circuit bidirectional conversion (round-trip verified)
+- ZXDiagram graph data structure with Z/X spiders and Hadamard edges
+- Circuit ↔ ZX conversion with round-trip unitary equivalence
 - Simplification rules: spider fusion, identity removal, color change, Hadamard cancellation
-- Phase gadget optimization reducing T-count (T-CNOT-T patterns: 2→0)
+- T-count reduction via phase merging through CNOT controls (T-CNOT-T: 2→0)
 - Constraint-propagated circuit extraction with correct gate ordering
-- One-liner API: `zx_optimize(circuit)` → optimized circuit
+- `zx_optimize(circuit)` one-liner API
 - 58 tests, example demo, KB article (ZX-calculus guide)
 
 ### Phase 28: Quantum Networking
