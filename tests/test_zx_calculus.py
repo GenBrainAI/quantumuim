@@ -470,6 +470,6 @@ class TestExistingTestsUnbroken:
         assert abs(abs(state[0]) ** 2 - 0.5) < 1e-10
 
     def test_import_surface_code(self):
-        from quantumium.surface_code.lattice import SurfaceCodeLattice
-        lattice = SurfaceCodeLattice(3)
-        assert lattice.num_data == 9
+        from quantumium.surface_code.lattice import SurfaceCode
+        lattice = SurfaceCode(3)
+        assert lattice.distance == 3
