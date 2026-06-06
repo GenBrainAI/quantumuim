@@ -208,7 +208,7 @@ jupyter notebook notebooks/quantum-finance.ipynb        # Option pricing, portfo
 
 ## Examples
 
-30 runnable example scripts covering every module:
+31 runnable example scripts covering every module:
 
 ```bash
 python examples/bell_state.py               # Bell state basics
@@ -223,6 +223,7 @@ python examples/tomography_demo.py          # State reconstruction
 python examples/tensor_network_demo.py      # MPS simulation
 python examples/surface_code_demo.py        # Surface code QEC
 python examples/zx_calculus_demo.py         # ZX-calculus optimization
+python examples/networking_demo.py          # Quantum networking
 python examples/algorithms/vqe_h2_example.py    # VQE for H2
 python examples/algorithms/qaoa_maxcut_example.py  # QAOA MaxCut
 ```
