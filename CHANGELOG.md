@@ -2,6 +2,42 @@
 
 All notable changes to the Quantumium SDK are documented in this file.
 
+## [0.2.0] - Unreleased
+
+### Surface Code Error Correction (Phase 26)
+- Rotated planar surface code for distances d=3, 5, 7
+- Self-contained Minimum Weight Perfect Matching (MWPM) decoder using BFS-based graph distances
+- Syndrome extraction for X, Z, and Y errors
+- Logical X/Z operators with anticommutation verification
+- Monte Carlo threshold estimation
+- 56 new tests
+
+### ZX-Calculus Optimization Engine (Phase 27)
+- `ZXDiagram` graph data structure with Z/X spiders and Hadamard edges
+- Circuit-to-ZX and ZX-to-circuit conversion with round-trip unitary equivalence
+- Simplification rules: spider fusion, identity removal, color change, Hadamard cancellation
+- T-count reduction via phase merging through CNOT controls
+- `zx_optimize(circuit)` one-liner API for automatic circuit simplification
+- 58 new tests
+
+### Quantum Networking Simulation (Phase 28)
+- `QuantumNetwork` graph topology with star, chain, and mesh constructors
+- Entanglement generation with channel loss (exponential decay with distance)
+- Entanglement swapping through repeater chains with fidelity tracking
+- BBPSSW purification protocol (fidelity improvement for F > 0.5)
+- Quantum teleportation with depolarizing noise model
+- `distribute_entanglement(network, source, target)` one-liner API
+- 50 new tests
+
+### Knowledge Base
+- Surface codes guide, ZX-calculus guide, quantum networking guide
+- Hardware validation guide, SDK benchmarking methodology
+
+### Stats
+- 28 packages, 1041 tests, 31 examples, 3 notebooks, 20 KB articles
+
+---
+
 ## [0.1.0] - 2025
 
 Initial release of the Quantumium quantum computing SDK.
