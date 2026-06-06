@@ -134,11 +134,14 @@ Build the most comprehensive, multi-platform quantum computing SDK — enabling 
 - `zx_optimize(circuit)` one-liner API
 - 58 tests, example demo, KB article (ZX-calculus guide)
 
-### Phase 28: Quantum Networking
-- Quantum repeater simulation (entanglement swapping)
-- Entanglement distribution protocols (BBPSSW purification)
-- Quantum teleportation over noisy channels
-- Simple quantum internet protocol stack
+### Phase 28: Quantum Networking — COMPLETE
+- QuantumNetwork graph topology with star, chain, mesh constructors
+- Entanglement generation with channel loss (exponential decay with distance)
+- Entanglement swapping through repeater chains with fidelity tracking
+- BBPSSW purification protocol (F' > F for F > 0.5, converges to F→1)
+- Quantum teleportation with depolarizing noise (fidelity = (2F+1)/3)
+- One-liner API: `distribute_entanglement(network, alice, bob)`
+- 50 tests, example demo, KB article (quantum networking guide)
 
 ### Phase 29: Real Hardware Validation
 - Integration tests against IBM Quantum free tier

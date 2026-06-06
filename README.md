@@ -10,7 +10,7 @@ A comprehensive quantum computing SDK for Python. Build quantum circuits, run
 algorithms, simulate noise, and execute on real hardware from IBM, Google, and
 Amazon — all through a single, clean API.
 
-**25 modules** | **12 algorithms** | **4 hardware backends** | **991+ tests**
+**26 modules** | **12 algorithms** | **4 hardware backends** | **1041+ tests**
 
 ### Key Features
 
@@ -153,6 +153,12 @@ qc = pqc.bind({theta: 1.57})
 - Spider fusion, identity removal, color change simplification rules
 - T-count optimization via phase merging through CNOT controls
 - One-liner API: `zx_optimize(circuit)` for automatic circuit simplification
+
+### Quantum Networking (`quantumium.networking`)
+- Network topology simulation (star, chain, mesh) with quantum channels
+- Entanglement generation, swapping through repeater chains, BBPSSW purification
+- Quantum teleportation with depolarizing noise model
+- One-liner API: `distribute_entanglement(network, source, target)`
 
 ### Error Mitigation (`quantumium.mitigation`)
 - Zero-Noise Extrapolation (ZNE), measurement error mitigation, Pauli twirling
