@@ -253,10 +253,10 @@ python -m pytest tests/ -q    # 1095 tests
 
 ## Knowledge Base
 
-The `kb/` directory contains 22 reference articles on quantum computing:
+The `kb/` directory contains 23 reference articles on quantum computing:
 - Quantum mechanics primer, linear algebra essentials
 - Quantum information theory, complexity theory
-- Error correction deep-dive, surface codes guide, ZX-calculus guide
+- Error correction deep-dive, surface codes guide, ZX-calculus guide, classical shadows guide
 - Algorithm catalog, variational algorithms guide
 - Quantum programming patterns
 - Hardware platform comparison, hardware validation guide, qubit routing guide
