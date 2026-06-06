@@ -271,11 +271,12 @@ mkdocs serve
 
 ## Knowledge Base
 
-The `kb/` directory contains 23 reference articles on quantum computing:
+The `kb/` directory contains 26 reference articles on quantum computing:
 - Quantum mechanics primer, linear algebra essentials
 - Quantum information theory, complexity theory
 - Error correction deep-dive, surface codes guide, ZX-calculus guide, classical shadows guide
 - Algorithm catalog, variational algorithms guide
+- Fermionic simulation guide, dynamical decoupling guide, resource estimation guide
 - Quantum programming patterns
 - Hardware platform comparison, hardware validation guide, qubit routing guide
 - SDK benchmarking methodology, v0.3.0 roadmap candidates
