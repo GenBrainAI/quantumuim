@@ -3,14 +3,14 @@
 [![CI](https://github.com/GenBrainAI/quantumuim/actions/workflows/ci.yml/badge.svg)](https://github.com/GenBrainAI/quantumuim/actions/workflows/ci.yml)
 [![Python 3.10+](https://img.shields.io/badge/python-3.10%2B-blue.svg)](https://www.python.org/downloads/)
 [![License: MIT](https://img.shields.io/badge/License-MIT-green.svg)](LICENSE)
-[![Tests](https://img.shields.io/badge/tests-1041%20passed-brightgreen.svg)](tests/)
+[![Tests](https://img.shields.io/badge/tests-1095%20passed-brightgreen.svg)](tests/)
 [![Coverage](https://img.shields.io/badge/coverage-report-yellow.svg)](https://github.com/GenBrainAI/quantumuim/actions/workflows/ci.yml)
 
 A comprehensive quantum computing SDK for Python. Build quantum circuits, run
 algorithms, simulate noise, and execute on real hardware from IBM, Google, and
 Amazon — all through a single, clean API.
 
-**26 modules** | **12 algorithms** | **4 hardware backends** | **1041+ tests**
+**26 modules** | **12 algorithms** | **4 hardware backends** | **1095+ tests**
 
 ### Key Features
 
@@ -193,6 +193,13 @@ qc = pqc.bind({theta: 1.57})
 | `CirqBackend` | Google | Cirq simulator, Google Quantum Engine |
 | `BraketBackend` | Amazon | IonQ, Rigetti, OQC, QuEra, SV1/DM1/TN1 |
 
+### Hardware Validation (`tests/test_backends/`)
+- Comprehensive test suite for all 4 backends: Bell, GHZ, Grover, QFT round-trip
+- Statistical validation: chi-squared goodness-of-fit and Hellinger fidelity
+- Vendor tests skip gracefully when SDK not installed
+- Noise model calibration: depolarizing degradation, monotonicity, gate-specific noise
+- Cross-backend comparison with automated fidelity checks
+
 ### Circuit Templates (`quantumium.circuits`)
 Bell pair, GHZ state, quantum teleportation, QFT / inverse QFT
 
@@ -224,6 +231,7 @@ python examples/tensor_network_demo.py      # MPS simulation
 python examples/surface_code_demo.py        # Surface code QEC
 python examples/zx_calculus_demo.py         # ZX-calculus optimization
 python examples/networking_demo.py          # Quantum networking
+python examples/hardware_validation_demo.py # Backend validation
 python examples/algorithms/vqe_h2_example.py    # VQE for H2
 python examples/algorithms/qaoa_maxcut_example.py  # QAOA MaxCut
 ```
@@ -233,7 +241,7 @@ See `examples/` for the full list.
 ## Testing
 
 ```bash
-python -m pytest tests/ -q    # 1041 tests
+python -m pytest tests/ -q    # 1095 tests
 ```
 
 ## Documentation
