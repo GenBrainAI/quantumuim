@@ -9,7 +9,6 @@ from quantumium.qplus.recycle import (
     QubitRecycler,
     FeedForwardController,
     RecycleEvent,
-    FeedForwardOp,
 )
 from quantumium.qplus.compress import ModularArithmeticOptimizer
 
@@ -151,7 +150,6 @@ class TestQubitRecycler:
                 result[1] *= (-1) ** power
                 return result
 
-            initial_state = np.array([0, 1], dtype=complex)
             phase, bits = qr.simulate_recycled_phase_estimation(ctrl_z, 1, 5)
             results.append(phase)
         mean_phase = np.mean(results)

@@ -7,7 +7,8 @@ QFT, reduces Shor's algorithm from 2n+3 to n+1 qubits.
 
 from __future__ import annotations
 
-from dataclasses import dataclass, field
+from collections.abc import Callable
+from dataclasses import dataclass
 
 import numpy as np
 from numpy.typing import NDArray
@@ -172,7 +173,6 @@ class QubitRecycler:
                 prob_0 += abs(state[i]) ** 2
 
         outcome = 0 if np.random.random() < prob_0 else 1
-        prob = prob_0 if outcome == 0 else (1.0 - prob_0)
 
         new_state = np.zeros_like(state)
         for i in range(dim):
@@ -220,7 +220,7 @@ class QubitRecycler:
 
     def simulate_recycled_phase_estimation(
         self,
-        controlled_u_fn: callable,
+        controlled_u_fn: Callable[[int, NDArray[np.complexfloating]], NDArray[np.complexfloating]],
         n_work: int,
         n_counting_bits: int,
     ) -> tuple[float, list[int]]:

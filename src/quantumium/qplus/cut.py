@@ -14,8 +14,7 @@ from itertools import product
 import numpy as np
 from numpy.typing import NDArray
 
-from ..core.circuit import QuantumCircuit
-from ..core.gate import Gate, H, S, X, I as I_gate
+from ..core.gate import Gate
 
 
 PAULI_LABELS = ["I", "X", "Y", "Z"]
@@ -128,7 +127,6 @@ class CircuitCutter:
             coeff = 1.0
 
             for cut_idx, (prep, meas, c) in enumerate(combo):
-                cut = self._cuts[cut_idx]
                 prep_config[cut_idx] = prep
                 meas_config[cut_idx] = meas
                 coeff *= c

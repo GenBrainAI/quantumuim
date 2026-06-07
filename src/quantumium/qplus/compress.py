@@ -7,8 +7,8 @@ for algorithms like Shor's from 2n+3 down to n+1 qubits.
 
 from __future__ import annotations
 
+from collections.abc import Callable
 from dataclasses import dataclass
-from math import gcd
 
 import numpy as np
 from numpy.typing import NDArray
@@ -43,7 +43,7 @@ class SemiclassicalQFT:
 
     def estimate_phase(
         self,
-        controlled_unitary_fn: callable,
+        controlled_unitary_fn: Callable[[int, NDArray[np.complexfloating]], NDArray[np.complexfloating]],
         n_work: int,
         initial_work_state: NDArray[np.complexfloating] | None = None,
     ) -> SemiclassicalQFTResult:
@@ -74,12 +74,6 @@ class SemiclassicalQFT:
 
         for k in range(self.n_bits - 1, -1, -1):
             power = 2**k
-            control_0 = np.array([1.0, 0.0], dtype=complex)
-            control_plus = np.array([1.0, 1.0], dtype=complex) / np.sqrt(2)
-
-            state_0 = np.kron(control_0, work_state)
-            state_plus = np.kron(control_plus, work_state)
-
             full_state = np.zeros(2 * dim_work, dtype=complex)
             full_state[:dim_work] = work_state / np.sqrt(2)
             ctrl1_work = controlled_unitary_fn(power, work_state)
@@ -191,7 +185,6 @@ class ModularArithmeticOptimizer:
 
         Simulates |x⟩ → |a·x mod N⟩ for computational basis states.
         """
-        dim = 2**n_bits
         perm = ModularArithmeticOptimizer.mod_exp_permutation(a, 1, N, n_bits)
         return perm @ work_state
 

@@ -12,7 +12,7 @@ import numpy as np
 
 from quantumium.qplus.compress import SemiclassicalQFT, ModularArithmeticOptimizer
 from quantumium.qplus.recycle import QubitRecycler
-from quantumium.qplus.cut import CircuitCutter, CutRecombiner, WireCut
+from quantumium.qplus.cut import CircuitCutter, WireCut
 from quantumium.qplus.distribute import QPUOrchestrator
 
 

@@ -8,7 +8,6 @@ import pytest
 from quantumium.qplus.distribute import (
     QPUOrchestrator,
     DistributionStrategy,
-    DistributionPlan,
     DistributedResult,
     QPUPartition,
 )

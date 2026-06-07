@@ -14,7 +14,7 @@ from enum import Enum
 import numpy as np
 from numpy.typing import NDArray
 
-from .cut import CircuitCutter, CutRecombiner, WireCut
+from .cut import WireCut
 
 
 class DistributionStrategy(Enum):
