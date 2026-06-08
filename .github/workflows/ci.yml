@@ -49,11 +49,8 @@ jobs:
           python -m pip install --upgrade pip
           pip install -e ".[dev]"
 
-      - name: Type check with mypy
-        run: mypy src/quantumium/ --ignore-missing-imports
-
-      - name: Type check Q+ (strict)
-        run: mypy src/quantumium/qplus/ --strict --ignore-missing-imports
+      - name: Type check with mypy (strict)
+        run: mypy --strict src/quantumium/
 
   test:
     runs-on: ubuntu-latest
@@ -78,10 +75,9 @@ jobs:
 
       - name: Run tests with coverage
         run: >
-          python -m pytest tests/ src/quantumium/qplus/tests/
-          -p no:logfire
+          python -m pytest tests/
           --cov=quantumium --cov-report=term-missing --cov-report=xml
-          --cov-fail-under=70
+          --cov-fail-under=85
           --tb=short -q
 
       - name: Upload coverage report
@@ -90,3 +86,63 @@ jobs:
         with:
           name: coverage-report
           path: coverage.xml
+
+  interop:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+
+      - name: Install dependencies with optional backends
+        run: |
+          python -m pip install --upgrade pip
+          pip install -e ".[dev,qiskit,cirq]"
+
+      - name: Run interop tests
+        run: python -m pytest tests/test_interop.py -v --tb=short
+
+  docs:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -e ".[dev]"
+
+      - name: Build documentation
+        run: mkdocs build --strict
+
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+
+      - name: Install build tools
+        run: python -m pip install --upgrade pip build
+
+      - name: Build sdist and wheel
+        run: python -m build
+
+      - name: Verify package installs
+        run: |
+          pip install dist/quantumium-*.whl
+          python -c "import quantumium; print(f'quantumium {quantumium.__version__}')"
