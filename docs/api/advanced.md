@@ -105,13 +105,6 @@
       show_root_heading: true
       members_order: source
 
-## Qubit Routing
-
-::: quantumium.transpiler.routing
-    options:
-      show_root_heading: true
-      members_order: source
-
 ## Classical Shadows
 
 ::: quantumium.shadows

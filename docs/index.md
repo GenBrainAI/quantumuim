@@ -4,7 +4,7 @@
 
 Build quantum circuits, run algorithms, simulate noise, and execute on real hardware from IBM, Google, and Amazon — all through a single, clean API.
 
-**26 modules** | **12 algorithms** | **4 hardware backends** | **1095+ tests**
+**26 modules** | **12 algorithms** | **4 hardware backends** | **1,709 tests**
 
 ## Quick Start
 
@@ -43,8 +43,29 @@ pip install quantumium[all-backends] # All backends
 - **Advanced simulation** — tensor networks (MPS), stabilizer tableaux, open quantum systems, adiabatic computing
 - **Production tooling** — transpiler, OpenQASM 2.0 import/export, error correction, error mitigation, benchmarking
 
+## Q+ Algorithm
+
+Quantumium includes the Q+ algorithm — a three-layer strategy for solving
+problems larger than available qubit hardware:
+
+```python
+from quantumium.qplus.shor import ShorQPlus
+
+sqp = ShorQPlus()
+result = sqp.factor(143)
+print(f"Factors: {result.factors}")       # (11, 13)
+print(f"Qubits used: {result.qubits_used}")  # 10 (vs 25 standard)
+print(f"Savings: {result.savings_pct:.0f}%")  # 60%
+```
+
+Factors N=143 in **17 ms** using only **10 qubits** — a 60% reduction vs.
+standard Shor's algorithm. See the [Q+ tutorial](tutorials/qplus.md) and
+[benchmarks](benchmarks.md).
+
 ## What's Next?
 
 - [Getting Started](getting-started.md) — step-by-step tutorial
-- [Examples](examples.md) — 33 runnable scripts covering every module
+- [Tutorials](tutorials/bell-state.md) — Bell state, VQE, Q+ walkthroughs
+- [Examples](examples.md) — 35 runnable scripts covering every module
 - [API Reference](api/core.md) — full module documentation
+- [Benchmarks](benchmarks.md) — performance data across all backends

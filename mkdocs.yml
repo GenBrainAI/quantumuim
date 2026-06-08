@@ -1,5 +1,5 @@
 site_name: Quantumium
-site_description: Comprehensive quantum computing SDK for Python
+site_description: Quantum computing SDK for Python — circuits, algorithms, simulation, and hardware backends
 site_url: https://genbrainai.github.io/quantumuim
 repo_url: https://github.com/GenBrainAI/quantumuim
 repo_name: GenBrainAI/quantumuim
@@ -24,11 +24,14 @@ theme:
         name: Switch to light mode
   features:
     - content.code.copy
+    - content.code.annotate
     - navigation.sections
     - navigation.expand
     - navigation.top
+    - navigation.indexes
     - search.suggest
     - search.highlight
+    - toc.follow
   icon:
     repo: fontawesome/brands/github
 
@@ -41,7 +44,9 @@ plugins:
             docstring_style: google
             show_source: true
             show_root_heading: true
+            show_symbol_type_heading: true
             members_order: source
+            merge_init_into_class: true
 
 markdown_extensions:
   - admonition
@@ -54,16 +59,26 @@ markdown_extensions:
       alternate_style: true
   - toc:
       permalink: true
+  - attr_list
+  - pymdownx.emoji:
+      emoji_index: !!python/name:material.extensions.emoji.twemoji
+      emoji_generator: !!python/name:material.extensions.emoji.to_svg
 
 nav:
   - Home: index.md
   - Getting Started: getting-started.md
+  - Tutorials:
+    - Bell State & Entanglement: tutorials/bell-state.md
+    - VQE for Molecular Chemistry: tutorials/vqe.md
+    - "Q+: Factor with Fewer Qubits": tutorials/qplus.md
   - Examples: examples.md
   - API Reference:
-    - Core: api/core.md
+    - Core (Circuit, Gates, Noise): api/core.md
     - Algorithms: api/algorithms.md
-    - Backends: api/backends.md
-    - Applications: api/applications.md
+    - Q+ Algorithm: api/qplus.md
+    - Transpiler & Routing: api/transpiler.md
+    - Backends (IBM, Google, Amazon): api/backends.md
+    - Applications (Chemistry, Finance, ML): api/applications.md
     - Advanced: api/advanced.md
   - Benchmarks: benchmarks.md
   - Contributing: contributing.md

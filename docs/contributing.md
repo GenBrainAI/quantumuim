@@ -39,10 +39,10 @@ src/quantumium/
     finance/        # Option pricing, risk analysis
     transpiler/     # Circuit optimization, OpenQASM
     ...
-tests/              # Test suite (1095+ tests)
-examples/           # Runnable example scripts (33)
-docs/               # MkDocs documentation
-kb/                 # Knowledge base articles (21)
+tests/              # Test suite (1,709 tests)
+examples/           # Runnable example scripts (35)
+docs/               # MkDocs documentation site
+benchmarks/         # Performance benchmark suite
 ```
 
 ## Testing
