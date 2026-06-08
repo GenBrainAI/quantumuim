@@ -5,12 +5,14 @@ Demonstrates that ShorQPlus.factor() successfully factors semiprimes
 (15, 21, 35, 77, 143) using n+2 qubits instead of 3n+1 qubits.
 """
 
+from __future__ import annotations
+
 import time
 
 from quantumium.qplus.shor import ShorQPlus
 
 
-SEMIPRIMES = [
+SEMIPRIMES: list[tuple[int, int, int]] = [
     (15, 3, 5),
     (21, 3, 7),
     (35, 5, 7),
@@ -19,7 +21,7 @@ SEMIPRIMES = [
 ]
 
 
-def benchmark_factoring():
+def benchmark_factoring() -> None:
     print("SHOR Q+ BENCHMARK")
     print("=" * 70)
     print(f"{'N':>5} {'n_bits':>6} {'Std Qubits':>10} {'Q+ Qubits':>10} "
@@ -39,6 +41,7 @@ def benchmark_factoring():
         t0 = time.time()
 
         success = False
+        result = shor.factor(N, max_attempts=15)
         for attempt in range(30):
             result = shor.factor(N, max_attempts=15)
             if result.success and result.factors is not None:
@@ -49,7 +52,7 @@ def benchmark_factoring():
 
         elapsed = time.time() - t0
 
-        if success:
+        if success and result.factors is not None:
             p, q = sorted(result.factors)
             status = f"{p} x {q}"
             total_successes += 1
@@ -81,7 +84,7 @@ def benchmark_factoring():
           f"using {comp['semiclassical_qft']} qubits instead of {comp['standard_shor']}")
 
 
-def main():
+def main() -> None:
     benchmark_factoring()
 
 

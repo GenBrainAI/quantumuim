@@ -8,7 +8,10 @@ Demonstrates:
 4. Multi-QPU distribution planning (Layer 3b: Distribute)
 """
 
+from __future__ import annotations
+
 import numpy as np
+from numpy.typing import NDArray
 
 from quantumium.qplus.compress import SemiclassicalQFT, ModularArithmeticOptimizer
 from quantumium.qplus.recycle import QubitRecycler
@@ -16,7 +19,7 @@ from quantumium.qplus.cut import CircuitCutter, WireCut
 from quantumium.qplus.distribute import QPUOrchestrator
 
 
-def demo_layer1_compress():
+def demo_layer1_compress() -> None:
     """Layer 1: Semiclassical QFT reduces counting qubits to 1."""
     print("=" * 60)
     print("LAYER 1: Algorithmic Compression (Semiclassical QFT)")
@@ -24,15 +27,15 @@ def demo_layer1_compress():
 
     print("\nPhase estimation for Z gate (eigenvalue -1, phase = 0.5):")
 
-    def ctrl_z(power, state):
-        result = state.copy()
-        result[1] *= (-1) ** power
-        return result
+    def ctrl_z(power: int, state: NDArray[np.complexfloating]) -> NDArray[np.complexfloating]:
+        out = np.array(state, dtype=complex)
+        out[1] *= (-1) ** power
+        return out
 
     sqft = SemiclassicalQFT(n_bits=8)
     initial = np.array([0, 1], dtype=complex)
 
-    phases = []
+    phases: list[float] = []
     for trial in range(10):
         result = sqft.estimate_phase(ctrl_z, 1, initial)
         phases.append(result.phase)
@@ -49,7 +52,7 @@ def demo_layer1_compress():
         print(f"  {strategy:15s}: {qubits} qubits for 8-bit number")
 
 
-def demo_layer2_recycle():
+def demo_layer2_recycle() -> None:
     """Layer 2: Qubit recycling reuses measured qubits."""
     print("\n" + "=" * 60)
     print("LAYER 2: Qubit Recycling")
@@ -60,7 +63,7 @@ def demo_layer2_recycle():
 
     n_bits = 4
 
-    def ctrl_u(power, state):
+    def ctrl_u(power: int, state: NDArray[np.complexfloating]) -> NDArray[np.complexfloating]:
         perm = ModularArithmeticOptimizer.mod_exp_permutation(7, power, 15, n_bits)
         return perm @ state
 
@@ -80,7 +83,7 @@ def demo_layer2_recycle():
     print(f"  Qubits: {n_bits + 1} (1 recycled counting + {n_bits} work)")
 
 
-def demo_layer3a_cut():
+def demo_layer3a_cut() -> None:
     """Layer 3a: Circuit cutting for distributing across QPUs."""
     print("\n" + "=" * 60)
     print("LAYER 3a: Circuit Cutting")
@@ -104,7 +107,7 @@ def demo_layer3a_cut():
     print(f"  Reconstructed expectation: {result:.4f} (expected: 1.0)")
 
 
-def demo_layer3b_distribute():
+def demo_layer3b_distribute() -> None:
     """Layer 3b: Multi-QPU orchestration."""
     print("\n" + "=" * 60)
     print("LAYER 3b: Multi-QPU Distribution")
@@ -123,7 +126,7 @@ def demo_layer3b_distribute():
         print(f"  {n_q} qubits, {n_qpu} QPUs, quantum_link={qlink}: {rec}")
 
 
-def main():
+def main() -> None:
     print("Q+ ALGORITHM DEMO")
     print("Beyond-qubit-count quantum computing framework\n")
 

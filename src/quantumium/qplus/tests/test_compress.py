@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import numpy as np
 import pytest
+from numpy.typing import NDArray
 
 from quantumium.qplus.compress import (
     SemiclassicalQFT,
@@ -15,54 +16,54 @@ from quantumium.qplus.compress import (
 
 
 class TestSemiclassicalQFT:
-    def test_init_valid(self):
+    def test_init_valid(self) -> None:
         sqft = SemiclassicalQFT(5)
         assert sqft.n_bits == 5
 
-    def test_init_invalid(self):
+    def test_init_invalid(self) -> None:
         with pytest.raises(ValueError, match="n_bits must be >= 1"):
             SemiclassicalQFT(0)
 
-    def test_estimate_phase_identity(self):
+    def test_estimate_phase_identity(self) -> None:
         """Identity unitary should give phase ~0."""
         sqft = SemiclassicalQFT(4)
 
-        def ctrl_u(power, state):
-            return state.copy()
+        def ctrl_u(power: int, state: NDArray[np.complexfloating]) -> NDArray[np.complexfloating]:
+            return np.array(state, dtype=complex)
 
         result = sqft.estimate_phase(ctrl_u, 1)
         assert isinstance(result, SemiclassicalQFTResult)
         assert result.n_qubits_used == 2
 
-    def test_estimate_phase_result_structure(self):
+    def test_estimate_phase_result_structure(self) -> None:
         sqft = SemiclassicalQFT(3)
 
-        def ctrl_u(power, state):
-            return state.copy()
+        def ctrl_u(power: int, state: NDArray[np.complexfloating]) -> NDArray[np.complexfloating]:
+            return np.array(state, dtype=complex)
 
         result = sqft.estimate_phase(ctrl_u, 2)
         assert len(result.measured_bits) == 3
         assert all(b in (0, 1) for b in result.measured_bits)
         assert 0.0 <= result.phase < 1.0
 
-    def test_qubit_savings(self):
+    def test_qubit_savings(self) -> None:
         """Semiclassical QFT uses n_work+1 qubits, not n_work+n_counting."""
         sqft = SemiclassicalQFT(8)
 
-        def ctrl_u(power, state):
-            return state.copy()
+        def ctrl_u(power: int, state: NDArray[np.complexfloating]) -> NDArray[np.complexfloating]:
+            return np.array(state, dtype=complex)
 
         result = sqft.estimate_phase(ctrl_u, 4)
         assert result.n_qubits_used == 5  # 1 counting + 4 work
 
-    def test_estimate_phase_z_gate(self):
+    def test_estimate_phase_z_gate(self) -> None:
         """Z gate has eigenvalue -1 = e^{i*pi}, phase should be ~0.5."""
         sqft = SemiclassicalQFT(6)
 
-        def ctrl_z(power, state):
-            result = state.copy()
-            result[1] *= (-1) ** power
-            return result
+        def ctrl_z(power: int, state: NDArray[np.complexfloating]) -> NDArray[np.complexfloating]:
+            out = np.array(state, dtype=complex)
+            out[1] *= (-1) ** power
+            return out
 
         initial = np.array([0, 1], dtype=complex)
         phases = []
@@ -74,23 +75,23 @@ class TestSemiclassicalQFT:
 
 
 class TestModularArithmeticOptimizer:
-    def test_qubit_count_standard(self):
+    def test_qubit_count_standard(self) -> None:
         assert ModularArithmeticOptimizer.qubit_count(4, "standard") == 13
 
-    def test_qubit_count_beauregard(self):
+    def test_qubit_count_beauregard(self) -> None:
         assert ModularArithmeticOptimizer.qubit_count(4, "beauregard") == 11
 
-    def test_qubit_count_haner(self):
+    def test_qubit_count_haner(self) -> None:
         assert ModularArithmeticOptimizer.qubit_count(4, "haner") == 10
 
-    def test_qubit_count_semiclassical(self):
+    def test_qubit_count_semiclassical(self) -> None:
         assert ModularArithmeticOptimizer.qubit_count(4, "semiclassical") == 6
 
-    def test_qubit_count_unknown_strategy(self):
+    def test_qubit_count_unknown_strategy(self) -> None:
         with pytest.raises(ValueError):
             ModularArithmeticOptimizer.qubit_count(4, "unknown")
 
-    def test_mod_exp_permutation_basic(self):
+    def test_mod_exp_permutation_basic(self) -> None:
         perm = ModularArithmeticOptimizer.mod_exp_permutation(2, 1, 15, 4)
         assert perm.shape == (16, 16)
         state = np.zeros(16, dtype=complex)
@@ -98,41 +99,41 @@ class TestModularArithmeticOptimizer:
         result = perm @ state
         assert abs(result[2]) > 0.99  # 2*1 mod 15 = 2
 
-    def test_mod_exp_permutation_unitarity(self):
+    def test_mod_exp_permutation_unitarity(self) -> None:
         perm = ModularArithmeticOptimizer.mod_exp_permutation(7, 1, 15, 4)
         identity = np.eye(16, dtype=complex)
         assert np.allclose(perm @ perm.conj().T, identity, atol=1e-10)
 
-    def test_mod_exp_permutation_power(self):
+    def test_mod_exp_permutation_power(self) -> None:
         perm = ModularArithmeticOptimizer.mod_exp_permutation(2, 3, 15, 4)
         state = np.zeros(16, dtype=complex)
         state[1] = 1.0
         result = perm @ state
         assert abs(result[8]) > 0.99  # 2^3 * 1 mod 15 = 8
 
-    def test_mod_exp_overflow_identity(self):
+    def test_mod_exp_overflow_identity(self) -> None:
         perm = ModularArithmeticOptimizer.mod_exp_permutation(2, 1, 15, 4)
         state = np.zeros(16, dtype=complex)
         state[15] = 1.0  # x=15 >= N=15, should be identity
         result = perm @ state
         assert abs(result[15]) > 0.99
 
-    def test_controlled_mod_multiply(self):
+    def test_controlled_mod_multiply(self) -> None:
         state = np.zeros(16, dtype=complex)
         state[3] = 1.0  # |3⟩
         result = ModularArithmeticOptimizer.controlled_mod_multiply(2, 15, 4, state)
         assert abs(result[6]) > 0.99  # 2*3 mod 15 = 6
 
-    def test_create_config(self):
+    def test_create_config(self) -> None:
         config = ModularArithmeticOptimizer.create_config(7, 15, "beauregard")
         assert isinstance(config, CompressedModExpConfig)
         assert config.a == 7
         assert config.N == 15
         assert config.strategy == "beauregard"
 
-    def test_compressed_order_finding_15(self):
+    def test_compressed_order_finding_15(self) -> None:
         """Order of 7 mod 15 is 4."""
-        results = []
+        results: list[int] = []
         for _ in range(30):
             phase, order, qubits = ModularArithmeticOptimizer.compressed_order_finding(
                 7, 15, strategy="semiclassical"
@@ -141,7 +142,7 @@ class TestModularArithmeticOptimizer:
                 results.append(order)
         assert any(r == 4 for r in results), f"Expected order 4, got {results}"
 
-    def test_compressed_order_finding_qubit_savings(self):
+    def test_compressed_order_finding_qubit_savings(self) -> None:
         _, _, qubits = ModularArithmeticOptimizer.compressed_order_finding(
             7, 15, strategy="semiclassical"
         )
@@ -150,20 +151,20 @@ class TestModularArithmeticOptimizer:
 
 
 class TestExtractOrder:
-    def test_exact_phase(self):
+    def test_exact_phase(self) -> None:
         order = _extract_order(0.25, 7, 15)
         assert order == 4
 
-    def test_zero_phase(self):
+    def test_zero_phase(self) -> None:
         assert _extract_order(0.0, 7, 15) is None
 
-    def test_known_phase(self):
+    def test_known_phase(self) -> None:
         # phase = 1/4 for order 4
         order = _extract_order(0.25, 2, 15)
         assert order is not None
         assert pow(2, order, 15) == 1
 
-    def test_approximate_phase(self):
+    def test_approximate_phase(self) -> None:
         order = _extract_order(0.2501, 7, 15)
         assert order is not None
         assert pow(7, order, 15) == 1
