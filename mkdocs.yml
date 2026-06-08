@@ -80,6 +80,7 @@ nav:
     - Backends (IBM, Google, Amazon): api/backends.md
     - Applications (Chemistry, Finance, ML): api/applications.md
     - Advanced: api/advanced.md
+  - Interoperability: interop.md
   - Benchmarks: benchmarks.md
   - Contributing: contributing.md
   - Changelog: changelog.md
