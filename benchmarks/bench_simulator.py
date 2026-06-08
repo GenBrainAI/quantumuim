@@ -133,7 +133,7 @@ def _run_bench(name: str, category: str, nq: int, builder, run_fn, iterations: i
     return result
 
 
-# --- Statevector benchmarks (max 8 qubits — SDK uses O(4^n) full matrix multiply) ---
+# --- Statevector benchmarks (tensor contraction — O(2^n) per gate) ---
 
 
 def bench_statevector(iterations: int) -> list[BenchResult]:
@@ -144,12 +144,23 @@ def bench_statevector(iterations: int) -> list[BenchResult]:
         ("GHZ-5", 5, lambda: _build_ghz(5)),
         ("GHZ-7", 7, lambda: _build_ghz(7)),
         ("GHZ-8", 8, lambda: _build_ghz(8)),
+        ("GHZ-10", 10, lambda: _build_ghz(10)),
+        ("GHZ-12", 12, lambda: _build_ghz(12)),
+        ("GHZ-15", 15, lambda: _build_ghz(15)),
+        ("GHZ-20", 20, lambda: _build_ghz(20)),
         ("QFT-3", 3, lambda: _build_qft(3)),
         ("QFT-5", 5, lambda: _build_qft(5)),
         ("QFT-7", 7, lambda: _build_qft(7)),
+        ("QFT-10", 10, lambda: _build_qft(10)),
+        ("QFT-12", 12, lambda: _build_qft(12)),
+        ("QFT-15", 15, lambda: _build_qft(15)),
         ("Random-5x5", 5, lambda: _build_random(5, 5)),
         ("Random-7x3", 7, lambda: _build_random(7, 3)),
         ("Random-8x3", 8, lambda: _build_random(8, 3)),
+        ("Random-10x5", 10, lambda: _build_random(10, 5)),
+        ("Random-12x3", 12, lambda: _build_random(12, 3)),
+        ("Random-15x3", 15, lambda: _build_random(15, 3)),
+        ("Random-20x3", 20, lambda: _build_random(20, 3)),
     ]
     for name, nq, builder in configs:
         results.append(
@@ -158,7 +169,7 @@ def bench_statevector(iterations: int) -> list[BenchResult]:
     return results
 
 
-# --- Density matrix benchmarks (max 7 qubits — O(4^n) with Kraus channels) ---
+# --- Density matrix benchmarks (tensor contraction with Kraus channels) ---
 
 
 def bench_density_matrix(iterations: int) -> list[BenchResult]:
@@ -173,9 +184,11 @@ def bench_density_matrix(iterations: int) -> list[BenchResult]:
         ("GHZ-3-noisy", 3, lambda: _build_ghz(3)),
         ("GHZ-5-noisy", 5, lambda: _build_ghz(5)),
         ("GHZ-7-noisy", 7, lambda: _build_ghz(7)),
+        ("GHZ-10-noisy", 10, lambda: _build_ghz(10)),
         ("Random-3x5-noisy", 3, lambda: _build_random(3, 5)),
         ("Random-5x3-noisy", 5, lambda: _build_random(5, 3)),
         ("Random-7x3-noisy", 7, lambda: _build_random(7, 3)),
+        ("Random-10x3-noisy", 10, lambda: _build_random(10, 3)),
     ]
     for name, nq, builder in configs:
         results.append(

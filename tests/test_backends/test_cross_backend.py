@@ -85,6 +85,7 @@ class TestNoiseModelCalibration:
 
     def test_noisy_measurement_adds_errors(self, bell_circuit):
         noise = NoiseModel(default_single_qubit_noise=depolarizing(0.1))
+        noise.add_gate_noise("CNOT", depolarizing(0.05))
         counts = bell_circuit.noisy_measure(noise, shots=SHOTS)
         p01 = counts.get("01", 0) / SHOTS
         p10 = counts.get("10", 0) / SHOTS

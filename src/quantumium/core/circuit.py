@@ -74,9 +74,41 @@ class QuantumCircuit:
         state[0] = 1.0
 
         for inst in self._instructions:
-            full_matrix = self._expand_gate(inst.gate.matrix, inst.target_qubits, n)
-            state = full_matrix @ state
+            state = self._apply_gate_to_statevector(
+                state, inst.gate.matrix, inst.target_qubits, n
+            )
         return state
+
+    @staticmethod
+    def _apply_gate_to_statevector(
+        state: NDArray[np.complexfloating],
+        gate_matrix: NDArray[np.complexfloating],
+        target_qubits: tuple[int, ...],
+        num_qubits: int,
+    ) -> NDArray[np.complexfloating]:
+        """Apply a gate via tensor contraction — O(2^n * 4^k) instead of O(4^n)."""
+        n = num_qubits
+        k = len(target_qubits)
+        state_tensor = state.reshape((2,) * n)
+        gate_tensor = gate_matrix.reshape((2,) * (2 * k))
+
+        # Qubit q maps to axis (n - 1 - q) in the reshaped tensor
+        target_axes = [n - 1 - q for q in target_qubits]
+
+        # Contract gate input indices [k..2k-1] with state's target axes
+        result = np.tensordot(
+            gate_tensor, state_tensor, axes=(list(range(k, 2 * k)), target_axes)
+        )
+
+        # Move gate output axes (currently first k axes) back to target positions
+        remaining_axes = sorted(set(range(n)) - set(target_axes))
+        perm = [0] * n
+        for j in range(k):
+            perm[target_axes[j]] = j
+        for j in range(n - k):
+            perm[remaining_axes[j]] = k + j
+
+        return result.transpose(perm).reshape(2**n)
 
     def _expand_gate(
         self,
@@ -121,16 +153,88 @@ class QuantumCircuit:
         rho[0, 0] = 1.0
 
         for inst in self._instructions:
-            U = self._expand_gate(inst.gate.matrix, inst.target_qubits, n)
-            rho = U @ rho @ U.conj().T
+            rho = self._apply_gate_to_density_matrix(
+                rho, inst.gate.matrix, inst.target_qubits, n
+            )
 
             if noise_model is not None:
                 channel = noise_model.get_noise(inst.gate.name, inst.gate.num_qubits)
                 if channel is not None:
                     for q in inst.target_qubits:
-                        rho = self._apply_single_qubit_channel(rho, channel, q, n)
+                        rho = self._apply_channel_tensor(rho, channel, q, n)
 
         return rho
+
+    @staticmethod
+    def _apply_gate_to_density_matrix(
+        rho: NDArray[np.complexfloating],
+        gate_matrix: NDArray[np.complexfloating],
+        target_qubits: tuple[int, ...],
+        num_qubits: int,
+    ) -> NDArray[np.complexfloating]:
+        """Apply ρ' = U ρ U† via tensor contraction — O(4^n * 4^k) instead of O(8^n)."""
+        n = num_qubits
+        k = len(target_qubits)
+        dim = 2**n
+
+        # Reshape ρ as rank-2n tensor: first n axes = ket, last n axes = bra
+        rho_tensor = rho.reshape((2,) * (2 * n))
+        gate_tensor = gate_matrix.reshape((2,) * (2 * k))
+
+        target_axes_ket = [n - 1 - q for q in target_qubits]
+        target_axes_bra = [n + n - 1 - q for q in target_qubits]
+
+        # Step 1: Apply U to ket side — contract gate input with ket axes
+        result = np.tensordot(
+            gate_tensor, rho_tensor, axes=(list(range(k, 2 * k)), target_axes_ket)
+        )
+        # Gate output axes [0..k-1] are now first, then remaining 2n-k axes
+        remaining_ket = sorted(set(range(n)) - set(target_axes_ket))
+        remaining_bra = list(range(n, 2 * n))
+        all_remaining = remaining_ket + remaining_bra
+
+        perm = [0] * (2 * n)
+        for j in range(k):
+            perm[target_axes_ket[j]] = j
+        for j in range(len(all_remaining)):
+            perm[all_remaining[j]] = k + j
+        result = result.transpose(perm)
+
+        # Step 2: Apply U† to bra side — contract conj(gate) input with bra axes
+        gate_conj = gate_matrix.conj().reshape((2,) * (2 * k))
+        result = np.tensordot(
+            gate_conj, result, axes=(list(range(k, 2 * k)), target_axes_bra)
+        )
+        remaining_all = sorted(set(range(2 * n)) - set(target_axes_bra))
+
+        perm2 = [0] * (2 * n)
+        for j in range(k):
+            perm2[target_axes_bra[j]] = j
+        for j in range(len(remaining_all)):
+            perm2[remaining_all[j]] = k + j
+        result = result.transpose(perm2)
+
+        return result.reshape(dim, dim)
+
+    @staticmethod
+    def _apply_channel_tensor(
+        rho: NDArray[np.complexfloating],
+        channel: NoiseChannel,
+        qubit: int,
+        num_qubits: int,
+    ) -> NDArray[np.complexfloating]:
+        """Apply a single-qubit noise channel via tensor contraction."""
+        n = num_qubits
+        dim = 2**n
+        result = np.zeros((dim, dim), dtype=complex)
+
+        target_qubits = (qubit,)
+        for kraus in channel.kraus_operators:
+            rho_k = QuantumCircuit._apply_gate_to_density_matrix(
+                rho, kraus, target_qubits, n
+            )
+            result += rho_k
+        return result
 
     @staticmethod
     def _apply_single_qubit_channel(

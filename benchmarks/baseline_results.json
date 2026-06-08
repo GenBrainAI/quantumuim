@@ -13,13 +13,13 @@
       "num_qubits": 2,
       "circuit_depth": 2,
       "gate_count": 2,
-      "mean_ms": 0.067,
-      "std_ms": 0.03,
-      "peak_memory_delta_kb": 0.0,
+      "mean_ms": 0.061,
+      "std_ms": 0.036,
+      "peak_memory_delta_kb": 140.0,
       "times_ms": [
-        0.102,
-        0.052,
-        0.049
+        0.101,
+        0.048,
+        0.034
       ]
     },
     {
@@ -28,13 +28,13 @@
       "num_qubits": 3,
       "circuit_depth": 3,
       "gate_count": 3,
-      "mean_ms": 0.242,
-      "std_ms": 0.027,
+      "mean_ms": 0.047,
+      "std_ms": 0.012,
       "peak_memory_delta_kb": 0.0,
       "times_ms": [
-        0.241,
-        0.269,
-        0.216
+        0.06,
+        0.042,
+        0.038
       ]
     },
     {
@@ -43,13 +43,13 @@
       "num_qubits": 5,
       "circuit_depth": 5,
       "gate_count": 5,
-      "mean_ms": 5.98,
-      "std_ms": 0.399,
+      "mean_ms": 0.077,
+      "std_ms": 0.015,
       "peak_memory_delta_kb": 0.0,
       "times_ms": [
-        5.886,
-        5.636,
-        6.418
+        0.094,
+        0.07,
+        0.067
       ]
     },
     {
@@ -58,13 +58,13 @@
       "num_qubits": 7,
       "circuit_depth": 7,
       "gate_count": 7,
-      "mean_ms": 443.79,
-      "std_ms": 29.49,
-      "peak_memory_delta_kb": 512.0,
+      "mean_ms": 0.111,
+      "std_ms": 0.012,
+      "peak_memory_delta_kb": 0.0,
       "times_ms": [
-        409.746,
-        461.441,
-        460.184
+        0.125,
+        0.104,
+        0.104
       ]
     },
     {
@@ -73,13 +73,73 @@
       "num_qubits": 8,
       "circuit_depth": 8,
       "gate_count": 8,
-      "mean_ms": 1452.92,
-      "std_ms": 29.907,
-      "peak_memory_delta_kb": 1632.0,
+      "mean_ms": 0.205,
+      "std_ms": 0.059,
+      "peak_memory_delta_kb": 0.0,
       "times_ms": [
-        1441.175,
-        1430.67,
-        1486.917
+        0.185,
+        0.271,
+        0.16
+      ]
+    },
+    {
+      "name": "GHZ-10",
+      "category": "statevector",
+      "num_qubits": 10,
+      "circuit_depth": 10,
+      "gate_count": 10,
+      "mean_ms": 0.227,
+      "std_ms": 0.017,
+      "peak_memory_delta_kb": 0.0,
+      "times_ms": [
+        0.227,
+        0.244,
+        0.21
+      ]
+    },
+    {
+      "name": "GHZ-12",
+      "category": "statevector",
+      "num_qubits": 12,
+      "circuit_depth": 12,
+      "gate_count": 12,
+      "mean_ms": 0.471,
+      "std_ms": 0.03,
+      "peak_memory_delta_kb": 0.0,
+      "times_ms": [
+        0.48,
+        0.495,
+        0.437
+      ]
+    },
+    {
+      "name": "GHZ-15",
+      "category": "statevector",
+      "num_qubits": 15,
+      "circuit_depth": 15,
+      "gate_count": 15,
+      "mean_ms": 30.905,
+      "std_ms": 14.829,
+      "peak_memory_delta_kb": 1452.0,
+      "times_ms": [
+        33.914,
+        43.999,
+        14.802
+      ]
+    },
+    {
+      "name": "GHZ-20",
+      "category": "statevector",
+      "num_qubits": 20,
+      "circuit_depth": 20,
+      "gate_count": 20,
+      "mean_ms": 970.131,
+      "std_ms": 73.974,
+      "peak_memory_delta_kb": 47664.0,
+      "times_ms": [
+        956.328,
+        904.031,
+        1050.034
       ]
     },
     {
@@ -88,13 +148,13 @@
       "num_qubits": 3,
       "circuit_depth": 5,
       "gate_count": 6,
-      "mean_ms": 0.657,
-      "std_ms": 0.034,
+      "mean_ms": 0.123,
+      "std_ms": 0.043,
       "peak_memory_delta_kb": 0.0,
       "times_ms": [
-        0.695,
-        0.643,
-        0.632
+        0.173,
+        0.098,
+        0.097
       ]
     },
     {
@@ -103,13 +163,13 @@
       "num_qubits": 5,
       "circuit_depth": 9,
       "gate_count": 15,
-      "mean_ms": 42.268,
-      "std_ms": 10.096,
+      "mean_ms": 0.247,
+      "std_ms": 0.105,
       "peak_memory_delta_kb": 0.0,
       "times_ms": [
-        31.361,
-        44.159,
-        51.286
+        0.368,
+        0.199,
+        0.176
       ]
     },
     {
@@ -118,13 +178,58 @@
       "num_qubits": 7,
       "circuit_depth": 13,
       "gate_count": 28,
-      "mean_ms": 1895.829,
-      "std_ms": 133.916,
+      "mean_ms": 0.562,
+      "std_ms": 0.046,
       "peak_memory_delta_kb": 0.0,
       "times_ms": [
-        2049.55,
-        1833.493,
-        1804.444
+        0.613,
+        0.549,
+        0.524
+      ]
+    },
+    {
+      "name": "QFT-10",
+      "category": "statevector",
+      "num_qubits": 10,
+      "circuit_depth": 19,
+      "gate_count": 55,
+      "mean_ms": 3.673,
+      "std_ms": 1.423,
+      "peak_memory_delta_kb": 0.0,
+      "times_ms": [
+        2.089,
+        4.846,
+        4.084
+      ]
+    },
+    {
+      "name": "QFT-12",
+      "category": "statevector",
+      "num_qubits": 12,
+      "circuit_depth": 23,
+      "gate_count": 78,
+      "mean_ms": 4.769,
+      "std_ms": 1.518,
+      "peak_memory_delta_kb": 0.0,
+      "times_ms": [
+        6.131,
+        5.045,
+        3.132
+      ]
+    },
+    {
+      "name": "QFT-15",
+      "category": "statevector",
+      "num_qubits": 15,
+      "circuit_depth": 29,
+      "gate_count": 120,
+      "mean_ms": 86.227,
+      "std_ms": 14.439,
+      "peak_memory_delta_kb": 0.0,
+      "times_ms": [
+        89.375,
+        98.831,
+        70.474
       ]
     },
     {
@@ -133,13 +238,13 @@
       "num_qubits": 5,
       "circuit_depth": 15,
       "gate_count": 45,
-      "mean_ms": 82.937,
-      "std_ms": 32.2,
+      "mean_ms": 0.858,
+      "std_ms": 0.082,
       "peak_memory_delta_kb": 0.0,
       "times_ms": [
-        118.542,
-        55.856,
-        74.413
+        0.903,
+        0.764,
+        0.909
       ]
     },
     {
@@ -148,13 +253,13 @@
       "num_qubits": 7,
       "circuit_depth": 9,
       "gate_count": 39,
-      "mean_ms": 2616.027,
-      "std_ms": 52.259,
-      "peak_memory_delta_kb": 256.0,
+      "mean_ms": 0.78,
+      "std_ms": 0.072,
+      "peak_memory_delta_kb": 0.0,
       "times_ms": [
-        2558.076,
-        2630.433,
-        2659.573
+        0.861,
+        0.723,
+        0.758
       ]
     },
     {
@@ -163,13 +268,73 @@
       "num_qubits": 8,
       "circuit_depth": 9,
       "gate_count": 45,
-      "mean_ms": 8059.11,
-      "std_ms": 22.339,
-      "peak_memory_delta_kb": 1560.0,
+      "mean_ms": 9.159,
+      "std_ms": 14.047,
+      "peak_memory_delta_kb": 0.0,
       "times_ms": [
-        8064.652,
-        8078.157,
-        8034.522
+        0.986,
+        25.379,
+        1.111
+      ]
+    },
+    {
+      "name": "Random-10x5",
+      "category": "statevector",
+      "num_qubits": 10,
+      "circuit_depth": 15,
+      "gate_count": 95,
+      "mean_ms": 2.702,
+      "std_ms": 0.153,
+      "peak_memory_delta_kb": 0.0,
+      "times_ms": [
+        2.805,
+        2.776,
+        2.526
+      ]
+    },
+    {
+      "name": "Random-12x3",
+      "category": "statevector",
+      "num_qubits": 12,
+      "circuit_depth": 9,
+      "gate_count": 69,
+      "mean_ms": 3.018,
+      "std_ms": 0.061,
+      "peak_memory_delta_kb": 0.0,
+      "times_ms": [
+        3.084,
+        3.003,
+        2.965
+      ]
+    },
+    {
+      "name": "Random-15x3",
+      "category": "statevector",
+      "num_qubits": 15,
+      "circuit_depth": 9,
+      "gate_count": 87,
+      "mean_ms": 61.409,
+      "std_ms": 21.808,
+      "peak_memory_delta_kb": 0.0,
+      "times_ms": [
+        44.491,
+        53.715,
+        86.022
+      ]
+    },
+    {
+      "name": "Random-20x3",
+      "category": "statevector",
+      "num_qubits": 20,
+      "circuit_depth": 9,
+      "gate_count": 117,
+      "mean_ms": 4968.802,
+      "std_ms": 248.929,
+      "peak_memory_delta_kb": 7420.0,
+      "times_ms": [
+        4705.927,
+        4999.553,
+        5200.927
       ]
     },
     {
@@ -178,13 +343,13 @@
       "num_qubits": 2,
       "circuit_depth": 2,
       "gate_count": 2,
-      "mean_ms": 1.052,
-      "std_ms": 0.237,
+      "mean_ms": 0.511,
+      "std_ms": 0.038,
       "peak_memory_delta_kb": 0.0,
       "times_ms": [
-        1.005,
-        0.843,
-        1.31
+        0.555,
+        0.488,
+        0.49
       ]
     },
     {
@@ -193,13 +358,13 @@
       "num_qubits": 3,
       "circuit_depth": 3,
       "gate_count": 3,
-      "mean_ms": 2.152,
-      "std_ms": 0.108,
+      "mean_ms": 0.947,
+      "std_ms": 0.123,
       "peak_memory_delta_kb": 0.0,
       "times_ms": [
-        2.276,
-        2.105,
-        2.076
+        0.884,
+        1.088,
+        0.868
       ]
     },
     {
@@ -208,13 +373,13 @@
       "num_qubits": 5,
       "circuit_depth": 5,
       "gate_count": 5,
-      "mean_ms": 22.74,
-      "std_ms": 13.863,
+      "mean_ms": 2.926,
+      "std_ms": 0.779,
       "peak_memory_delta_kb": 0.0,
       "times_ms": [
-        14.922,
-        38.747,
-        14.552
+        3.693,
+        2.135,
+        2.951
       ]
     },
     {
@@ -223,13 +388,28 @@
       "num_qubits": 7,
       "circuit_depth": 7,
       "gate_count": 7,
-      "mean_ms": 711.352,
-      "std_ms": 26.193,
-      "peak_memory_delta_kb": 1044.0,
+      "mean_ms": 26.023,
+      "std_ms": 17.369,
+      "peak_memory_delta_kb": 0.0,
       "times_ms": [
-        738.04,
-        710.335,
-        685.683
+        19.924,
+        45.619,
+        12.525
+      ]
+    },
+    {
+      "name": "GHZ-10-noisy",
+      "category": "density_matrix",
+      "num_qubits": 10,
+      "circuit_depth": 10,
+      "gate_count": 10,
+      "mean_ms": 7001.065,
+      "std_ms": 104.131,
+      "peak_memory_delta_kb": 49264.0,
+      "times_ms": [
+        7109.514,
+        6991.81,
+        6901.869
       ]
     },
     {
@@ -238,13 +418,13 @@
       "num_qubits": 3,
       "circuit_depth": 15,
       "gate_count": 25,
-      "mean_ms": 19.137,
-      "std_ms": 13.195,
+      "mean_ms": 4.876,
+      "std_ms": 0.185,
       "peak_memory_delta_kb": 0.0,
       "times_ms": [
-        12.254,
-        34.35,
-        10.807
+        4.83,
+        4.719,
+        5.08
       ]
     },
     {
@@ -253,13 +433,13 @@
       "num_qubits": 5,
       "circuit_depth": 9,
       "gate_count": 27,
-      "mean_ms": 71.094,
-      "std_ms": 31.771,
+      "mean_ms": 14.261,
+      "std_ms": 12.312,
       "peak_memory_delta_kb": 0.0,
       "times_ms": [
-        106.361,
-        62.21,
-        44.71
+        28.477,
+        7.133,
+        7.172
       ]
     },
     {
@@ -268,13 +448,28 @@
       "num_qubits": 7,
       "circuit_depth": 9,
       "gate_count": 39,
-      "mean_ms": 3346.798,
-      "std_ms": 69.404,
-      "peak_memory_delta_kb": 36.0,
+      "mean_ms": 53.875,
+      "std_ms": 13.229,
+      "peak_memory_delta_kb": 0.0,
       "times_ms": [
-        3424.615,
-        3324.479,
-        3291.299
+        69.028,
+        47.968,
+        44.628
+      ]
+    },
+    {
+      "name": "Random-10x3-noisy",
+      "category": "density_matrix",
+      "num_qubits": 10,
+      "circuit_depth": 9,
+      "gate_count": 57,
+      "mean_ms": 23809.469,
+      "std_ms": 421.208,
+      "peak_memory_delta_kb": 172.0,
+      "times_ms": [
+        23541.936,
+        23591.475,
+        24294.996
       ]
     },
     {
@@ -283,13 +478,13 @@
       "num_qubits": 10,
       "circuit_depth": 10,
       "gate_count": 10,
-      "mean_ms": 9.989,
-      "std_ms": 16.492,
+      "mean_ms": 0.592,
+      "std_ms": 0.258,
       "peak_memory_delta_kb": 0.0,
       "times_ms": [
-        29.032,
-        0.508,
-        0.426
+        0.889,
+        0.44,
+        0.445
       ]
     },
     {
@@ -298,13 +493,13 @@
       "num_qubits": 15,
       "circuit_depth": 15,
       "gate_count": 15,
-      "mean_ms": 0.876,
-      "std_ms": 0.332,
+      "mean_ms": 0.648,
+      "std_ms": 0.011,
       "peak_memory_delta_kb": 0.0,
       "times_ms": [
-        0.707,
-        1.258,
-        0.663
+        0.658,
+        0.65,
+        0.635
       ]
     },
     {
@@ -313,13 +508,13 @@
       "num_qubits": 20,
       "circuit_depth": 20,
       "gate_count": 20,
-      "mean_ms": 0.893,
-      "std_ms": 0.066,
+      "mean_ms": 0.853,
+      "std_ms": 0.011,
       "peak_memory_delta_kb": 0.0,
       "times_ms": [
-        0.864,
-        0.969,
-        0.846
+        0.841,
+        0.862,
+        0.856
       ]
     },
     {
@@ -328,13 +523,13 @@
       "num_qubits": 20,
       "circuit_depth": 20,
       "gate_count": 20,
-      "mean_ms": 0.927,
-      "std_ms": 0.134,
+      "mean_ms": 0.854,
+      "std_ms": 0.013,
       "peak_memory_delta_kb": 0.0,
       "times_ms": [
-        0.871,
-        0.83,
-        1.079
+        0.862,
+        0.861,
+        0.84
       ]
     },
     {
@@ -343,13 +538,13 @@
       "num_qubits": 30,
       "circuit_depth": 30,
       "gate_count": 30,
-      "mean_ms": 13.136,
-      "std_ms": 20.163,
+      "mean_ms": 1.294,
+      "std_ms": 0.02,
       "peak_memory_delta_kb": 0.0,
       "times_ms": [
-        1.726,
-        36.416,
-        1.266
+        1.287,
+        1.279,
+        1.317
       ]
     },
     {
@@ -358,13 +553,13 @@
       "num_qubits": 2,
       "circuit_depth": 1,
       "gate_count": 0,
-      "mean_ms": 96.472,
-      "std_ms": 11.735,
-      "peak_memory_delta_kb": 136.0,
+      "mean_ms": 85.122,
+      "std_ms": 3.908,
+      "peak_memory_delta_kb": 0.0,
       "times_ms": [
-        93.257,
-        86.679,
-        109.479
+        88.827,
+        85.503,
+        81.038
       ]
     },
     {
@@ -373,13 +568,13 @@
       "num_qubits": 4,
       "circuit_depth": 1,
       "gate_count": 0,
-      "mean_ms": 1701.352,
-      "std_ms": 11.699,
-      "peak_memory_delta_kb": 276.0,
+      "mean_ms": 422.073,
+      "std_ms": 17.371,
+      "peak_memory_delta_kb": 0.0,
       "times_ms": [
-        1697.311,
-        1714.536,
-        1692.209
+        403.833,
+        423.967,
+        438.42
       ]
     },
     {
@@ -388,13 +583,13 @@
       "num_qubits": 6,
       "circuit_depth": 1,
       "gate_count": 0,
-      "mean_ms": 108737.869,
-      "std_ms": 4578.147,
-      "peak_memory_delta_kb": 472.0,
+      "mean_ms": 5061.186,
+      "std_ms": 262.328,
+      "peak_memory_delta_kb": 0.0,
       "times_ms": [
-        103455.456,
-        111201.569,
-        111556.583
+        4790.601,
+        5314.394,
+        5078.563
       ]
     },
     {
@@ -403,13 +598,13 @@
       "num_qubits": 6,
       "circuit_depth": 0,
       "gate_count": 0,
-      "mean_ms": 0.451,
-      "std_ms": 0.11,
+      "mean_ms": 0.432,
+      "std_ms": 0.099,
       "peak_memory_delta_kb": 0.0,
       "times_ms": [
-        0.574,
-        0.416,
-        0.363
+        0.543,
+        0.401,
+        0.351
       ]
     },
     {
@@ -418,13 +613,13 @@
       "num_qubits": 7,
       "circuit_depth": 0,
       "gate_count": 0,
-      "mean_ms": 0.493,
-      "std_ms": 0.033,
+      "mean_ms": 0.519,
+      "std_ms": 0.02,
       "peak_memory_delta_kb": 0.0,
       "times_ms": [
-        0.511,
-        0.455,
-        0.514
+        0.535,
+        0.525,
+        0.496
       ]
     },
     {
@@ -433,13 +628,13 @@
       "num_qubits": 8,
       "circuit_depth": 0,
       "gate_count": 0,
-      "mean_ms": 0.892,
-      "std_ms": 0.036,
+      "mean_ms": 0.864,
+      "std_ms": 0.027,
       "peak_memory_delta_kb": 0.0,
       "times_ms": [
-        0.922,
-        0.902,
-        0.852
+        0.892,
+        0.84,
+        0.86
       ]
     },
     {
@@ -448,13 +643,13 @@
       "num_qubits": 9,
       "circuit_depth": 0,
       "gate_count": 0,
-      "mean_ms": 1.806,
-      "std_ms": 0.097,
+      "mean_ms": 1.701,
+      "std_ms": 0.026,
       "peak_memory_delta_kb": 0.0,
       "times_ms": [
-        1.744,
-        1.917,
-        1.756
+        1.729,
+        1.698,
+        1.676
       ]
     },
     {
@@ -463,13 +658,13 @@
       "num_qubits": 10,
       "circuit_depth": 0,
       "gate_count": 0,
-      "mean_ms": 17.167,
-      "std_ms": 19.407,
-      "peak_memory_delta_kb": 512.0,
+      "mean_ms": 22.534,
+      "std_ms": 13.49,
+      "peak_memory_delta_kb": 0.0,
       "times_ms": [
-        6.384,
-        39.57,
-        5.546
+        24.458,
+        8.186,
+        34.959
       ]
     }
   ]

@@ -15,16 +15,16 @@ python benchmarks/bench_simulator.py --iterations 5 --output my_results.json
 
 ## Benchmark Categories
 
-### 1. Statevector Simulation (2-8 qubits)
+### 1. Statevector Simulation (2-20 qubits)
 
-Full statevector simulation using O(4^n) matrix multiply:
+Statevector simulation using O(2^n) tensor contraction per gate:
 
 | Benchmark | Qubits | Description |
 |-----------|--------|-------------|
 | Bell | 2 | H + CNOT Bell pair |
-| GHZ-3/5/7/8 | 3-8 | GHZ state preparation |
-| QFT-3/5/7 | 3-7 | Quantum Fourier Transform |
-| Random-NxD | 5-8 | Random 1Q gates + CNOT layers |
+| GHZ-3/5/7/8/10/12/15/20 | 3-20 | GHZ state preparation |
+| QFT-3/5/7/10/12/15 | 3-15 | Quantum Fourier Transform |
+| Random-NxD | 5-20 | Random 1Q gates + CNOT layers |
 
 ### 2. Density Matrix Simulation (2-7 qubits)
 
@@ -121,7 +121,7 @@ A >1.5x slowdown on any benchmark warrants investigation.
 
 ## Scaling Notes
 
-The SDK's statevector simulator uses full 2^n x 2^n matrix multiplication for each gate,
-giving O(4^n) per-gate cost. This limits practical statevector benchmarks to ~8-10 qubits.
+The statevector simulator uses tensor contraction (np.tensordot) for gate application,
+giving O(2^n * 4^k) per k-qubit gate. This scales to ~20 qubits on commodity hardware.
 For larger circuits, MPS simulation scales polynomially in qubit count (linear in bond dimension),
 making it suitable for circuits with bounded entanglement.
