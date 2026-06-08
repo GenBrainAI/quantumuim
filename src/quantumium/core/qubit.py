@@ -18,18 +18,22 @@ class Qubit:
 
     @classmethod
     def zero(cls) -> Qubit:
+        """Create the |0⟩ state."""
         return cls(1.0, 0.0)
 
     @classmethod
     def one(cls) -> Qubit:
+        """Create the |1⟩ state."""
         return cls(0.0, 1.0)
 
     @classmethod
     def plus(cls) -> Qubit:
+        """Create the |+⟩ = (|0⟩ + |1⟩)/√2 state."""
         return cls(1.0 / np.sqrt(2), 1.0 / np.sqrt(2))
 
     @classmethod
     def minus(cls) -> Qubit:
+        """Create the |−⟩ = (|0⟩ − |1⟩)/√2 state."""
         return cls(1.0 / np.sqrt(2), -1.0 / np.sqrt(2))
 
     @property
@@ -41,6 +45,7 @@ class Qubit:
         return float(np.abs(self._state[0]) ** 2), float(np.abs(self._state[1]) ** 2)
 
     def measure(self) -> int:
+        """Measure the qubit, collapsing it to |0⟩ or |1⟩. Returns 0 or 1."""
         p0, _ = self.probabilities
         result = 0 if np.random.random() < p0 else 1
         self._state = np.array([1, 0], dtype=complex) if result == 0 else np.array([0, 1], dtype=complex)

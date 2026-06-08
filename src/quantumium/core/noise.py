@@ -21,6 +21,7 @@ class NoiseChannel:
             raise ValueError(f"Kraus operators for '{self.name}' do not satisfy completeness")
 
     def apply(self, density_matrix: NDArray[np.complexfloating]) -> NDArray[np.complexfloating]:
+        """Apply this noise channel to a density matrix via Kraus operators."""
         return sum(k @ density_matrix @ k.conj().T for k in self.kraus_operators)  # type: ignore[return-value]
 
 
@@ -71,9 +72,11 @@ class NoiseModel:
     default_two_qubit_noise: NoiseChannel | None = None
 
     def add_gate_noise(self, gate_name: str, channel: NoiseChannel) -> None:
+        """Register a noise channel for a specific gate by name."""
         self.gate_noise[gate_name] = channel
 
     def get_noise(self, gate_name: str, num_qubits: int) -> NoiseChannel | None:
+        """Look up the noise channel for a gate, falling back to defaults."""
         if gate_name in self.gate_noise:
             return self.gate_noise[gate_name]
         if num_qubits == 1 and self.default_single_qubit_noise:

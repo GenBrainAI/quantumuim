@@ -26,7 +26,8 @@ class QuantumCircuit:
         self.num_qubits = num_qubits
         self._instructions: list[Instruction] = []
 
-    def apply(self, gate: Gate, *qubits: int) -> QuantumCircuit:
+    def apply(self, gate: Gate, *qubits: int) -> "QuantumCircuit":
+        """Apply a gate to the specified qubit(s). Returns self for chaining."""
         for q in qubits:
             if q < 0 or q >= self.num_qubits:
                 raise IndexError(f"Qubit index {q} out of range for {self.num_qubits}-qubit circuit")
@@ -65,6 +66,7 @@ class QuantumCircuit:
         return len(layers)
 
     def statevector(self) -> NDArray[np.complexfloating]:
+        """Simulate the circuit and return the final state vector."""
         n = self.num_qubits
         state = np.zeros(2**n, dtype=complex)
         state[0] = 1.0
@@ -164,6 +166,7 @@ class QuantumCircuit:
         return dict(sorted(counts.items()))
 
     def measure_all(self, shots: int = 1024) -> dict[str, int]:
+        """Measure all qubits in the computational basis and return bitstring counts."""
         state = self.statevector()
         probabilities = np.abs(state) ** 2
         indices = np.arange(len(state))
