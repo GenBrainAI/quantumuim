@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "quantumium"
-version = "0.1.0"
+version = "0.3.0"
 description = "Quantum computing SDK — circuits, algorithms, hardware backends, and error mitigation for NISQ and beyond"
 readme = "README.md"
 license = "MIT"

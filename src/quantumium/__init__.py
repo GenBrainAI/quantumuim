@@ -51,4 +51,19 @@ utils
     Entanglement measures and ASCII circuit visualization.
 """
 
-__version__ = "0.1.0"
+__version__ = "0.3.0"
+
+from .core import QuantumCircuit, Gate, Qubit, Instruction
+from .core import H, X, Y, Z, S, T, I, CNOT, SWAP, CZ, CCX
+from .core import Rx, Ry, Rz
+from .core import NoiseChannel, NoiseModel, bit_flip, phase_flip, depolarizing, amplitude_damping
+from .core import Parameter, ParameterVector, ParameterizedCircuit
+
+__all__ = [
+    "QuantumCircuit", "Gate", "Qubit", "Instruction",
+    "H", "X", "Y", "Z", "S", "T", "I", "CNOT", "SWAP", "CZ", "CCX",
+    "Rx", "Ry", "Rz",
+    "NoiseChannel", "NoiseModel",
+    "bit_flip", "phase_flip", "depolarizing", "amplitude_damping",
+    "Parameter", "ParameterVector", "ParameterizedCircuit",
+]
