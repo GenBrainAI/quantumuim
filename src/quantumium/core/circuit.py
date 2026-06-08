@@ -74,9 +74,7 @@ class QuantumCircuit:
         state[0] = 1.0
 
         for inst in self._instructions:
-            state = self._apply_gate_to_statevector(
-                state, inst.gate.matrix, inst.target_qubits, n
-            )
+            state = self._apply_gate_to_statevector(state, inst.gate.matrix, inst.target_qubits, n)
         return state
 
     @staticmethod
@@ -96,9 +94,7 @@ class QuantumCircuit:
         target_axes = [n - 1 - q for q in target_qubits]
 
         # Contract gate input indices [k..2k-1] with state's target axes
-        result = np.tensordot(
-            gate_tensor, state_tensor, axes=(list(range(k, 2 * k)), target_axes)
-        )
+        result = np.tensordot(gate_tensor, state_tensor, axes=(list(range(k, 2 * k)), target_axes))
 
         # Move gate output axes (currently first k axes) back to target positions
         remaining_axes = sorted(set(range(n)) - set(target_axes))
@@ -153,9 +149,7 @@ class QuantumCircuit:
         rho[0, 0] = 1.0
 
         for inst in self._instructions:
-            rho = self._apply_gate_to_density_matrix(
-                rho, inst.gate.matrix, inst.target_qubits, n
-            )
+            rho = self._apply_gate_to_density_matrix(rho, inst.gate.matrix, inst.target_qubits, n)
 
             if noise_model is not None:
                 channel = noise_model.get_noise(inst.gate.name, inst.gate.num_qubits)
@@ -202,9 +196,7 @@ class QuantumCircuit:
 
         # Step 2: Apply U† to bra side — contract conj(gate) input with bra axes
         gate_conj = gate_matrix.conj().reshape((2,) * (2 * k))
-        result = np.tensordot(
-            gate_conj, result, axes=(list(range(k, 2 * k)), target_axes_bra)
-        )
+        result = np.tensordot(gate_conj, result, axes=(list(range(k, 2 * k)), target_axes_bra))
         remaining_all = sorted(set(range(2 * n)) - set(target_axes_bra))
 
         perm2 = [0] * (2 * n)
@@ -230,9 +222,7 @@ class QuantumCircuit:
 
         target_qubits = (qubit,)
         for kraus in channel.kraus_operators:
-            rho_k = QuantumCircuit._apply_gate_to_density_matrix(
-                rho, kraus, target_qubits, n
-            )
+            rho_k = QuantumCircuit._apply_gate_to_density_matrix(rho, kraus, target_qubits, n)
             result += rho_k
         return result
 

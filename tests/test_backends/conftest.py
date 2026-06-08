@@ -27,6 +27,10 @@ requires_qiskit = pytest.mark.skipif(
     not _can_import("qiskit"),
     reason="qiskit not installed",
 )
+requires_qiskit_aer = pytest.mark.skipif(
+    not (_can_import("qiskit") and _can_import("qiskit_aer")),
+    reason="qiskit-aer not installed",
+)
 requires_cirq = pytest.mark.skipif(
     not _can_import("cirq"),
     reason="cirq not installed",

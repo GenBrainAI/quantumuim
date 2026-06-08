@@ -2,18 +2,13 @@
 
 from __future__ import annotations
 
-import math
 import re
 
-import numpy as np
-
 try:
-    import qiskit  # type: ignore[import-not-found]
-    from qiskit.circuit import QuantumCircuit as QiskitCircuit  # type: ignore[import-not-found]
+    from qiskit.circuit import QuantumCircuit as QiskitCircuit
 except ImportError as e:
     raise ImportError(
-        "Qiskit is required for circuit conversion. "
-        "Install it with: pip install quantumium[qiskit]"
+        "Qiskit is required for circuit conversion. Install it with: pip install quantumium[qiskit]"
     ) from e
 
 from quantumium.core.circuit import QuantumCircuit
@@ -55,7 +50,7 @@ _FIXED_GATE_TO_QISKIT: dict[str, str] = {
 _PARAM_GATE_PATTERN = re.compile(r"^(Rx|Ry|Rz|CRx|CRy|CRz|Rxx|Rzz)\((-?[\d.]+)\)$")
 
 
-def to_qiskit(circuit: QuantumCircuit) -> QiskitCircuit:  # type: ignore[type-arg]
+def to_qiskit(circuit: QuantumCircuit) -> QiskitCircuit:
     """Convert a Quantumium circuit to a Qiskit QuantumCircuit."""
     qc = QiskitCircuit(circuit.num_qubits)
 
@@ -118,7 +113,7 @@ _QISKIT_PARAM_GATE_MAP: dict[str, type] = {
 }
 
 
-def from_qiskit(qiskit_circuit: QiskitCircuit) -> QuantumCircuit:  # type: ignore[type-arg]
+def from_qiskit(qiskit_circuit: QiskitCircuit) -> QuantumCircuit:
     """Convert a Qiskit QuantumCircuit to a Quantumium circuit."""
     qc = QuantumCircuit(qiskit_circuit.num_qubits)
 

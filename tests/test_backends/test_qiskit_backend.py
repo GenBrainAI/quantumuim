@@ -9,6 +9,7 @@ from quantumium.backends.qiskit_backend import QiskitBackend
 
 from .conftest import (
     requires_qiskit,
+    requires_qiskit_aer,
     chi_squared_test,
     hellinger_fidelity,
 )
@@ -35,7 +36,7 @@ class TestQiskitBackendMeta:
         assert isinstance(backend.is_available(), bool)
 
 
-@requires_qiskit
+@requires_qiskit_aer
 class TestQiskitSimulator:
     def test_bell_state(self, bell_circuit):
         backend = QiskitBackend()
