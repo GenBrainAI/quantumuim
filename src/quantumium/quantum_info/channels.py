@@ -177,9 +177,7 @@ def kraus_to_ptm(
     ptm = np.zeros((n, n), dtype=float)
     for i, Pi in enumerate(paulis):
         for j, Pj in enumerate(paulis):
-            val = sum(
-                np.trace(Pi @ K @ Pj @ K.conj().T) for K in kraus_ops
-            )
+            val = sum(np.trace(Pi @ K @ Pj @ K.conj().T) for K in kraus_ops)
             ptm[i, j] = float(np.real(val))
 
     return ptm
@@ -289,9 +287,7 @@ class QuantumChannel:
         return cls(_kraus=kraus_ops, name=name)
 
     @classmethod
-    def from_choi(
-        cls, choi: NDArray[np.complexfloating], name: str = ""
-    ) -> QuantumChannel:
+    def from_choi(cls, choi: NDArray[np.complexfloating], name: str = "") -> QuantumChannel:
         """Create a QuantumChannel from a Choi matrix.
 
         Args:
@@ -320,9 +316,7 @@ class QuantumChannel:
         return cls(_superop=superop, name=name)
 
     @classmethod
-    def from_unitary(
-        cls, U: NDArray[np.complexfloating], name: str = ""
-    ) -> QuantumChannel:
+    def from_unitary(cls, U: NDArray[np.complexfloating], name: str = "") -> QuantumChannel:
         """Create a QuantumChannel from a single unitary matrix.
 
         The channel is represented as a single Kraus operator equal to U.

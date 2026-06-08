@@ -1,6 +1,5 @@
 """Tests for quantumium.adiabatic — adiabatic quantum computing."""
 
-import math
 import numpy as np
 import pytest
 
@@ -24,6 +23,7 @@ I2 = np.eye(2, dtype=complex)
 # ============================================================
 # Hamiltonians
 # ============================================================
+
 
 class TestHamiltonians:
     def test_transverse_field_hermitian(self):
@@ -87,6 +87,7 @@ class TestHamiltonians:
 # Schedule functions
 # ============================================================
 
+
 class TestSchedules:
     def test_linear_boundaries(self):
         assert linear_schedule(0, 10) == 0.0
@@ -107,6 +108,7 @@ class TestSchedules:
 # ============================================================
 # Spectral gap
 # ============================================================
+
 
 class TestSpectralGap:
     def test_gap_shape(self):
@@ -137,6 +139,7 @@ class TestSpectralGap:
 # Adiabatic evolution
 # ============================================================
 
+
 class TestAdiabaticEvolution:
     def test_returns_result(self):
         H_init = transverse_field_hamiltonian(2)
@@ -150,8 +153,10 @@ class TestAdiabaticEvolution:
         H_init = -SX
         H_final = -SZ
         result = adiabatic_evolve(
-            H_init, H_final,
-            total_time=20.0, num_steps=2000,
+            H_init,
+            H_final,
+            total_time=20.0,
+            num_steps=2000,
         )
         assert result.ground_state_prob > 0.95
 
@@ -187,8 +192,10 @@ class TestAdiabaticEvolution:
         H_init = -SX
         H_final = -SZ
         result = adiabatic_evolve(
-            H_init, H_final,
-            total_time=20.0, num_steps=2000,
+            H_init,
+            H_final,
+            total_time=20.0,
+            num_steps=2000,
         )
         assert result.optimal_bitstring == "0"
 
@@ -196,8 +203,10 @@ class TestAdiabaticEvolution:
         H_init = -SX
         H_final = -SZ
         result = adiabatic_evolve(
-            H_init, H_final,
-            total_time=10.0, num_steps=1000,
+            H_init,
+            H_final,
+            total_time=10.0,
+            num_steps=1000,
             schedule=lambda t, T: polynomial_schedule(t, T, power=3),
         )
         assert result.ground_state_prob > 0.8
@@ -207,8 +216,10 @@ class TestAdiabaticEvolution:
         J = np.array([[0, 1], [0, 0]], dtype=float)
         H_final = ising_hamiltonian(2, J=J)
         result = adiabatic_evolve(
-            H_init, H_final,
-            total_time=20.0, num_steps=2000,
+            H_init,
+            H_final,
+            total_time=20.0,
+            num_steps=2000,
         )
         # Ground state of -ZZ is |00> or |11> (degenerate)
         probs = np.abs(result.final_state) ** 2
@@ -222,8 +233,10 @@ class TestAdiabaticEvolution:
         # For adiabatic, we want to find the max, so negate
         H_final = -maxcut_hamiltonian(3, edges)
         result = adiabatic_evolve(
-            H_init, H_final,
-            total_time=30.0, num_steps=3000,
+            H_init,
+            H_final,
+            total_time=30.0,
+            num_steps=3000,
         )
         # Should find a bitstring that cuts 2 edges
         bs = result.optimal_bitstring
@@ -235,8 +248,10 @@ class TestAdiabaticEvolution:
         H_final = -SZ
         psi0 = np.array([1, 0], dtype=complex)  # |0> instead of ground state of H_init
         result = adiabatic_evolve(
-            H_init, H_final,
-            total_time=10.0, num_steps=1000,
+            H_init,
+            H_final,
+            total_time=10.0,
+            num_steps=1000,
             initial_state=psi0,
         )
         assert isinstance(result, AdiabaticResult)

@@ -5,13 +5,15 @@ from __future__ import annotations
 import numpy as np
 import pytest
 
-from quantumium.core.gate import H, X, Y, Z, S, T, CNOT, SWAP, CZ, Rx, Ry, Rz, Rxx, Rzz
+from quantumium.core.gate import H, X, CNOT, SWAP, Rx, Ry, Rz, Rxx, Rzz
 from quantumium.core.circuit import QuantumCircuit
 from quantumium.core.noise import NoiseModel, bit_flip, depolarizing, amplitude_damping
 from quantumium.core.parameter import (
-    Parameter, ParameterizedCircuit, hardware_efficient_template,
+    Parameter,
+    ParameterizedCircuit,
+    hardware_efficient_template,
 )
-from quantumium.transpiler.passes import transpile, count_gates, circuit_depth
+from quantumium.transpiler.passes import transpile, count_gates
 from quantumium.circuits.templates import bell_pair, ghz_state, qft, inverse_qft
 
 
@@ -43,9 +45,7 @@ class TestCircuitBuildTranspileSimulate:
         state_orig = qc.statevector()
         optimized = transpile(qc)
         state_opt = optimized.statevector()
-        np.testing.assert_allclose(
-            np.abs(state_orig) ** 2, np.abs(state_opt) ** 2, atol=1e-10
-        )
+        np.testing.assert_allclose(np.abs(state_orig) ** 2, np.abs(state_opt) ** 2, atol=1e-10)
 
     def test_qft_inverse_qft_pipeline(self) -> None:
         """QFT followed by inverse QFT should be identity."""
@@ -63,9 +63,7 @@ class TestCircuitBuildTranspileSimulate:
         for inst in inverse_qft(n).instructions:
             qc_roundtrip.apply(inst.gate, *inst.target_qubits)
         state_after = qc_roundtrip.statevector()
-        np.testing.assert_allclose(
-            np.abs(state_after) ** 2, np.abs(state_before) ** 2, atol=1e-10
-        )
+        np.testing.assert_allclose(np.abs(state_after) ** 2, np.abs(state_before) ** 2, atol=1e-10)
 
     def test_transpile_redundant_gates_removed(self) -> None:
         qc = QuantumCircuit(2)
@@ -82,6 +80,7 @@ class TestCircuitBuildTranspileSimulate:
 
     def test_swap_decompose_and_optimize(self) -> None:
         from quantumium.transpiler.passes import decompose_swap
+
         qc = QuantumCircuit(2)
         qc.apply(H, 0)
         qc.apply(SWAP, 0, 1)
@@ -234,9 +233,7 @@ class TestCircuitTemplatesPipeline:
         assert abs(np.linalg.norm(state) - 1.0) < 1e-10
         optimized = transpile(qc)
         state_opt = optimized.statevector()
-        np.testing.assert_allclose(
-            np.abs(state) ** 2, np.abs(state_opt) ** 2, atol=1e-10
-        )
+        np.testing.assert_allclose(np.abs(state) ** 2, np.abs(state_opt) ** 2, atol=1e-10)
 
     def test_two_qubit_rotation_gates(self) -> None:
         qc = QuantumCircuit(2)

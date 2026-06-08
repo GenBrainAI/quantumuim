@@ -12,12 +12,11 @@ Each reduces to choosing the right QSP polynomial and angles.
 from __future__ import annotations
 
 import math
-from dataclasses import dataclass
 
 import numpy as np
 from numpy.typing import NDArray
 
-from .qsvt import QSVTResult, block_encoding, qsvt_transform
+from .qsvt import QSVTResult, qsvt_transform
 from .angle_finding import find_qsp_angles
 
 
@@ -75,7 +74,8 @@ def qsvt_matrix_inversion(
         target = target * 0.95 / max_abs
 
     # Fit to Chebyshev basis
-    from .angle_finding import _chebyshev, _fit_chebyshev
+    from .angle_finding import _fit_chebyshev
+
     coeffs = _fit_chebyshev(target, grid, degree)
 
     angles = find_qsp_angles(coeffs, num_iterations=500, learning_rate=0.01)
@@ -120,6 +120,7 @@ def qsvt_hamiltonian_sim(
 
     # Approximate cos(τx) via Chebyshev fitting on a grid
     from .angle_finding import _fit_chebyshev
+
     grid = np.linspace(-1, 1, 100)
     target = np.cos(tau * grid)
 
@@ -163,6 +164,7 @@ def qsvt_amplitude_amplification(
     d = 2 * num_iterations + 1
 
     from .angle_finding import chebyshev_angles
+
     angles = chebyshev_angles(d)
 
     return qsvt_transform(A, angles)

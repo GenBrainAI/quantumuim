@@ -13,7 +13,6 @@ from __future__ import annotations
 import numpy as np
 from numpy.typing import NDArray
 
-from ..core.circuit import QuantumCircuit
 from .encoding import zz_feature_map, angle_encode
 
 

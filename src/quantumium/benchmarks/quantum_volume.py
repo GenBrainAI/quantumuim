@@ -122,6 +122,7 @@ class QVResult:
         num_circuits: Number of random model circuits averaged over.
         threshold: Heavy output probability threshold used (typically 2/3).
     """
+
     num_qubits: int
     quantum_volume: int
     heavy_output_prob: float

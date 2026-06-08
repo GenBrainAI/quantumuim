@@ -8,7 +8,6 @@ Requires: pip install amazon-braket-sdk
 
 from __future__ import annotations
 
-import numpy as np
 
 from ..core.circuit import QuantumCircuit
 from .base import Backend, ExecutionResult
@@ -82,6 +81,7 @@ class BraketBackend(Backend):
         """
         try:
             import braket  # noqa: F401
+
             return True
         except ImportError:
             return False
@@ -99,7 +99,6 @@ class BraketBackend(Backend):
             braket.circuits.Circuit: The equivalent Braket circuit.
         """
         from braket.circuits import Circuit as BraketCircuit
-        from braket.circuits.gates import Unitary
 
         braket_circuit = BraketCircuit()
 
@@ -130,7 +129,9 @@ class BraketBackend(Backend):
             RuntimeError: If the Amazon Braket SDK is not installed.
         """
         if not self.is_available():
-            raise RuntimeError("Amazon Braket SDK is not installed. Run: pip install amazon-braket-sdk")
+            raise RuntimeError(
+                "Amazon Braket SDK is not installed. Run: pip install amazon-braket-sdk"
+            )
 
         from braket.aws import AwsDevice
         from braket.devices import LocalSimulator

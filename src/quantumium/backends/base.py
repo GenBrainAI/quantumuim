@@ -24,6 +24,7 @@ class ExecutionResult:
         metadata: Arbitrary backend-specific metadata (device ARN, timing
             information, etc.).
     """
+
     counts: dict[str, int]
     shots: int
     backend_name: str

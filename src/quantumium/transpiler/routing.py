@@ -8,12 +8,12 @@ hardware with limited qubit connectivity. The SABRE algorithm
 from __future__ import annotations
 
 from collections import deque
-from dataclasses import dataclass, field
+from dataclasses import dataclass
 
 import numpy as np
 
 from ..core.circuit import QuantumCircuit, Instruction
-from ..core.gate import SWAP, CNOT, Gate
+from ..core.gate import SWAP, Gate
 
 
 class CouplingMap:
@@ -70,7 +70,7 @@ class CouplingMap:
     def distance(self, q1: int, q2: int) -> int:
         if self._dist is None:
             self._build_distance_matrix()
-        return self._dist.get((q1, q2), float('inf'))
+        return self._dist.get((q1, q2), float("inf"))
 
     def shortest_path(self, q1: int, q2: int) -> list[int]:
         if q1 == q2:
@@ -166,6 +166,7 @@ class Layout:
 @dataclass
 class RoutingResult:
     """Result of routing a circuit onto a coupling map."""
+
     circuit: QuantumCircuit
     initial_layout: Layout
     final_layout: Layout
@@ -217,6 +218,7 @@ class SABRERouter:
         rng = np.random.RandomState(self._seed)
         best_result = None
         best_initial = None
+        best_layout = initial_layout.copy()
 
         for iteration in range(self._max_iterations):
             if iteration % 2 == 0:
@@ -296,10 +298,7 @@ class SABRERouter:
                             del qubit_deps[q]
                 continue
 
-            unresolved_2q = [
-                idx for idx in front_layer
-                if instructions[idx].gate.num_qubits == 2
-            ]
+            unresolved_2q = [idx for idx in front_layer if instructions[idx].gate.num_qubits == 2]
 
             if not unresolved_2q:
                 for idx in front_layer:
@@ -319,7 +318,7 @@ class SABRERouter:
             )
 
             best_swap = None
-            best_score = float('inf')
+            best_score = float("inf")
 
             candidate_phys = set()
             for idx in unresolved_2q:
@@ -341,8 +340,7 @@ class SABRERouter:
 
             for p1, p2 in swap_candidates:
                 score = self._score_swap(
-                    p1, p2, layout, coupling_map, instructions,
-                    unresolved_2q, extended_set
+                    p1, p2, layout, coupling_map, instructions, unresolved_2q, extended_set
                 )
                 if score < best_score:
                     best_score = score

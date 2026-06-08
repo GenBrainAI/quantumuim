@@ -155,8 +155,12 @@ class TestQplusResult:
 
     def test_result_defaults(self) -> None:
         result = QplusResult(
-            N=15, factors=None, success=False,
-            qubits_used=6, qubits_standard=13, qubit_savings=7,
+            N=15,
+            factors=None,
+            success=False,
+            qubits_used=6,
+            qubits_standard=13,
+            qubit_savings=7,
         )
         assert result.order is None
         assert result.layers_used == []
@@ -165,11 +169,16 @@ class TestQplusResult:
 class TestShorQPlusMultipleNumbers:
     """Test factoring across multiple semiprimes."""
 
-    @pytest.mark.parametrize("N,expected_factors", [
-        (15, {(3, 5), (5, 3)}),
-        (21, {(3, 7), (7, 3)}),
-    ])
-    def test_factor_semiprimes_reliable(self, N: int, expected_factors: set[tuple[int, int]]) -> None:
+    @pytest.mark.parametrize(
+        "N,expected_factors",
+        [
+            (15, {(3, 5), (5, 3)}),
+            (21, {(3, 7), (7, 3)}),
+        ],
+    )
+    def test_factor_semiprimes_reliable(
+        self, N: int, expected_factors: set[tuple[int, int]]
+    ) -> None:
         shor = ShorQPlus(strategy="recycled")
         successes = 0
         for _ in range(30):

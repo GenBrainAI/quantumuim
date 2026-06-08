@@ -29,6 +29,7 @@ from quantumium.finance.portfolio import (
 # Black-Scholes Tests
 # ============================================================
 
+
 class TestBlackScholes:
     def test_call_basic(self):
         price = black_scholes_price(100, 100, 0.05, 0.2, 1.0, "call")
@@ -70,6 +71,7 @@ class TestBlackScholes:
 # Distribution Helpers
 # ============================================================
 
+
 class TestHelpers:
     def test_norm_cdf(self):
         assert abs(_norm_cdf(0) - 0.5) < 1e-10
@@ -99,6 +101,7 @@ class TestHelpers:
 # ============================================================
 # Quantum Option Pricing
 # ============================================================
+
 
 class TestEuropeanOptionPrice:
     def test_call_returns_result(self):
@@ -143,6 +146,7 @@ class TestEuropeanOptionPrice:
 # Classical VaR
 # ============================================================
 
+
 class TestClassicalVaR:
     def test_basic(self):
         losses = np.array([1, 2, 3, 4, 5], dtype=float)
@@ -174,6 +178,7 @@ class TestClassicalVaR:
 # ============================================================
 # Quantum VaR
 # ============================================================
+
 
 class TestQuantumVaR:
     def test_returns_result(self):
@@ -207,6 +212,7 @@ class TestQuantumVaR:
 # Portfolio QUBO
 # ============================================================
 
+
 class TestPortfolioQUBO:
     def test_qubo_shape(self):
         mu = np.array([0.1, 0.2, 0.15])
@@ -216,9 +222,7 @@ class TestPortfolioQUBO:
 
     def test_qubo_symmetric(self):
         mu = np.array([0.1, 0.2, 0.15])
-        sigma = np.array([[0.04, 0.01, 0.005],
-                          [0.01, 0.09, 0.01],
-                          [0.005, 0.01, 0.06]])
+        sigma = np.array([[0.04, 0.01, 0.005], [0.01, 0.09, 0.01], [0.005, 0.01, 0.06]])
         Q = _portfolio_qubo(mu, sigma, 0.5, 2, 1.0)
         np.testing.assert_array_almost_equal(Q, Q.T)
 
@@ -239,6 +243,7 @@ class TestPortfolioQUBO:
 # Quantum Portfolio Optimization
 # ============================================================
 
+
 class TestPortfolioOptimization:
     def test_returns_result(self):
         mu = [0.1, 0.2, 0.15, 0.05]
@@ -254,9 +259,7 @@ class TestPortfolioOptimization:
 
     def test_three_assets(self):
         mu = [0.15, 0.10, 0.05]
-        sigma = [[0.04, 0.005, 0.001],
-                 [0.005, 0.02, 0.002],
-                 [0.001, 0.002, 0.01]]
+        sigma = [[0.04, 0.005, 0.001], [0.005, 0.02, 0.002], [0.001, 0.002, 0.01]]
         result = quantum_portfolio_optimization(mu, sigma, budget=1, num_restarts=100)
         assert len(result.selection) == 1
         assert result.num_assets == 3
@@ -281,8 +284,13 @@ class TestPortfolioOptimization:
         mu = [0.01, 0.50]
         sigma = [[0.01, 0], [0, 0.01]]
         result = quantum_portfolio_optimization(
-            mu, sigma, budget=1, risk_factor=0.1, penalty=10.0,
-            qaoa_layers=3, num_restarts=200,
+            mu,
+            sigma,
+            budget=1,
+            risk_factor=0.1,
+            penalty=10.0,
+            qaoa_layers=3,
+            num_restarts=200,
         )
         # With low risk and very different returns, should prefer asset 1
         assert 1 in result.selection

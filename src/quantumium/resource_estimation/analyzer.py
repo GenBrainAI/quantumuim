@@ -92,9 +92,7 @@ class CircuitAnalyzer:
         n_t = self.t_count(circuit)
         n_rot = self.rotation_count(circuit)
         rot_cost = n_rot * self._rotation_t_cost()
-        n_cliff = sum(
-            c for name, c in counts.items() if self._is_clifford(name)
-        )
+        n_cliff = sum(c for name, c in counts.items() if self._is_clifford(name))
         n_meas = counts.get("MEASURE", 0)
 
         return LogicalResources(

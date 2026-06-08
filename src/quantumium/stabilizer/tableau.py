@@ -44,7 +44,7 @@ class StabilizerTableau:
         # Initialize to |0...0>: destabilizers = X_i, stabilizers = Z_i
         self.table = np.zeros((2 * num_qubits, 2 * num_qubits + 1), dtype=np.uint8)
         for i in range(num_qubits):
-            self.table[i, i] = 1              # destabilizer i: X_i
+            self.table[i, i] = 1  # destabilizer i: X_i
             self.table[num_qubits + i, num_qubits + i] = 1  # stabilizer i: Z_i
 
     @property
@@ -141,12 +141,12 @@ class StabilizerTableau:
         for k in range(self.n):
             xa, za = self._x(i, k), self._z(i, k)
             xb, zb = self._x(j, k), self._z(j, k)
-            if xa == 1 and za == 1:      # Y
-                g += zb - xb             # Y*I=Y(0), Y*X=Z(-1), Y*Y=I(0), Y*Z=X(1)
-            elif xa == 1 and za == 0:    # X
-                g += zb * (2 * xb - 1)   # X*I=X(0), X*X=I(0), X*Y=Z(1), X*Z=Y(-1)
-            elif xa == 0 and za == 1:    # Z
-                g += xb * (1 - 2 * zb)   # Z*I=Z(0), Z*X=Y(1), Z*Y=X(-1), Z*Z=I(0)
+            if xa == 1 and za == 1:  # Y
+                g += zb - xb  # Y*I=Y(0), Y*X=Z(-1), Y*Y=I(0), Y*Z=X(1)
+            elif xa == 1 and za == 0:  # X
+                g += zb * (2 * xb - 1)  # X*I=X(0), X*X=I(0), X*Y=Z(1), X*Z=Y(-1)
+            elif xa == 0 and za == 1:  # Z
+                g += xb * (1 - 2 * zb)  # Z*I=Z(0), Z*X=Y(1), Z*Y=X(-1), Z*Z=I(0)
         # g mod 4: if g%4 == 0 or 1, phase contribution is 0; if 2 or 3, it's 1
         return (g % 4) // 2
 
@@ -386,7 +386,8 @@ def to_statevector(tableau: StabilizerTableau) -> NDArray[np.complexfloating]:
 
 
 def _pauli_matrix(
-    tableau: StabilizerTableau, row: int,
+    tableau: StabilizerTableau,
+    row: int,
 ) -> NDArray[np.complexfloating]:
     """Build the full Pauli matrix for a tableau row."""
     n = tableau.n

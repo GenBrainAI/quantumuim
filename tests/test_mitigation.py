@@ -3,7 +3,7 @@
 import numpy as np
 
 from quantumium.core.circuit import QuantumCircuit
-from quantumium.core.gate import X, H as Hgate, Z, CNOT, Ry
+from quantumium.core.gate import X, H as Hgate, Z, CNOT
 from quantumium.mitigation.zne import (
     noise_scaled_circuits,
     richardson_extrapolate,
@@ -23,6 +23,7 @@ from quantumium.mitigation.twirling import (
 
 
 # --- ZNE Tests ---
+
 
 class TestNoiseScaledCircuits:
     def test_scale_1_unchanged(self):
@@ -118,6 +119,7 @@ class TestExtrapolation:
 
 # --- Measurement Error Mitigation Tests ---
 
+
 class TestCalibrationMatrix:
     def test_no_errors(self):
         """With zero error rates, calibration matrix is identity."""
@@ -171,6 +173,7 @@ class TestMitigateCounts:
 
 
 # --- Pauli Twirling Tests ---
+
 
 class TestPauliTwirl:
     def test_twirled_circuit_same_structure(self):

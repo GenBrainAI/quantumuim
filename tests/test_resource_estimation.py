@@ -1,15 +1,12 @@
 """Tests for the resource estimation module."""
 
-import math
-
 import pytest
 
 from quantumium.core.circuit import QuantumCircuit
-from quantumium.core.gate import H, X, Y, Z, S, T, CNOT, CZ, SWAP, CCX, Rz, Rx, Ry
+from quantumium.core.gate import H, X, T, CNOT, SWAP, CCX, Rz, Rx, Ry
 from quantumium.resource_estimation import (
     CircuitAnalyzer,
     LogicalResources,
-    PhysicalEstimate,
     ResourceEstimator,
     MagicStateFactory,
 )
@@ -18,6 +15,7 @@ from quantumium.resource_estimation import (
 # ──────────────────────────────────────────────
 # CircuitAnalyzer — T-gate counting
 # ──────────────────────────────────────────────
+
 
 class TestTCount:
     def test_single_t_gate(self):
@@ -62,6 +60,7 @@ class TestTCount:
 # CircuitAnalyzer — T-depth
 # ──────────────────────────────────────────────
 
+
 class TestTDepth:
     def test_sequential_t(self):
         qc = QuantumCircuit(1)
@@ -101,6 +100,7 @@ class TestTDepth:
 # CircuitAnalyzer — Clifford counting
 # ──────────────────────────────────────────────
 
+
 class TestCliffordCount:
     def test_basic_cliffords(self):
         qc = QuantumCircuit(2)
@@ -129,6 +129,7 @@ class TestCliffordCount:
 # CircuitAnalyzer — rotation gates
 # ──────────────────────────────────────────────
 
+
 class TestRotationCount:
     def test_rz_detected(self):
         qc = QuantumCircuit(1)
@@ -154,6 +155,7 @@ class TestRotationCount:
 # ──────────────────────────────────────────────
 # CircuitAnalyzer — full analysis
 # ──────────────────────────────────────────────
+
 
 class TestAnalyze:
     def test_bell_state_analysis(self):
@@ -199,19 +201,29 @@ class TestAnalyze:
 # LogicalResources
 # ──────────────────────────────────────────────
 
+
 class TestLogicalResources:
     def test_total_t_budget(self):
         lr = LogicalResources(
-            n_qubits=5, n_t_gates=10, t_depth=3,
-            n_clifford=20, n_measurements=0, circuit_depth=15,
-            n_rotation_gates=2, rotation_t_cost=100,
+            n_qubits=5,
+            n_t_gates=10,
+            t_depth=3,
+            n_clifford=20,
+            n_measurements=0,
+            circuit_depth=15,
+            n_rotation_gates=2,
+            rotation_t_cost=100,
         )
         assert lr.total_t_budget == 110
 
     def test_summary_contains_fields(self):
         lr = LogicalResources(
-            n_qubits=3, n_t_gates=7, t_depth=4,
-            n_clifford=10, n_measurements=1, circuit_depth=12,
+            n_qubits=3,
+            n_t_gates=7,
+            t_depth=4,
+            n_clifford=10,
+            n_measurements=1,
+            circuit_depth=12,
         )
         s = lr.summary()
         assert "3" in s
@@ -222,6 +234,7 @@ class TestLogicalResources:
 # MagicStateFactory
 # ──────────────────────────────────────────────
 
+
 class TestMagicStateFactory:
     def test_output_error_one_round(self):
         f = MagicStateFactory(code_distance=7, physical_error_rate=1e-3)
@@ -230,7 +243,7 @@ class TestMagicStateFactory:
     def test_output_error_two_rounds(self):
         f = MagicStateFactory(code_distance=7, physical_error_rate=1e-3, n_distillation_rounds=2)
         p1 = 35.0 * (1e-3) ** 3
-        p2 = 35.0 * p1 ** 3
+        p2 = 35.0 * p1**3
         assert abs(f.output_error_rate - p2) < 1e-30
 
     def test_qubits_per_factory(self):
@@ -268,6 +281,7 @@ class TestMagicStateFactory:
 # ResourceEstimator — code distance
 # ──────────────────────────────────────────────
 
+
 class TestCodeDistance:
     def test_distance_is_odd(self):
         est = ResourceEstimator(physical_error_rate=1e-3)
@@ -296,6 +310,7 @@ class TestCodeDistance:
 # ResourceEstimator — factory count
 # ──────────────────────────────────────────────
 
+
 class TestFactoryCount:
     def test_no_t_gates_no_factory(self):
         est = ResourceEstimator()
@@ -315,6 +330,7 @@ class TestFactoryCount:
 # ──────────────────────────────────────────────
 # ResourceEstimator — full estimation
 # ──────────────────────────────────────────────
+
 
 class TestFullEstimation:
     def test_bell_state_estimate(self):
@@ -390,6 +406,7 @@ class TestFullEstimation:
 # Scaling and monotonicity
 # ──────────────────────────────────────────────
 
+
 class TestScaling:
     def test_more_qubits_more_physical(self):
         est = ResourceEstimator()
@@ -438,6 +455,7 @@ class TestScaling:
 # Edge cases
 # ──────────────────────────────────────────────
 
+
 class TestEdgeCases:
     def test_clifford_only_no_factory(self):
         qc = QuantumCircuit(3)
@@ -458,8 +476,12 @@ class TestEdgeCases:
 
     def test_empty_logical_resources(self):
         lr = LogicalResources(
-            n_qubits=1, n_t_gates=0, t_depth=0,
-            n_clifford=0, n_measurements=0, circuit_depth=0,
+            n_qubits=1,
+            n_t_gates=0,
+            t_depth=0,
+            n_clifford=0,
+            n_measurements=0,
+            circuit_depth=0,
         )
         assert lr.total_t_budget == 0
 

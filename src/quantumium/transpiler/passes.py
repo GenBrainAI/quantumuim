@@ -7,10 +7,9 @@ Passes can be composed via the transpile() pipeline.
 from __future__ import annotations
 
 import numpy as np
-from numpy.typing import NDArray
 
 from ..core.circuit import QuantumCircuit, Instruction
-from ..core.gate import Gate, I, X, Y, Z, H, S, T, CNOT, SWAP
+from ..core.gate import Gate, CNOT, SWAP
 
 
 def _gates_equal(a: Gate, b: Gate) -> bool:
@@ -56,6 +55,7 @@ def _product_gate(a: Gate, b: Gate) -> Gate:
 
 
 # --- Individual passes ---
+
 
 def cancel_inverses(instructions: list[Instruction]) -> list[Instruction]:
     """Remove adjacent gate pairs that multiply to identity.
@@ -170,9 +170,13 @@ def cancel_cnots(instructions: list[Instruction]) -> list[Instruction]:
         if i + 1 < len(instructions):
             curr = instructions[i]
             nxt = instructions[i + 1]
-            if (curr.gate.num_qubits == 2 and nxt.gate.num_qubits == 2
-                    and curr.target_qubits == nxt.target_qubits
-                    and _gates_equal(curr.gate, CNOT) and _gates_equal(nxt.gate, CNOT)):
+            if (
+                curr.gate.num_qubits == 2
+                and nxt.gate.num_qubits == 2
+                and curr.target_qubits == nxt.target_qubits
+                and _gates_equal(curr.gate, CNOT)
+                and _gates_equal(nxt.gate, CNOT)
+            ):
                 i += 2
                 continue
         result.append(instructions[i])

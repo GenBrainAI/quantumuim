@@ -24,7 +24,7 @@ class MagicStateFactory:
 
     @property
     def input_states(self) -> int:
-        return int(15 ** self.n_distillation_rounds)
+        return int(15**self.n_distillation_rounds)
 
     @property
     def output_error_rate(self) -> float:
@@ -50,9 +50,7 @@ class MagicStateFactory:
         return 1.0 / cycle_time
 
     @staticmethod
-    def rounds_needed(
-        physical_error_rate: float, target_t_error: float
-    ) -> int:
+    def rounds_needed(physical_error_rate: float, target_t_error: float) -> int:
         p = physical_error_rate
         rounds = 0
         while p > target_t_error and rounds < 10:

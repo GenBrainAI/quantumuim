@@ -161,9 +161,7 @@ class DDScheduler:
                 count += self.sequence.num_pulses
         return count
 
-    def find_idle_windows(
-        self, circuit: QuantumCircuit
-    ) -> dict[int, list[tuple[int, int]]]:
+    def find_idle_windows(self, circuit: QuantumCircuit) -> dict[int, list[tuple[int, int]]]:
         """Return idle windows per qubit for inspection."""
         _, idle_windows = self._compute_schedule(circuit)
         return {q: windows for q, windows in enumerate(idle_windows)}

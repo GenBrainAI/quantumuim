@@ -4,7 +4,7 @@ import numpy as np
 import pytest
 
 from quantumium.core.circuit import QuantumCircuit
-from quantumium.core.gate import H, X, CNOT, Ry
+from quantumium.core.gate import H, X, CNOT
 from quantumium.core.noise import NoiseModel, depolarizing
 from quantumium.tomography.state_tomography import (
     tomography,

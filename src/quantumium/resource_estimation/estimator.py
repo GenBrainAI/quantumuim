@@ -31,9 +31,7 @@ class ResourceEstimator:
         self.routing_overhead = routing_overhead
         self.analyzer = CircuitAnalyzer(rotation_precision=rotation_precision)
 
-    def code_distance(
-        self, target_error: float, n_logical_ops: int
-    ) -> int:
+    def code_distance(self, target_error: float, n_logical_ops: int) -> int:
         """Compute required surface code distance.
 
         Uses: p_L ≈ 0.1 * (p_phys / p_threshold)^((d+1)/2)
@@ -89,9 +87,7 @@ class ResourceEstimator:
         d = self.code_distance(target_error, n_ops)
 
         qubits_per_logical = 2 * d * d - 1
-        data_qubits = int(
-            math.ceil(logical.n_qubits * qubits_per_logical * self.routing_overhead)
-        )
+        data_qubits = int(math.ceil(logical.n_qubits * qubits_per_logical * self.routing_overhead))
 
         n_factories = self.factory_count(total_t, logical.t_depth, d)
         factory = MagicStateFactory(

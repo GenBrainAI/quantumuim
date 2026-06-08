@@ -1,10 +1,9 @@
 """Tests for circuit transpiler optimization passes."""
 
 import numpy as np
-import pytest
 
-from quantumium.core.circuit import QuantumCircuit, Instruction
-from quantumium.core.gate import H, X, Y, Z, S, T, CNOT, SWAP, I, Ry, Rz
+from quantumium.core.circuit import QuantumCircuit
+from quantumium.core.gate import H, X, Z, S, T, CNOT, SWAP, I
 from quantumium.transpiler.passes import (
     cancel_inverses,
     remove_identity_gates,

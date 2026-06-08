@@ -4,7 +4,7 @@ import numpy as np
 import pytest
 
 from quantumium.core.circuit import QuantumCircuit
-from quantumium.core.gate import H, X, CNOT
+from quantumium.core.gate import H, CNOT
 from quantumium.utils.entanglement import (
     partial_trace,
     von_neumann_entropy,

@@ -8,8 +8,6 @@ from __future__ import annotations
 import numpy as np
 import pytest
 
-# --- Layer 1: Compress ---
-
 from quantumium.qplus.compress import (
     SemiclassicalQFT,
     SemiclassicalQFTResult,
@@ -17,6 +15,23 @@ from quantumium.qplus.compress import (
     CompressedModExpConfig,
     _extract_order,
 )
+from quantumium.qplus.recycle import (
+    QubitRecycler,
+    FeedForwardController,
+)
+from quantumium.qplus.cut import (
+    CircuitCutter,
+    CutRecombiner,
+    WireCut,
+    PAULI_MATRICES,
+    PAULI_PREP_STATES,
+    _expand_single_qubit_op,
+)
+from quantumium.qplus.distribute import (
+    QPUOrchestrator,
+    DistributedResult,
+)
+from quantumium.qplus.shor import ShorQPlus, QplusResult
 
 
 class TestSemiclassicalQFT:
@@ -169,12 +184,6 @@ class TestExtractOrder:
 
 # --- Layer 2: Recycle ---
 
-from quantumium.qplus.recycle import (
-    QubitRecycler,
-    FeedForwardController,
-    RecycleEvent,
-)
-
 
 class TestFeedForwardController:
     def test_record_and_get_measurement(self):
@@ -263,6 +272,7 @@ class TestQubitRecycler:
 
     def test_recycled_order_finding_15(self):
         from quantumium.qplus.compress import _extract_order
+
         n_bits = 4
         successes = 0
         for _ in range(30):
@@ -280,15 +290,6 @@ class TestQubitRecycler:
 
 
 # --- Layer 3a: Cut ---
-
-from quantumium.qplus.cut import (
-    CircuitCutter,
-    CutRecombiner,
-    WireCut,
-    PAULI_MATRICES,
-    PAULI_PREP_STATES,
-    _expand_single_qubit_op,
-)
 
 
 class TestPauliConstants:
@@ -379,12 +380,6 @@ class TestExpandOp:
 
 # --- Layer 3b: Distribute ---
 
-from quantumium.qplus.distribute import (
-    QPUOrchestrator,
-    DistributionStrategy,
-    DistributedResult,
-)
-
 
 class TestQPUOrchestrator:
     def test_init_default(self):
@@ -430,8 +425,6 @@ class TestQPUOrchestrator:
 
 # --- Full Stack: Shor Q+ ---
 
-from quantumium.qplus.shor import ShorQPlus, QplusResult
-
 
 class TestShorQPlusInit:
     def test_default(self):
@@ -466,34 +459,22 @@ class TestShorQPlusTrivial:
 class TestShorQPlusQuantum:
     def test_factor_15_semiclassical(self):
         shor = ShorQPlus(strategy="semiclassical")
-        successes = sum(
-            1 for _ in range(20)
-            if shor.factor(15, a=7, max_attempts=1).success
-        )
+        successes = sum(1 for _ in range(20) if shor.factor(15, a=7, max_attempts=1).success)
         assert successes >= 3
 
     def test_factor_15_recycled(self):
         shor = ShorQPlus(strategy="recycled")
-        successes = sum(
-            1 for _ in range(20)
-            if shor.factor(15, a=7, max_attempts=1).success
-        )
+        successes = sum(1 for _ in range(20) if shor.factor(15, a=7, max_attempts=1).success)
         assert successes >= 3
 
     def test_factor_21(self):
         shor = ShorQPlus(strategy="semiclassical")
-        successes = sum(
-            1 for _ in range(20)
-            if shor.factor(21, a=2).success
-        )
+        successes = sum(1 for _ in range(20) if shor.factor(21, a=2).success)
         assert successes >= 2
 
     def test_factor_35(self):
         shor = ShorQPlus(strategy="semiclassical")
-        successes = sum(
-            1 for _ in range(20)
-            if shor.factor(35, a=2).success
-        )
+        successes = sum(1 for _ in range(20) if shor.factor(35, a=2).success)
         assert successes >= 2
 
     def test_factor_auto(self):
@@ -522,7 +503,8 @@ class TestShorQPlusSemiprimes:
     def test_reliable_factoring(self, N):
         shor = ShorQPlus(strategy="recycled")
         successes = sum(
-            1 for _ in range(30)
+            1
+            for _ in range(30)
             if (r := shor.factor(N, max_attempts=10)).success
             and r.factors is not None
             and r.factors[0] * r.factors[1] == N
@@ -532,7 +514,8 @@ class TestShorQPlusSemiprimes:
     def test_factor_77(self):
         shor = ShorQPlus(strategy="semiclassical")
         successes = sum(
-            1 for _ in range(20)
+            1
+            for _ in range(20)
             if (r := shor.factor(77, max_attempts=15)).success
             and r.factors is not None
             and r.factors[0] * r.factors[1] == 77
@@ -542,7 +525,8 @@ class TestShorQPlusSemiprimes:
     def test_factor_143(self):
         shor = ShorQPlus(strategy="semiclassical")
         successes = sum(
-            1 for _ in range(20)
+            1
+            for _ in range(20)
             if (r := shor.factor(143, max_attempts=15)).success
             and r.factors is not None
             and r.factors[0] * r.factors[1] == 143
@@ -553,14 +537,22 @@ class TestShorQPlusSemiprimes:
 class TestQplusResult:
     def test_structure(self):
         result = QplusResult(
-            N=15, factors=(3, 5), success=True,
-            qubits_used=6, qubits_standard=13, qubit_savings=7,
+            N=15,
+            factors=(3, 5),
+            success=True,
+            qubits_used=6,
+            qubits_standard=13,
+            qubit_savings=7,
         )
         assert result.qubit_savings == 7
 
     def test_defaults(self):
         result = QplusResult(
-            N=15, factors=None, success=False,
-            qubits_used=6, qubits_standard=13, qubit_savings=7,
+            N=15,
+            factors=None,
+            success=False,
+            qubits_used=6,
+            qubits_standard=13,
+            qubit_savings=7,
         )
         assert result.layers_used == []

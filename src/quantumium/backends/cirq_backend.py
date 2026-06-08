@@ -2,7 +2,6 @@
 
 from __future__ import annotations
 
-import numpy as np
 
 from ..core.circuit import QuantumCircuit
 from .base import Backend, ExecutionResult
@@ -51,6 +50,7 @@ class CirqBackend(Backend):
         """
         try:
             import cirq  # noqa: F401
+
             return True
         except ImportError:
             return False
@@ -82,7 +82,7 @@ class CirqBackend(Backend):
             moments.append(cirq_gate.on(*target_qubits))
 
         cirq_circuit = cirq.Circuit(moments)
-        cirq_circuit.append(cirq.measure(*qubits, key='result'))
+        cirq_circuit.append(cirq.measure(*qubits, key="result"))
         return cirq_circuit, qubits
 
     def run(self, circuit: QuantumCircuit, shots: int = 1024) -> ExecutionResult:
@@ -137,12 +137,11 @@ class CirqBackend(Backend):
         Returns:
             dict[str, int]: Mapping of bitstrings to observation counts.
         """
-        import pandas as pd
 
-        measurements = result.measurements['result']
+        measurements = result.measurements["result"]
         counts: dict[str, int] = {}
         for row in measurements:
-            bitstring = ''.join(str(int(b)) for b in row)
+            bitstring = "".join(str(int(b)) for b in row)
             counts[bitstring] = counts.get(bitstring, 0) + 1
         return counts
 
@@ -162,6 +161,6 @@ class CirqBackend(Backend):
         import cirq_google
 
         engine = cirq_google.get_engine()
-        processor = engine.get_processor(self._processor_id or 'rainbow')
+        processor = engine.get_processor(self._processor_id or "rainbow")
         result = processor.run(cirq_circuit, repetitions=shots)
         return self._result_to_counts(result, cirq_circuit.num_qubits)

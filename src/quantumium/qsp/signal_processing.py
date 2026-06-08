@@ -49,6 +49,7 @@ class QSPResult:
         signal_values (NDArray[np.floating]): The signal values a
             at which the polynomial was evaluated.
     """
+
     polynomial_values: NDArray[np.complexfloating]
     angles: NDArray[np.floating]
     degree: int
@@ -58,18 +59,24 @@ class QSPResult:
 def _signal_operator(a: float) -> NDArray[np.complexfloating]:
     """W(a) signal rotation matrix for signal value a ∈ [-1, 1]."""
     s = math.sqrt(max(0.0, 1 - a * a))
-    return np.array([
-        [a, 1j * s],
-        [1j * s, a],
-    ], dtype=complex)
+    return np.array(
+        [
+            [a, 1j * s],
+            [1j * s, a],
+        ],
+        dtype=complex,
+    )
 
 
 def _processing_operator(phi: float) -> NDArray[np.complexfloating]:
     """S(φ) = diag(e^{iφ}, e^{-iφ}) processing rotation."""
-    return np.array([
-        [np.exp(1j * phi), 0],
-        [0, np.exp(-1j * phi)],
-    ], dtype=complex)
+    return np.array(
+        [
+            [np.exp(1j * phi), 0],
+            [0, np.exp(-1j * phi)],
+        ],
+        dtype=complex,
+    )
 
 
 def qsp_sequence(

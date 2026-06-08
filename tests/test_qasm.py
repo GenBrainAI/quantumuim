@@ -130,18 +130,14 @@ class TestRoundTrip:
         original.apply(H, 0).apply(CNOT, 0, 1)
         qasm = to_qasm(original)
         restored = from_qasm(qasm)
-        np.testing.assert_allclose(
-            original.statevector(), restored.statevector(), atol=1e-10
-        )
+        np.testing.assert_allclose(original.statevector(), restored.statevector(), atol=1e-10)
 
     def test_rotation_roundtrip(self):
         original = QuantumCircuit(1)
         original.apply(Rx(0.5), 0).apply(Ry(1.2), 0).apply(Rz(2.3), 0)
         qasm = to_qasm(original)
         restored = from_qasm(qasm)
-        np.testing.assert_allclose(
-            original.statevector(), restored.statevector(), atol=1e-6
-        )
+        np.testing.assert_allclose(original.statevector(), restored.statevector(), atol=1e-6)
 
     def test_ghz_roundtrip(self):
         original = QuantumCircuit(3)
@@ -150,9 +146,7 @@ class TestRoundTrip:
         original.apply(CNOT, 1, 2)
         qasm = to_qasm(original)
         restored = from_qasm(qasm)
-        np.testing.assert_allclose(
-            original.statevector(), restored.statevector(), atol=1e-10
-        )
+        np.testing.assert_allclose(original.statevector(), restored.statevector(), atol=1e-10)
 
     def test_complex_circuit_roundtrip(self):
         original = QuantumCircuit(2)
@@ -163,6 +157,4 @@ class TestRoundTrip:
         original.apply(Ry(0.8), 1)
         qasm = to_qasm(original)
         restored = from_qasm(qasm)
-        np.testing.assert_allclose(
-            original.statevector(), restored.statevector(), atol=1e-6
-        )
+        np.testing.assert_allclose(original.statevector(), restored.statevector(), atol=1e-6)

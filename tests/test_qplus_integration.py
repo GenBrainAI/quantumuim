@@ -3,19 +3,18 @@
 from __future__ import annotations
 
 import numpy as np
-import pytest
 from numpy.typing import NDArray
 
 from quantumium.core.gate import H, X, CNOT, Rz
 from quantumium.core.circuit import QuantumCircuit
-from quantumium.transpiler.passes import transpile, count_gates
-from quantumium.circuits.templates import qft, inverse_qft
+from quantumium.transpiler.passes import transpile
+from quantumium.circuits.templates import qft
 
 from quantumium.qplus.compress import SemiclassicalQFT, ModularArithmeticOptimizer
 from quantumium.qplus.recycle import QubitRecycler, FeedForwardController
 from quantumium.qplus.cut import CircuitCutter, CutRecombiner, WireCut
-from quantumium.qplus.distribute import QPUOrchestrator, DistributionStrategy
-from quantumium.qplus.shor import ShorQPlus, QplusResult
+from quantumium.qplus.distribute import QPUOrchestrator
+from quantumium.qplus.shor import ShorQPlus
 
 
 class TestSemiclassicalQFTWithSDK:
@@ -47,7 +46,9 @@ class TestSemiclassicalQFTWithSDK:
         qft_qubits = qft_circuit.num_qubits
         sqft = SemiclassicalQFT(n)
 
-        def ctrl_identity(power: int, state: NDArray[np.complexfloating]) -> NDArray[np.complexfloating]:
+        def ctrl_identity(
+            power: int, state: NDArray[np.complexfloating]
+        ) -> NDArray[np.complexfloating]:
             return np.array(state, dtype=complex)
 
         result = sqft.estimate_phase(ctrl_identity, 2)
@@ -81,9 +82,7 @@ class TestCircuitCuttingWithSDK:
         U = _circuit_unitary(optimized)
 
         cutter = CircuitCutter([WireCut(0, 0)])
-        result = cutter.evaluate_cut_circuit(
-            np.eye(4, dtype=complex), U, 0, 2
-        )
+        result = cutter.evaluate_cut_circuit(np.eye(4, dtype=complex), U, 0, 2)
         assert isinstance(result, float)
 
     def test_cut_recombine_identity(self) -> None:

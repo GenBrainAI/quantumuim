@@ -118,12 +118,18 @@ def _controlled_phase(theta: float) -> Gate:
     Gate
         A two-qubit controlled phase gate.
     """
-    return Gate(np.array([
-        [1, 0, 0, 0],
-        [0, 1, 0, 0],
-        [0, 0, 1, 0],
-        [0, 0, 0, np.exp(1j * theta)],
-    ], dtype=complex), f"CP({theta:.3f})")
+    return Gate(
+        np.array(
+            [
+                [1, 0, 0, 0],
+                [0, 1, 0, 0],
+                [0, 0, 1, 0],
+                [0, 0, 0, np.exp(1j * theta)],
+            ],
+            dtype=complex,
+        ),
+        f"CP({theta:.3f})",
+    )
 
 
 def _apply_inverse_qft_inplace(
@@ -143,6 +149,7 @@ def _apply_inverse_qft_inplace(
         Indices of the qubits to which the inverse QFT is applied.
     """
     from ..core.gate import SWAP
+
     n = len(qubits)
 
     for i in range(n // 2):
@@ -202,6 +209,7 @@ def _extract_phase_from_counting_register(
 # Quantum Counting
 # ============================================================
 
+
 @dataclass
 class QuantumCountingResult:
     """Result container for quantum counting.
@@ -220,6 +228,7 @@ class QuantumCountingResult:
         A ``(lower, upper)`` confidence interval for the estimated count,
         based on the QPE resolution.
     """
+
     estimated_count: float
     theta: float
     total_states: int
@@ -300,9 +309,7 @@ def quantum_counting(
 
     # Extract phase: eigenvalue = exp(2πiφ), φ = y/2^n
     sv = qc.statevector()
-    phi = _extract_phase_from_counting_register(
-        sv, num_counting_qubits, total_qubits
-    )
+    phi = _extract_phase_from_counting_register(sv, num_counting_qubits, total_qubits)
 
     # Grover eigenvalue exp(2πiφ) = exp(2iθ), so θ = πφ
     theta_est = math.pi * phi
@@ -340,6 +347,7 @@ def quantum_counting(
 # Canonical Amplitude Estimation
 # ============================================================
 
+
 @dataclass
 class AmplitudeEstimationResult:
     """Result container for canonical amplitude estimation.
@@ -357,6 +365,7 @@ class AmplitudeEstimationResult:
     num_grover_iterations : int
         Total number of Grover operator applications (2^num_evaluation_qubits - 1).
     """
+
     estimated_amplitude: float
     estimated_probability: float
     theta: float
@@ -454,9 +463,7 @@ def amplitude_estimation(
 
     # Extract phase
     sv = qc.statevector()
-    phi = _extract_phase_from_counting_register(
-        sv, num_evaluation_qubits, total_qubits
-    )
+    phi = _extract_phase_from_counting_register(sv, num_evaluation_qubits, total_qubits)
 
     # θ = πφ, amplitude = sin(θ)
     theta = math.pi * phi
@@ -476,6 +483,7 @@ def amplitude_estimation(
 # Iterative Amplitude Estimation
 # ============================================================
 
+
 @dataclass
 class IterativeAEResult:
     """Result container for iterative amplitude estimation.
@@ -493,6 +501,7 @@ class IterativeAEResult:
     total_oracle_calls : int
         Total number of Grover operator applications across all rounds.
     """
+
     estimated_amplitude: float
     estimated_probability: float
     theta: float
@@ -564,10 +573,7 @@ def iterative_amplitude_estimation(
 
         sv = qc.statevector()
 
-        p_k = sum(
-            abs(sv[_bit_reverse(s, num_search_qubits)]) ** 2
-            for s in marked_states
-        )
+        p_k = sum(abs(sv[_bit_reverse(s, num_search_qubits)]) ** 2 for s in marked_states)
 
         # p_k = sin^2((2k+1) * theta)
         angle = math.asin(min(1.0, max(0.0, math.sqrt(p_k))))
@@ -630,7 +636,7 @@ def _circuit_to_unitary(qc: QuantumCircuit) -> NDArray[np.complexfloating]:
         if gate_matrix.shape[0] == dim:
             full = gate_matrix
         else:
-            full = qc._expand_gate(gate_matrix, target)
+            full = qc._expand_gate(gate_matrix, target, n)
         U = full @ U
 
     return U

@@ -13,7 +13,7 @@ import numpy as np
 from numpy.typing import NDArray
 
 from ..core.circuit import QuantumCircuit
-from ..core.gate import Gate, H, X, Ry
+from ..core.gate import Gate, H
 from ..core.noise import NoiseModel
 
 
@@ -41,6 +41,7 @@ class TomographyResult:
         measurements: Raw measurement counts keyed by Pauli basis string
             (e.g., ``{"XZ": {"00": 512, "01": 488, ...}, ...}``).
     """
+
     density_matrix: NDArray[np.complexfloating]
     fidelity: float | None
     num_qubits: int
@@ -194,9 +195,7 @@ def linear_inversion(
             measure_basis = label.replace("I", "Z")
             if measure_basis in measurements:
                 non_i_indices = [i for i, c in enumerate(label) if c != "I"]
-                expectation = _expectation_from_counts(
-                    measurements[measure_basis], non_i_indices
-                )
+                expectation = _expectation_from_counts(measurements[measure_basis], non_i_indices)
             else:
                 expectation = 0.0
 
@@ -266,9 +265,13 @@ def maximum_likelihood(
         rotation = np.array([[1]], dtype=complex)
         for b in basis:
             if b == "X":
-                rotation = np.kron(rotation, (1 / np.sqrt(2)) * np.array([[1, 1], [1, -1]], dtype=complex))
+                rotation = np.kron(
+                    rotation, (1 / np.sqrt(2)) * np.array([[1, 1], [1, -1]], dtype=complex)
+                )
             elif b == "Y":
-                rotation = np.kron(rotation, (1 / np.sqrt(2)) * np.array([[1, -1j], [1, 1j]], dtype=complex))
+                rotation = np.kron(
+                    rotation, (1 / np.sqrt(2)) * np.array([[1, -1j], [1, 1j]], dtype=complex)
+                )
             elif b == "Z":
                 rotation = np.kron(rotation, np.eye(2, dtype=complex))
 

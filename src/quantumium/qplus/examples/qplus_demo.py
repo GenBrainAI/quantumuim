@@ -40,8 +40,10 @@ def demo_layer1_compress() -> None:
         result = sqft.estimate_phase(ctrl_z, 1, initial)
         phases.append(result.phase)
         if trial < 3:
-            print(f"  Trial {trial + 1}: phase = {result.phase:.4f}, "
-                  f"qubits used = {result.n_qubits_used}")
+            print(
+                f"  Trial {trial + 1}: phase = {result.phase:.4f}, "
+                f"qubits used = {result.n_qubits_used}"
+            )
 
     print(f"  Mean phase: {np.mean(phases):.4f} (expected: 0.5)")
     print(f"  Qubits used: {result.n_qubits_used} vs standard {8 + 1} = {8 + 1}")
@@ -73,6 +75,7 @@ def demo_layer2_recycle() -> None:
         qr = QubitRecycler(n_bits + 1)
         phase, bits = qr.simulate_recycled_phase_estimation(ctrl_u, n_bits, 9)
         from quantumium.qplus.compress import _extract_order
+
         order = _extract_order(phase, 7, 15)
         if order == 4:
             successes += 1
@@ -96,8 +99,10 @@ def demo_layer3a_cut() -> None:
 
     for k in range(1, 5):
         resources = cutter.estimate_resources(n_cuts=k)
-        print(f"  {k} cuts: {int(resources['n_subcircuit_evals'])} evaluations, "
-              f"{int(resources['overhead_factor'])}x overhead")
+        print(
+            f"  {k} cuts: {int(resources['n_subcircuit_evals'])} evaluations, "
+            f"{int(resources['overhead_factor'])}x overhead"
+        )
 
     print("\nCut circuit evaluation (identity):")
     n = 2

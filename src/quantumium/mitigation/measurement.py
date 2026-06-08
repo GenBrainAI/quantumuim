@@ -25,15 +25,17 @@ def calibration_matrix(
         2^n x 2^n calibration matrix A such that noisy = A @ ideal.
     """
     qubits = sorted(error_rates.keys())
-    n = len(qubits)
+    len(qubits)
 
     single_matrices = []
     for q in qubits:
         p01, p10 = error_rates[q]
-        m = np.array([
-            [1 - p10, p01],
-            [p10, 1 - p01],
-        ])
+        m = np.array(
+            [
+                [1 - p10, p01],
+                [p10, 1 - p01],
+            ]
+        )
         single_matrices.append(m)
 
     result = single_matrices[0]

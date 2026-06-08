@@ -41,10 +41,12 @@ def demo_partition_planning() -> None:
             orch = QPUOrchestrator(n_qpus=n_qpus, strategy="classical_only")
             plan = orch.partition_circuit(n_qubits)
             partitions = [p.qubit_indices for p in plan.partitions]
-            print(f"  {n_qubits} qubits / {n_qpus} QPUs: "
-                  f"partitions={partitions}, "
-                  f"cuts={len(plan.cuts)}, "
-                  f"overhead={plan.estimated_overhead:.0f}x")
+            print(
+                f"  {n_qubits} qubits / {n_qpus} QPUs: "
+                f"partitions={partitions}, "
+                f"cuts={len(plan.cuts)}, "
+                f"overhead={plan.estimated_overhead:.0f}x"
+            )
 
     print()
 
@@ -60,17 +62,19 @@ def demo_strategy_comparison() -> None:
         qc.apply(CNOT, i, i + 1)
     U = _circuit_unitary(qc)
 
-    print(f"  Circuit: 4-qubit GHZ state (H + 3 CNOTs)")
+    print("  Circuit: 4-qubit GHZ state (H + 3 CNOTs)")
     print(f"  {'Strategy':<18} {'Value':>8} {'Overhead':>10} {'QPUs':>6} {'Cuts':>6}")
     print(f"  {'─' * 18} {'─' * 8} {'─' * 10} {'─' * 6} {'─' * 6}")
 
     for strategy in ["classical_only", "locc", "teleport"]:
         orch = QPUOrchestrator(n_qpus=2, strategy=strategy)
         result = orch.execute_distributed(U, 4)
-        print(f"  {strategy:<18} {result.recombined_value:>8.4f} "
-              f"{result.overhead:>10.1f}x "
-              f"{result.n_qpus:>6} "
-              f"{result.n_cuts:>6}")
+        print(
+            f"  {strategy:<18} {result.recombined_value:>8.4f} "
+            f"{result.overhead:>10.1f}x "
+            f"{result.n_qpus:>6} "
+            f"{result.n_cuts:>6}"
+        )
 
     print()
 
@@ -83,7 +87,7 @@ def demo_strategy_recommendation() -> None:
     scenarios = [
         (4, 2, False, "Small circuit, no quantum link"),
         (8, 4, False, "Large circuit, no quantum link"),
-        (8, 4, True,  "Large circuit, with quantum link"),
+        (8, 4, True, "Large circuit, with quantum link"),
         (16, 8, True, "Very large circuit, with quantum link"),
     ]
 
@@ -100,8 +104,7 @@ def demo_resource_estimation() -> None:
     print("4. RESOURCE ESTIMATION")
     print("-" * 50)
 
-    print(f"  {'Qubits':>8} {'Gates':>8} {'QPUs':>6} {'Cuts':>6} "
-          f"{'Overhead':>10} {'Strategy':<15}")
+    print(f"  {'Qubits':>8} {'Gates':>8} {'QPUs':>6} {'Cuts':>6} {'Overhead':>10} {'Strategy':<15}")
     print(f"  {'─' * 8} {'─' * 8} {'─' * 6} {'─' * 6} {'─' * 10} {'─' * 15}")
 
     configs = [
@@ -114,9 +117,11 @@ def demo_resource_estimation() -> None:
     for n_q, n_g, n_qpus, strategy in configs:
         orch = QPUOrchestrator(n_qpus=n_qpus, strategy=strategy)
         res = orch.estimate_resources(n_q, n_g)
-        print(f"  {n_q:>8} {n_g:>8} {int(res['n_qpus']):>6} "
-              f"{int(res['n_cuts']):>6} {res['overhead_factor']:>10.1f}x "
-              f"{strategy:<15}")
+        print(
+            f"  {n_q:>8} {n_g:>8} {int(res['n_qpus']):>6} "
+            f"{int(res['n_cuts']):>6} {res['overhead_factor']:>10.1f}x "
+            f"{strategy:<15}"
+        )
 
     print()
 
@@ -143,9 +148,11 @@ def demo_distributed_execution() -> None:
         orch = QPUOrchestrator(n_qpus=n_qpus, strategy="classical_only")
         result = orch.execute_distributed(U, 2)
         error = abs(result.recombined_value - ideal_value)
-        print(f"  {n_qpus} QPU(s): value={result.recombined_value:.4f}, "
-              f"overhead={result.overhead:.1f}x, "
-              f"error={error:.4f}")
+        print(
+            f"  {n_qpus} QPU(s): value={result.recombined_value:.4f}, "
+            f"overhead={result.overhead:.1f}x, "
+            f"error={error:.4f}"
+        )
 
     print()
 

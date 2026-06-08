@@ -10,7 +10,12 @@ import pytest
 from quantumium.core.circuit import QuantumCircuit
 from quantumium.core.gate import H, X, Y, Z, S, T, CNOT, SWAP, Rx, Ry, Rz, Gate
 from quantumium.transpiler.serialization import (
-    to_dict, from_dict, to_json, from_json, save, load,
+    to_dict,
+    from_dict,
+    to_json,
+    from_json,
+    save,
+    load,
 )
 
 
@@ -89,18 +94,14 @@ class TestJsonRoundTrip:
         original.apply(H, 0).apply(CNOT, 0, 1)
         json_str = to_json(original)
         restored = from_json(json_str)
-        np.testing.assert_allclose(
-            original.statevector(), restored.statevector(), atol=1e-10
-        )
+        np.testing.assert_allclose(original.statevector(), restored.statevector(), atol=1e-10)
 
     def test_rotation_circuit(self):
         original = QuantumCircuit(1)
         original.apply(Rx(0.5), 0).apply(Ry(1.2), 0).apply(Rz(2.3), 0)
         json_str = to_json(original)
         restored = from_json(json_str)
-        np.testing.assert_allclose(
-            original.statevector(), restored.statevector(), atol=1e-10
-        )
+        np.testing.assert_allclose(original.statevector(), restored.statevector(), atol=1e-10)
 
     def test_custom_gate_roundtrip(self):
         matrix = np.array([[0, 1j], [1j, 0]], dtype=complex)
@@ -109,9 +110,7 @@ class TestJsonRoundTrip:
         original.apply(custom, 0)
         json_str = to_json(original)
         restored = from_json(json_str)
-        np.testing.assert_allclose(
-            original.statevector(), restored.statevector(), atol=1e-10
-        )
+        np.testing.assert_allclose(original.statevector(), restored.statevector(), atol=1e-10)
 
     def test_valid_json(self):
         qc = QuantumCircuit(2)
@@ -130,8 +129,6 @@ class TestFileIO:
         try:
             save(original, filepath)
             restored = load(filepath)
-            np.testing.assert_allclose(
-                original.statevector(), restored.statevector(), atol=1e-10
-            )
+            np.testing.assert_allclose(original.statevector(), restored.statevector(), atol=1e-10)
         finally:
             os.unlink(filepath)

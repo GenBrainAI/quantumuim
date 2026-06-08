@@ -14,12 +14,23 @@ from quantumium.core.circuit import QuantumCircuit
 from quantumium.utils.visualization import circuit_to_ascii
 from quantumium.transpiler.qasm import to_qasm, from_qasm, _extract_rotation_angle
 from quantumium.transpiler.serialization import (
-    to_dict, from_dict, to_json, from_json, save, load,
+    to_dict,
+    from_dict,
+    to_json,
+    from_json,
+    save,
+    load,
 )
 from quantumium.transpiler.passes import (
-    cancel_inverses, remove_identity_gates, merge_single_qubit_gates,
-    cancel_cnots, commute_and_cancel, decompose_swap, count_gates,
-    circuit_depth, transpile,
+    cancel_inverses,
+    remove_identity_gates,
+    merge_single_qubit_gates,
+    cancel_cnots,
+    commute_and_cancel,
+    decompose_swap,
+    count_gates,
+    circuit_depth,
+    transpile,
 )
 
 
@@ -34,6 +45,7 @@ def _circuit_unitary(qc: QuantumCircuit) -> np.ndarray:
 
 
 # === Visualization Edge Cases ===
+
 
 class TestVisualizationEdgeCases:
     def test_single_qubit_empty(self) -> None:
@@ -114,6 +126,7 @@ class TestVisualizationEdgeCases:
 
 # === QASM Edge Cases ===
 
+
 class TestQASMEdgeCases:
     def test_empty_circuit_export(self) -> None:
         qc = QuantumCircuit(2)
@@ -131,9 +144,7 @@ class TestQASMEdgeCases:
         qc2 = from_qasm(qasm)
         assert qc2.num_qubits == 2
         assert len(qc2.instructions) == 3
-        np.testing.assert_allclose(
-            _circuit_unitary(qc), _circuit_unitary(qc2), atol=1e-10
-        )
+        np.testing.assert_allclose(_circuit_unitary(qc), _circuit_unitary(qc2), atol=1e-10)
 
     def test_roundtrip_rotation_gates(self) -> None:
         qc = QuantumCircuit(1)
@@ -208,6 +219,7 @@ measure q[0] -> c[0];
 
 # === Serialization Edge Cases ===
 
+
 class TestSerializationEdgeCases:
     def test_roundtrip_dict(self) -> None:
         qc = QuantumCircuit(2)
@@ -215,9 +227,7 @@ class TestSerializationEdgeCases:
         qc.apply(CNOT, 0, 1)
         d = to_dict(qc)
         qc2 = from_dict(d)
-        np.testing.assert_allclose(
-            _circuit_unitary(qc), _circuit_unitary(qc2), atol=1e-10
-        )
+        np.testing.assert_allclose(_circuit_unitary(qc), _circuit_unitary(qc2), atol=1e-10)
 
     def test_roundtrip_json(self) -> None:
         qc = QuantumCircuit(3)
@@ -226,9 +236,7 @@ class TestSerializationEdgeCases:
         qc.apply(CNOT, 0, 2)
         j = to_json(qc)
         qc2 = from_json(j)
-        np.testing.assert_allclose(
-            _circuit_unitary(qc), _circuit_unitary(qc2), atol=1e-3
-        )
+        np.testing.assert_allclose(_circuit_unitary(qc), _circuit_unitary(qc2), atol=1e-3)
 
     def test_roundtrip_custom_gate(self) -> None:
         custom = Gate(S.matrix, "MyCustom")
@@ -237,9 +245,7 @@ class TestSerializationEdgeCases:
         d = to_dict(qc)
         assert d["instructions"][0]["gate"] == "custom"
         qc2 = from_dict(d)
-        np.testing.assert_allclose(
-            _circuit_unitary(qc), _circuit_unitary(qc2), atol=1e-10
-        )
+        np.testing.assert_allclose(_circuit_unitary(qc), _circuit_unitary(qc2), atol=1e-10)
 
     def test_save_load_file(self) -> None:
         qc = QuantumCircuit(2)
@@ -250,9 +256,7 @@ class TestSerializationEdgeCases:
         try:
             save(qc, filepath)
             qc2 = load(filepath)
-            np.testing.assert_allclose(
-                _circuit_unitary(qc), _circuit_unitary(qc2), atol=1e-10
-            )
+            np.testing.assert_allclose(_circuit_unitary(qc), _circuit_unitary(qc2), atol=1e-10)
         finally:
             os.unlink(filepath)
 
@@ -303,6 +307,7 @@ class TestSerializationEdgeCases:
 
 
 # === Transpiler Pass Edge Cases ===
+
 
 class TestTranspilerPassEdgeCases:
     def test_cancel_inverses_triple_x(self) -> None:

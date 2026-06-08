@@ -15,6 +15,7 @@ from quantumium.surface_code.logical import has_logical_error
 @dataclass
 class ThresholdResult:
     """Results from a threshold estimation run."""
+
     distances: list[int]
     error_rates: list[float]
     logical_error_rates: dict[int, list[float]] = field(default_factory=dict)

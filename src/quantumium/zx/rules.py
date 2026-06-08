@@ -2,9 +2,8 @@
 
 from __future__ import annotations
 
-import math
 
-from .diagram import HADAMARD, REGULAR, ZXDiagram, _norm, _phase_eq
+from .diagram import HADAMARD, REGULAR, ZXDiagram
 
 
 def spider_fusion(diag: ZXDiagram) -> bool:

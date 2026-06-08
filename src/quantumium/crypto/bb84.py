@@ -48,6 +48,7 @@ class BB84Result:
         detection_threshold: QBER threshold used for eavesdropper
             detection (default 0.11).
     """
+
     alice_key: list[int]
     bob_key: list[int]
     sifted_length: int
@@ -201,8 +202,7 @@ def bb84_protocol(
 
     # Use last num_check bits for checking, first num_key bits for key
     check_errors = sum(
-        sifted_alice[num_key + i] != sifted_bob[num_key + i]
-        for i in range(num_check)
+        sifted_alice[num_key + i] != sifted_bob[num_key + i] for i in range(num_check)
     )
     qber = check_errors / num_check if num_check > 0 else 0.0
 

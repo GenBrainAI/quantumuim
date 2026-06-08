@@ -6,12 +6,13 @@ energies and molecular properties using VQE and other algorithms.
 
 from __future__ import annotations
 
+from collections.abc import Callable
 from dataclasses import dataclass
 
 import numpy as np
 from numpy.typing import NDArray
 
-from ..algorithms.vqe import vqe, h2_hamiltonian, hamiltonian_expectation, VQEResult
+from ..algorithms.vqe import vqe, VQEResult
 
 
 @dataclass
@@ -31,6 +32,7 @@ class MoleculeResult:
         vqe_result: Full :class:`VQEResult` object from the underlying
             VQE run, containing optimal parameters and convergence history.
     """
+
     molecule: str
     ground_energy: float
     exact_energy: float
@@ -66,15 +68,17 @@ def _build_hamiltonian(
     H = np.zeros((dim, dim), dtype=complex)
 
     pauli_matrices = {
-        'I': np.eye(2, dtype=complex),
-        'X': np.array([[0, 1], [1, 0]], dtype=complex),
-        'Y': np.array([[0, -1j], [1j, 0]], dtype=complex),
-        'Z': np.array([[1, 0], [0, -1]], dtype=complex),
+        "I": np.eye(2, dtype=complex),
+        "X": np.array([[0, 1], [1, 0]], dtype=complex),
+        "Y": np.array([[0, -1j], [1j, 0]], dtype=complex),
+        "Z": np.array([[1, 0], [0, -1]], dtype=complex),
     }
 
     for pauli_string, coeff in coefficients.items():
         if len(pauli_string) != num_qubits:
-            raise ValueError(f"Pauli string '{pauli_string}' length doesn't match {num_qubits} qubits")
+            raise ValueError(
+                f"Pauli string '{pauli_string}' length doesn't match {num_qubits} qubits"
+            )
         term = np.array([[1]], dtype=complex)
         for char in pauli_string:
             term = np.kron(term, pauli_matrices[char])

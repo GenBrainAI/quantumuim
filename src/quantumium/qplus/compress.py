@@ -43,7 +43,9 @@ class SemiclassicalQFT:
 
     def estimate_phase(
         self,
-        controlled_unitary_fn: Callable[[int, NDArray[np.complexfloating]], NDArray[np.complexfloating]],
+        controlled_unitary_fn: Callable[
+            [int, NDArray[np.complexfloating]], NDArray[np.complexfloating]
+        ],
         n_work: int,
         initial_work_state: NDArray[np.complexfloating] | None = None,
     ) -> SemiclassicalQFTResult:

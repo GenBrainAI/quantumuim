@@ -24,6 +24,7 @@ from quantumium.error_correction.shor_code import (
 
 # --- Bit-flip code ---
 
+
 class TestBitFlipEncode:
     def test_encode_zero(self):
         encoded = bit_flip_encode(np.array([1, 0]))
@@ -108,6 +109,7 @@ class TestBitFlipDecode:
 
 # --- Phase-flip code ---
 
+
 class TestPhaseFlipEncode:
     def test_encode_zero_normalized(self):
         encoded = phase_flip_encode(np.array([1, 0]))
@@ -181,6 +183,7 @@ class TestPhaseFlipDecode:
 
 
 # --- Shor 9-qubit code ---
+
 
 class TestShorEncode:
     def test_encode_zero_normalized(self):

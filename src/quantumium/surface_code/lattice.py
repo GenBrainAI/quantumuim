@@ -31,8 +31,7 @@ class SurfaceCode:
         # (r,c), (r,c+1), (r+1,c), (r+1,c+1).
         for r in range(d - 1):
             for c in range(d - 1):
-                qubits = [r * d + c, r * d + c + 1,
-                          (r + 1) * d + c, (r + 1) * d + c + 1]
+                qubits = [r * d + c, r * d + c + 1, (r + 1) * d + c, (r + 1) * d + c + 1]
                 if (r + c) % 2 == 0:
                     x_stabs.append(qubits)
                 else:

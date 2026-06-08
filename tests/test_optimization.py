@@ -25,14 +25,21 @@ class TestMaxCut:
 class TestPortfolio:
     def test_simple_portfolio(self):
         returns = np.array([0.1, 0.2, 0.15])
-        cov = np.array([
-            [0.05, 0.01, 0.02],
-            [0.01, 0.08, 0.03],
-            [0.02, 0.03, 0.06],
-        ])
+        cov = np.array(
+            [
+                [0.05, 0.01, 0.02],
+                [0.01, 0.08, 0.03],
+                [0.02, 0.03, 0.06],
+            ]
+        )
         result = portfolio_optimization(
-            returns, cov, risk_aversion=0.5, budget=2,
-            p=1, num_starts=5, max_iter=50,
+            returns,
+            cov,
+            risk_aversion=0.5,
+            budget=2,
+            p=1,
+            num_starts=5,
+            max_iter=50,
         )
         assert result.problem.startswith("Portfolio")
         assert len(result.solution) == 3

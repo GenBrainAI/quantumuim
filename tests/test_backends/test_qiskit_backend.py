@@ -2,17 +2,13 @@
 
 from __future__ import annotations
 
-import numpy as np
 import pytest
 
-from quantumium.core.circuit import QuantumCircuit
-from quantumium.core.gate import H, X, CNOT
 from quantumium.backends import LocalSimulatorBackend, ExecutionResult
 from quantumium.backends.qiskit_backend import QiskitBackend
 
 from .conftest import (
     requires_qiskit,
-    hardware,
     chi_squared_test,
     hellinger_fidelity,
 )
@@ -98,10 +94,8 @@ class TestQiskitTranslation:
         backend = QiskitBackend()
         qiskit_circuit = backend._translate_circuit(bell_circuit)
         from qiskit.circuit import Measure
-        has_measure = any(
-            isinstance(inst.operation, Measure)
-            for inst in qiskit_circuit.data
-        )
+
+        has_measure = any(isinstance(inst.operation, Measure) for inst in qiskit_circuit.data)
         assert has_measure
 
 

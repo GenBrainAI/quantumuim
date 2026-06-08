@@ -6,13 +6,14 @@ import numpy as np
 import pytest
 
 from quantumium.core.circuit import QuantumCircuit
-from quantumium.core.gate import H, X, Z, CNOT, CCX, Rz
+from quantumium.core.gate import H, X, CNOT
 from quantumium.backends import LocalSimulatorBackend
 
 
 # ---------------------------------------------------------------------------
 # Skip-condition helpers
 # ---------------------------------------------------------------------------
+
 
 def _can_import(module_name: str) -> bool:
     try:
@@ -43,6 +44,7 @@ hardware = pytest.mark.skipif(
 # ---------------------------------------------------------------------------
 # Standard test circuits
 # ---------------------------------------------------------------------------
+
 
 @pytest.fixture
 def bell_circuit() -> QuantumCircuit:
@@ -88,6 +90,7 @@ def qft_roundtrip_circuit() -> QuantumCircuit:
         for j in range(i + 1, n):
             angle = np.pi / (2 ** (j - i))
             from quantumium.core.gate import controlled, Rz as _Rz
+
             crz = controlled(_Rz(angle), name=f"CRz({angle:.4f})")
             qc.apply(crz, j, i)
     # Inverse QFT
@@ -122,9 +125,11 @@ def grover3_circuit() -> QuantumCircuit:
 # Statistical validation helpers
 # ---------------------------------------------------------------------------
 
+
 def _regularized_gamma_series(a: float, x: float) -> float:
     """Lower regularized incomplete gamma via series expansion."""
     import math
+
     if x == 0:
         return 0.0
     ap = a
@@ -142,6 +147,7 @@ def _regularized_gamma_series(a: float, x: float) -> float:
 def _regularized_gamma_cf(a: float, x: float) -> float:
     """Upper regularized incomplete gamma via continued fraction."""
     import math
+
     b = x + 1 - a
     c, d = 1e30, 1.0 / b
     h = d

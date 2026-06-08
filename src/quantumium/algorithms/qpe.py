@@ -133,6 +133,7 @@ def qpe_circuit(
         qc.apply(cu, q, target_qubit)
 
     from quantumium.circuits.templates import inverse_qft as build_iqft
+
     iqft = build_iqft(num_counting_qubits)
     for inst in iqft.instructions:
         qc.apply(inst.gate, *inst.target_qubits)

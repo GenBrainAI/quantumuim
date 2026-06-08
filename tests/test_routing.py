@@ -3,7 +3,6 @@
 from __future__ import annotations
 
 import numpy as np
-import pytest
 
 from quantumium.transpiler.routing import (
     CouplingMap,
@@ -12,13 +11,14 @@ from quantumium.transpiler.routing import (
     RoutingResult,
     route,
 )
-from quantumium.core.circuit import QuantumCircuit, Instruction
-from quantumium.core.gate import H, CNOT, X, Y, Z, S, T, SWAP, Rz, controlled
+from quantumium.core.circuit import QuantumCircuit
+from quantumium.core.gate import H, CNOT, X, Z, S, Rz, controlled
 
 
 # ---------------------------------------------------------------------------
 # Helpers
 # ---------------------------------------------------------------------------
+
 
 def _check_coupling_compliance(result: RoutingResult, coupling_map: CouplingMap):
     """Assert every 2Q gate in routed circuit operates on connected qubits."""
@@ -30,9 +30,7 @@ def _check_coupling_compliance(result: RoutingResult, coupling_map: CouplingMap)
             )
         elif inst.gate.name == "SWAP":
             q0, q1 = inst.target_qubits
-            assert coupling_map.is_connected(q0, q1), (
-                f"SWAP on ({q0},{q1}) violates coupling"
-            )
+            assert coupling_map.is_connected(q0, q1), f"SWAP on ({q0},{q1}) violates coupling"
 
 
 def _remap_counts(counts: dict[str, int], layout: Layout, num_logical: int) -> dict[str, int]:
@@ -40,13 +38,13 @@ def _remap_counts(counts: dict[str, int], layout: Layout, num_logical: int) -> d
     mapped = {}
     for bitstring, count in counts.items():
         n = len(bitstring)
-        logical_bits = ['0'] * num_logical
+        logical_bits = ["0"] * num_logical
         for lq in range(num_logical):
             pq = layout.logical_to_physical(lq)
             if pq < n:
                 bit_pos = n - 1 - pq
                 logical_bits[num_logical - 1 - lq] = bitstring[bit_pos]
-        key = ''.join(logical_bits)
+        key = "".join(logical_bits)
         mapped[key] = mapped.get(key, 0) + count
     return mapped
 
@@ -54,6 +52,7 @@ def _remap_counts(counts: dict[str, int], layout: Layout, num_logical: int) -> d
 # ===========================================================================
 # CouplingMap Tests
 # ===========================================================================
+
 
 class TestCouplingMap:
     def test_linear_topology(self):
@@ -131,6 +130,7 @@ class TestCouplingMap:
 # Layout Tests
 # ===========================================================================
 
+
 class TestLayout:
     def test_trivial_layout(self):
         layout = Layout.trivial(4)
@@ -177,6 +177,7 @@ class TestLayout:
 # SABRE Router — Correctness Tests
 # ===========================================================================
 
+
 class TestSABRECorrectness:
     def test_already_compatible(self):
         """Circuit that already satisfies coupling needs no SWAPs."""
@@ -212,7 +213,7 @@ class TestSABRECorrectness:
         orig = qc.measure_all(shots=5000)
         routed = result.circuit.measure_all(shots=5000)
         mapped = _remap_counts(routed, result.initial_layout, 2)
-        for key in ('00', '11'):
+        for key in ("00", "11"):
             assert mapped.get(key, 0) > 1000
 
     def test_ghz3_on_linear(self):
@@ -226,8 +227,8 @@ class TestSABRECorrectness:
         _check_coupling_compliance(result, cm)
         routed = result.circuit.measure_all(shots=5000)
         mapped = _remap_counts(routed, result.initial_layout, 3)
-        assert mapped.get('000', 0) > 1000
-        assert mapped.get('111', 0) > 1000
+        assert mapped.get("000", 0) > 1000
+        assert mapped.get("111", 0) > 1000
 
     def test_single_qubit_only(self):
         """Circuit with only single-qubit gates needs no SWAPs."""
@@ -266,6 +267,7 @@ class TestSABRECorrectness:
 # ===========================================================================
 # Coupling Compliance Tests
 # ===========================================================================
+
 
 class TestCouplingCompliance:
     def test_qft4_linear(self):
@@ -337,6 +339,7 @@ class TestCouplingCompliance:
 # Edge Cases
 # ===========================================================================
 
+
 class TestEdgeCases:
     def test_two_qubit_circuit(self):
         """Minimal 2-qubit circuit on 2-qubit coupling."""
@@ -390,6 +393,7 @@ class TestEdgeCases:
 # RoutingResult Tests
 # ===========================================================================
 
+
 class TestRoutingResult:
     def test_result_fields(self):
         qc = QuantumCircuit(3)
@@ -411,16 +415,14 @@ class TestRoutingResult:
         qc.apply(CNOT, 1, 3)
         cm = CouplingMap.from_linear(4)
         result = route(qc, cm, seed=42)
-        actual_swaps = sum(
-            1 for inst in result.circuit.instructions
-            if inst.gate.name == "SWAP"
-        )
+        actual_swaps = sum(1 for inst in result.circuit.instructions if inst.gate.name == "SWAP")
         assert actual_swaps == result.swap_count
 
 
 # ===========================================================================
 # SABRE Algorithm Properties
 # ===========================================================================
+
 
 class TestSABREProperties:
     def test_backward_pass_improves(self):
@@ -460,6 +462,7 @@ class TestSABREProperties:
 # Measurement Preservation Tests
 # ===========================================================================
 
+
 class TestMeasurementPreservation:
     def test_bell_statistics(self):
         """Routed Bell state preserves 50/50 |00> + |11> distribution."""
@@ -470,10 +473,10 @@ class TestMeasurementPreservation:
         result = route(qc, cm, seed=42)
         routed_counts = result.circuit.measure_all(shots=5000)
         mapped = _remap_counts(routed_counts, result.initial_layout, 2)
-        assert mapped.get('00', 0) > 1500
-        assert mapped.get('11', 0) > 1500
-        assert mapped.get('01', 0) < 100
-        assert mapped.get('10', 0) < 100
+        assert mapped.get("00", 0) > 1500
+        assert mapped.get("11", 0) > 1500
+        assert mapped.get("01", 0) < 100
+        assert mapped.get("10", 0) < 100
 
     def test_x_gate_statistics(self):
         """X gate on qubit 0 preserves |1> outcome after routing."""
@@ -483,7 +486,7 @@ class TestMeasurementPreservation:
         result = route(qc, cm, seed=42)
         routed_counts = result.circuit.measure_all(shots=1000)
         mapped = _remap_counts(routed_counts, result.initial_layout, 3)
-        assert mapped.get('001', 0) == 1000
+        assert mapped.get("001", 0) == 1000
 
     def test_ghz4_statistics_on_grid(self):
         """GHZ-4 routed on grid preserves all-zero/all-one correlations."""
@@ -496,9 +499,9 @@ class TestMeasurementPreservation:
         _check_coupling_compliance(result, cm)
         routed_counts = result.circuit.measure_all(shots=5000)
         mapped = _remap_counts(routed_counts, result.initial_layout, 4)
-        assert mapped.get('0000', 0) > 1500
-        assert mapped.get('1111', 0) > 1500
-        spurious = sum(v for k, v in mapped.items() if k not in ('0000', '1111'))
+        assert mapped.get("0000", 0) > 1500
+        assert mapped.get("1111", 0) > 1500
+        spurious = sum(v for k, v in mapped.items() if k not in ("0000", "1111"))
         assert spurious < 100
 
 
@@ -506,10 +509,12 @@ class TestMeasurementPreservation:
 # Integration with Existing Transpiler
 # ===========================================================================
 
+
 class TestTranspilerIntegration:
     def test_route_then_decompose_swap(self):
         """Routed SWAPs can be decomposed to CNOTs via existing pass."""
         from quantumium.transpiler.passes import decompose_swap
+
         qc = QuantumCircuit(4)
         qc.apply(CNOT, 0, 3)
         cm = CouplingMap.from_linear(4)
@@ -523,7 +528,7 @@ class TestTranspilerIntegration:
     def test_existing_tests_unbroken(self):
         """Importing routing doesn't break existing transpiler."""
         from quantumium.transpiler.passes import transpile
-        from quantumium.transpiler.routing import route
+
         qc = QuantumCircuit(3)
         qc.apply(H, 0)
         qc.apply(CNOT, 0, 1)

@@ -2,17 +2,13 @@
 
 from __future__ import annotations
 
-import numpy as np
 import pytest
 
-from quantumium.core.circuit import QuantumCircuit
-from quantumium.core.gate import H, X, CNOT
 from quantumium.backends import LocalSimulatorBackend, ExecutionResult
 from quantumium.backends.cirq_backend import CirqBackend
 
 from .conftest import (
     requires_cirq,
-    hardware,
     chi_squared_test,
     hellinger_fidelity,
 )

@@ -4,7 +4,7 @@ import numpy as np
 import pytest
 
 from quantumium.algorithms.grover import grover_search, grover_oracle, grover_diffuser
-from quantumium.algorithms.deutsch_jozsa import deutsch_jozsa, classify_function
+from quantumium.algorithms.deutsch_jozsa import classify_function
 from quantumium.algorithms.bernstein_vazirani import bernstein_vazirani, find_secret
 
 

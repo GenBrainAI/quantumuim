@@ -13,6 +13,7 @@ from .diagram import HADAMARD, REGULAR, ZXDiagram, _norm, _phase_eq
 # Circuit → ZX
 # ---------------------------------------------------------------------------
 
+
 def circuit_to_zx(circuit) -> ZXDiagram:
     n = circuit.num_qubits
     diag = ZXDiagram(n)
@@ -30,8 +31,9 @@ def circuit_to_zx(circuit) -> ZXDiagram:
     return diag
 
 
-def _wire_add(diag: ZXDiagram, qubit: int, spider_id: int,
-              current: list[int], pending_h: list[bool]) -> None:
+def _wire_add(
+    diag: ZXDiagram, qubit: int, spider_id: int, current: list[int], pending_h: list[bool]
+) -> None:
     cur = current[qubit]
     out = diag.outputs[qubit]
     edge_in = HADAMARD if pending_h[qubit] else REGULAR
@@ -171,6 +173,7 @@ def _decompose_two_qubit(diag, gate, qubits, current, pending_h):
     q0, q1 = qubits
     m = gate._matrix
     from quantumium.core.gate import CNOT as CNOT_GATE, CZ as CZ_GATE
+
     if np.allclose(m, CZ_GATE._matrix, atol=1e-10):
         zs0 = diag.add_spider("Z", 0.0)
         _wire_add(diag, q0, zs0, current, pending_h)
@@ -199,6 +202,7 @@ def _decompose_two_qubit(diag, gate, qubits, current, pending_h):
 # ---------------------------------------------------------------------------
 # ZX → Circuit
 # ---------------------------------------------------------------------------
+
 
 def zx_to_circuit(diag: ZXDiagram):
     from quantumium.core.circuit import QuantumCircuit
@@ -307,6 +311,7 @@ def _compute_spider_times(diag: ZXDiagram, wires: list[list[int]]) -> dict[int, 
 
 def _phase_to_gate(color: str, phase: float):
     from quantumium.core.gate import X, Z, S, T, Rz, Rx
+
     p = _norm(phase)
     if p < 1e-10:
         return None
@@ -327,6 +332,7 @@ def _phase_to_gate(color: str, phase: float):
 # One-liner optimiser
 # ---------------------------------------------------------------------------
 
+
 def zx_optimize(circuit):
     diag = circuit_to_zx(circuit)
     diag.simplify()
@@ -337,9 +343,10 @@ def zx_optimize(circuit):
 # Unitary helper (for equivalence checks on small circuits)
 # ---------------------------------------------------------------------------
 
+
 def _circuit_unitary(circuit):
     n = circuit.num_qubits
-    dim = 2 ** n
+    dim = 2**n
     U = np.eye(dim, dtype=complex)
     for inst in circuit.instructions:
         G = circuit._expand_gate(inst.gate._matrix, inst.target_qubits, n)

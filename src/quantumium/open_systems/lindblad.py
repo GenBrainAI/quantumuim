@@ -26,6 +26,7 @@ class LindbladSystem:
         collapse_ops: List of (rate, operator) pairs for Lindblad terms.
         dim: Hilbert space dimension.
     """
+
     hamiltonian: NDArray[np.complexfloating] | Callable[[float], NDArray[np.complexfloating]]
     collapse_ops: list[tuple[float, NDArray[np.complexfloating]]] = field(default_factory=list)
 
@@ -133,8 +134,9 @@ def mesolve(
     rho = rho0.astype(complex).copy()
 
     states = [rho.copy()]
-    expect_values = {label: [float(np.real(expect(rho, op)))]
-                     for label, op in (observables or {}).items()}
+    expect_values = {
+        label: [float(np.real(expect(rho, op)))] for label, op in (observables or {}).items()
+    }
 
     for i in range(1, len(tlist)):
         dt_interval = tlist[i] - tlist[i - 1]
@@ -230,9 +232,7 @@ def _liouvillian(system: LindbladSystem, d: int) -> NDArray[np.complexfloating]:
 
         # γ(L⊗L* - ½(L†L⊗I + I⊗(L†L)^T))
         L_sup += gamma * (
-            np.kron(Lop, Lop.conj())
-            - 0.5 * np.kron(LdagL, I)
-            - 0.5 * np.kron(I, LdagL.T)
+            np.kron(Lop, Lop.conj()) - 0.5 * np.kron(LdagL, I) - 0.5 * np.kron(I, LdagL.T)
         )
 
     return L_sup

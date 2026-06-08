@@ -2,7 +2,6 @@
 
 import math
 
-import numpy as np
 
 from quantumium.algorithms.quantum_counting import (
     quantum_counting,
@@ -11,12 +10,12 @@ from quantumium.algorithms.quantum_counting import (
 )
 from quantumium.algorithms.grover import grover_oracle
 from quantumium.core.circuit import QuantumCircuit
-from quantumium.core.gate import H
 
 
 # ============================================================
 # Quantum Counting Tests
 # ============================================================
+
 
 class TestQuantumCounting:
     def test_single_marked_2qubits(self):
@@ -110,12 +109,14 @@ class TestQuantumCounting:
 # Canonical Amplitude Estimation Tests
 # ============================================================
 
+
 class TestAmplitudeEstimation:
     def test_quarter_marked(self):
         """1/4 of states marked → probability 0.25."""
         oracle = QuantumCircuit(2)
         oracle_matrix = grover_oracle(2, [0]).matrix
         from quantumium.core.gate import Gate
+
         oracle.apply(Gate(oracle_matrix, "O"), 0, 1)
 
         result = amplitude_estimation(
@@ -129,6 +130,7 @@ class TestAmplitudeEstimation:
         oracle = QuantumCircuit(2)
         oracle_matrix = grover_oracle(2, [0, 1]).matrix
         from quantumium.core.gate import Gate
+
         oracle.apply(Gate(oracle_matrix, "O"), 0, 1)
 
         result = amplitude_estimation(
@@ -141,6 +143,7 @@ class TestAmplitudeEstimation:
         oracle = QuantumCircuit(2)
         oracle_matrix = grover_oracle(2, [0]).matrix
         from quantumium.core.gate import Gate
+
         oracle.apply(Gate(oracle_matrix, "O"), 0, 1)
 
         result = amplitude_estimation(
@@ -156,6 +159,7 @@ class TestAmplitudeEstimation:
 # ============================================================
 # Iterative Amplitude Estimation Tests
 # ============================================================
+
 
 class TestIterativeAE:
     def test_single_marked(self):

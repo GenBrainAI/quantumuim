@@ -10,13 +10,20 @@ import json
 
 import numpy as np
 
-from ..core.circuit import QuantumCircuit, Instruction
+from ..core.circuit import QuantumCircuit
 from ..core.gate import Gate, I, X, Y, Z, H, S, T, CNOT, SWAP, Rx, Ry, Rz
 
 
 NAMED_GATES: dict[str, Gate] = {
-    "I": I, "X": X, "Y": Y, "Z": Z, "H": H, "S": S, "T": T,
-    "CNOT": CNOT, "SWAP": SWAP,
+    "I": I,
+    "X": X,
+    "Y": Y,
+    "Z": Z,
+    "H": H,
+    "S": S,
+    "T": T,
+    "CNOT": CNOT,
+    "SWAP": SWAP,
 }
 """Lookup table mapping gate name strings to pre-built Gate instances."""
 
@@ -48,7 +55,7 @@ def to_dict(circuit: QuantumCircuit) -> dict:
             for prefix, factory in ROTATION_FACTORIES.items():
                 if inst.gate.name.startswith(prefix + "("):
                     try:
-                        angle = float(inst.gate.name[len(prefix) + 1:-1])
+                        angle = float(inst.gate.name[len(prefix) + 1 : -1])
                         entry["gate"] = prefix
                         entry["angle"] = angle
                         break

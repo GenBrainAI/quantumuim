@@ -46,6 +46,7 @@ class ContinuousWalkResult:
         hamiltonian (str): Label indicating which Hamiltonian was used,
             either "adjacency" or "laplacian".
     """
+
     position_probabilities: NDArray[np.floating]
     num_vertices: int
     time: float

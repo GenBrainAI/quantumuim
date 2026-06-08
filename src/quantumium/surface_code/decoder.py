@@ -27,7 +27,9 @@ def _build_adjacency(stabilizers: list[list[int]]) -> dict[int, list[int]]:
 
 
 def _find_boundary_stabs(
-    stabilizers: list[list[int]], d: int, use_columns: bool,
+    stabilizers: list[list[int]],
+    d: int,
+    use_columns: bool,
 ) -> set[int]:
     """Find stabilizers adjacent to the rough boundary.
 
@@ -156,7 +158,9 @@ def _bfs_path(adj: dict[int, list[int]], start: int, end: int) -> list[int] | No
 
 
 def _bfs_path_to_set(
-    adj: dict[int, list[int]], start: int, targets: set[int],
+    adj: dict[int, list[int]],
+    start: int,
+    targets: set[int],
 ) -> list[int] | None:
     """BFS shortest path from start to any node in targets."""
     if start in targets:
@@ -253,8 +257,9 @@ def mwpm_decode(
     z_correction = np.zeros(code.n_data, dtype=int)
     pairs = _greedy_matching(x_defects, x_adj, x_boundary)
     for idx_a, idx_b in pairs:
-        for q in _correction_path(idx_a, idx_b, code.x_stabilizers, x_adj,
-                                  x_boundary, d, use_columns=True):
+        for q in _correction_path(
+            idx_a, idx_b, code.x_stabilizers, x_adj, x_boundary, d, use_columns=True
+        ):
             z_correction[q] ^= 1
 
     # --- X errors → Z syndrome → correct with X ---
@@ -265,8 +270,9 @@ def mwpm_decode(
     x_correction = np.zeros(code.n_data, dtype=int)
     pairs = _greedy_matching(z_defects, z_adj, z_boundary)
     for idx_a, idx_b in pairs:
-        for q in _correction_path(idx_a, idx_b, code.z_stabilizers, z_adj,
-                                  z_boundary, d, use_columns=False):
+        for q in _correction_path(
+            idx_a, idx_b, code.z_stabilizers, z_adj, z_boundary, d, use_columns=False
+        ):
             x_correction[q] ^= 1
 
     return x_correction, z_correction

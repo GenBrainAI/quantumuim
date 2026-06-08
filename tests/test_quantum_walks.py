@@ -23,6 +23,7 @@ from quantumium.quantum_walks.continuous import (
 # Graph Tests
 # ============================================================
 
+
 class TestLineGraph:
     def test_shape(self):
         A = line_graph(5)
@@ -140,6 +141,7 @@ class TestGridGraph:
 # Discrete Walk Tests
 # ============================================================
 
+
 class TestDiscreteWalk:
     def test_probability_normalization(self):
         """Probabilities must sum to 1."""
@@ -202,7 +204,7 @@ class TestHadamardWalkLine:
         )
         center = 20
         left_prob = np.sum(result.position_probabilities[:center])
-        right_prob = np.sum(result.position_probabilities[center + 1:])
+        right_prob = np.sum(result.position_probabilities[center + 1 :])
         assert left_prob != right_prob  # asymmetric
 
     def test_symmetric_coin_gives_symmetric_walk(self):
@@ -227,12 +229,10 @@ class TestHadamardWalkLine:
         result_long = hadamard_walk_line(num_positions=41, num_steps=15)
         center = 20
         var_short = sum(
-            (i - center) ** 2 * p
-            for i, p in enumerate(result_short.position_probabilities)
+            (i - center) ** 2 * p for i, p in enumerate(result_short.position_probabilities)
         )
         var_long = sum(
-            (i - center) ** 2 * p
-            for i, p in enumerate(result_long.position_probabilities)
+            (i - center) ** 2 * p for i, p in enumerate(result_long.position_probabilities)
         )
         assert var_long > 3 * var_short
 
@@ -253,6 +253,7 @@ class TestGroverWalk:
 # ============================================================
 # Continuous Walk Tests
 # ============================================================
+
 
 class TestContinuousWalk:
     def test_probability_normalization(self):
@@ -303,8 +304,8 @@ class TestContinuousWalk:
         A = line_graph(5)
         r1 = continuous_walk(A, time=1.0, gamma=0.5, initial_vertex=0)
         r2 = continuous_walk(A, time=1.0, gamma=2.0, initial_vertex=0)
-        var1 = sum(i ** 2 * p for i, p in enumerate(r1.position_probabilities))
-        var2 = sum(i ** 2 * p for i, p in enumerate(r2.position_probabilities))
+        var1 = sum(i**2 * p for i, p in enumerate(r1.position_probabilities))
+        var2 = sum(i**2 * p for i, p in enumerate(r2.position_probabilities))
         assert var2 > var1
 
     def test_custom_initial_state(self):

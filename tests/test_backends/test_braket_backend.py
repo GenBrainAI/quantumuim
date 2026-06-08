@@ -2,17 +2,13 @@
 
 from __future__ import annotations
 
-import numpy as np
 import pytest
 
-from quantumium.core.circuit import QuantumCircuit
-from quantumium.core.gate import H, X, CNOT
 from quantumium.backends import LocalSimulatorBackend, ExecutionResult
 from quantumium.backends.braket_backend import BraketBackend, BRAKET_DEVICES
 
 from .conftest import (
     requires_braket,
-    hardware,
     chi_squared_test,
     hellinger_fidelity,
 )
@@ -51,8 +47,14 @@ class TestBraketBackendMeta:
 
     def test_all_known_devices(self):
         expected_devices = {
-            "ionq-aria", "ionq-forte", "rigetti-ankaa",
-            "oqc-lucy", "quera-aquila", "sv1", "dm1", "tn1",
+            "ionq-aria",
+            "ionq-forte",
+            "rigetti-ankaa",
+            "oqc-lucy",
+            "quera-aquila",
+            "sv1",
+            "dm1",
+            "tn1",
         }
         assert set(BRAKET_DEVICES.keys()) == expected_devices
 

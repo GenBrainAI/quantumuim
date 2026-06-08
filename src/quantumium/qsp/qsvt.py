@@ -46,6 +46,7 @@ class QSVTResult:
         degree (int): Degree of the polynomial transformation
             (len(angles) - 1).
     """
+
     transformed_matrix: NDArray[np.complexfloating]
     original_matrix: NDArray[np.complexfloating]
     block_encoding_norm: float
@@ -108,10 +109,12 @@ def block_encoding(
     evals_r = np.maximum(evals_r, 0)
     C = evecs_r @ np.diag(np.sqrt(evals_r)) @ evecs_r.conj().T
 
-    U = np.block([
-        [A_normalized, B],
-        [C, -A_normalized.conj().T],
-    ])
+    U = np.block(
+        [
+            [A_normalized, B],
+            [C, -A_normalized.conj().T],
+        ]
+    )
 
     # Verify unitarity — if not exact due to numerics, project to unitary
     if not np.allclose(U @ U.conj().T, np.eye(2 * n), atol=1e-8):
@@ -182,10 +185,10 @@ def qsvt_circuit(
 
         if k < len(angles) - 1:
             if k % 2 == 0:
-                u_gate = Gate(U.copy(), f"U")
+                u_gate = Gate(U.copy(), "U")
                 qc.apply(u_gate, *qubit_indices)
             else:
-                u_dag_gate = Gate(U_dag.copy(), f"U†")
+                u_dag_gate = Gate(U_dag.copy(), "U†")
                 qc.apply(u_dag_gate, *qubit_indices)
 
     return qc

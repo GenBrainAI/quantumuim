@@ -98,9 +98,7 @@ def demo_cut_and_recombine() -> None:
     print()
 
     # Verify reconstruction
-    is_close = CutRecombiner.verify_reconstruction(
-        ideal_p00, reconstructed, tolerance=0.15
-    )
+    is_close = CutRecombiner.verify_reconstruction(ideal_p00, reconstructed, tolerance=0.15)
     print(f"  Verification (tol=0.15): {'PASS' if is_close else 'FAIL'}")
     print()
 
@@ -112,12 +110,12 @@ def demo_recombine_subcircuits() -> None:
 
     # Simulate subcircuit results from a 1-cut decomposition
     subcircuit_results: list[tuple[float, float]] = [
-        (0.5, 0.85),   # Pauli I preparation
+        (0.5, 0.85),  # Pauli I preparation
         (-0.5, 0.15),  # Pauli X preparation
-        (0.5, 0.65),   # Pauli Y preparation
+        (0.5, 0.65),  # Pauli Y preparation
         (-0.5, 0.35),  # Pauli Z preparation
         (0.25, 0.90),  # mixed term 1
-        (-0.25, 0.50), # mixed term 2
+        (-0.25, 0.50),  # mixed term 2
     ]
 
     recombined = CutRecombiner.recombine(subcircuit_results)
@@ -135,7 +133,7 @@ def demo_recombine_subcircuits() -> None:
     ]
 
     probs = CutRecombiner.recombine_probabilities(prob_results)
-    print(f"  Recombined probability distribution:")
+    print("  Recombined probability distribution:")
     for bitstring, prob in sorted(probs.items()):
         bar = "█" * int(prob * 40)
         print(f"    |{bitstring}⟩: {prob:.4f} {bar}")
@@ -153,17 +151,19 @@ def demo_multi_cut() -> None:
     qc.apply(H, 0)
     for i in range(3):
         qc.apply(CNOT, i, i + 1)
-    U = _circuit_unitary(qc)
+    _circuit_unitary(qc)
 
-    print(f"  4-qubit GHZ circuit: H + 3 CNOTs")
+    print("  4-qubit GHZ circuit: H + 3 CNOTs")
     print()
 
     for n_cuts in [1, 2, 3]:
         cuts = [WireCut(qubit=i, after_gate_index=i) for i in range(n_cuts)]
         cutter = CircuitCutter(cuts)
         res = cutter.estimate_resources(n_cuts=n_cuts)
-        print(f"  {n_cuts} cut(s): {int(res['n_subcircuit_evals'])} evals, "
-              f"{int(res['overhead_factor'])}x overhead")
+        print(
+            f"  {n_cuts} cut(s): {int(res['n_subcircuit_evals'])} evals, "
+            f"{int(res['overhead_factor'])}x overhead"
+        )
 
     print()
 

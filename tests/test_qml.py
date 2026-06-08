@@ -177,17 +177,17 @@ class TestVariationalClassifier:
     def test_basic_training(self):
         """VQC should train on a simple linearly separable dataset."""
         # Simple 2-feature dataset
-        X = np.array([
-            [0.0, 0.0],
-            [0.0, np.pi],
-            [np.pi, 0.0],
-            [np.pi, np.pi],
-        ])
+        X = np.array(
+            [
+                [0.0, 0.0],
+                [0.0, np.pi],
+                [np.pi, 0.0],
+                [np.pi, np.pi],
+            ]
+        )
         y = np.array([1.0, -1.0, -1.0, 1.0])  # XOR-like
 
-        result = variational_classifier(
-            X, y, num_layers=2, epochs=30, learning_rate=0.2, seed=42
-        )
+        result = variational_classifier(X, y, num_layers=2, epochs=30, learning_rate=0.2, seed=42)
         assert result.weights is not None
         assert len(result.loss_history) == 30
         assert result.loss_history[-1] <= result.loss_history[0]

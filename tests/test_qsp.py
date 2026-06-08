@@ -5,7 +5,6 @@ import numpy as np
 import pytest
 
 from quantumium.qsp.signal_processing import (
-    QSPResult,
     qsp_sequence,
     qsp_circuit,
     evaluate_qsp_polynomial,
@@ -20,10 +19,7 @@ from quantumium.qsp.qsvt import (
     _projector_controlled_phase,
 )
 from quantumium.qsp.angle_finding import (
-    find_qsp_angles,
     chebyshev_angles,
-    sign_function_angles,
-    threshold_angles,
     _chebyshev,
 )
 
@@ -31,6 +27,7 @@ from quantumium.qsp.angle_finding import (
 # ============================================================
 # Signal Operator & Processing Operator
 # ============================================================
+
 
 class TestSignalOperator:
     def test_unitarity(self):
@@ -73,6 +70,7 @@ class TestProcessingOperator:
 # QSP Sequence
 # ============================================================
 
+
 class TestQSPSequence:
     def test_identity_angles(self):
         # Zero angles should give W(a) (up to d-1 applications)
@@ -110,6 +108,7 @@ class TestQSPSequence:
 # QSP Circuit
 # ============================================================
 
+
 class TestQSPCircuit:
     def test_builds_circuit(self):
         qc = qsp_circuit([0.1, 0.2, 0.3], signal_value=0.5)
@@ -132,6 +131,7 @@ class TestQSPCircuit:
 # ============================================================
 # Chebyshev Polynomials
 # ============================================================
+
 
 class TestChebyshev:
     def test_T0(self):
@@ -161,6 +161,7 @@ class TestChebyshev:
 # Chebyshev Angles
 # ============================================================
 
+
 class TestChebyshevAngles:
     def test_degree_0(self):
         angles = chebyshev_angles(0)
@@ -184,6 +185,7 @@ class TestChebyshevAngles:
 # ============================================================
 # Block Encoding
 # ============================================================
+
 
 class TestBlockEncoding:
     def test_identity(self):
@@ -231,6 +233,7 @@ class TestBlockEncoding:
 # Projector Controlled Phase
 # ============================================================
 
+
 class TestProjectorControlledPhase:
     def test_identity_at_zero(self):
         Pi = _projector_controlled_phase(0.0, 2)
@@ -252,6 +255,7 @@ class TestProjectorControlledPhase:
 # ============================================================
 # QSVT Transform
 # ============================================================
+
 
 class TestQSVTTransform:
     def test_identity_angles(self):
@@ -278,6 +282,7 @@ class TestQSVTTransform:
 # QSVT Circuit
 # ============================================================
 
+
 class TestQSVTCircuit:
     def test_builds_circuit(self):
         A = np.array([[0.5, 0], [0, 0.3]], dtype=complex)
@@ -297,6 +302,7 @@ class TestQSVTCircuit:
 # ============================================================
 # Applications
 # ============================================================
+
 
 class TestQSVTApplications:
     def test_matrix_inversion_diagonal(self):
@@ -334,6 +340,7 @@ class TestQSVTApplications:
 # ============================================================
 # Integration: QSP Polynomial Properties
 # ============================================================
+
 
 class TestQSPProperties:
     def test_polynomial_bounded(self):

@@ -6,12 +6,10 @@ deterministic circuits, and statistical validation.
 
 from __future__ import annotations
 
-import numpy as np
-import pytest
 
 from quantumium.core.circuit import QuantumCircuit
-from quantumium.core.gate import H, X, Z, CNOT, CCX, Rz, Ry, Rx
-from quantumium.backends import LocalSimulatorBackend, ExecutionResult
+from quantumium.core.gate import H, X, CNOT, CCX
+from quantumium.backends import ExecutionResult
 from quantumium.backends.base import Backend
 
 from .conftest import chi_squared_test, hellinger_fidelity

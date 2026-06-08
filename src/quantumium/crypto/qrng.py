@@ -8,7 +8,6 @@ for randomness generation.
 from __future__ import annotations
 
 import numpy as np
-from numpy.typing import NDArray
 
 from ..core.circuit import QuantumCircuit
 from ..core.gate import H

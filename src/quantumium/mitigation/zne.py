@@ -12,7 +12,7 @@ from typing import Callable
 import numpy as np
 from numpy.typing import NDArray
 
-from ..core.circuit import QuantumCircuit, Instruction
+from ..core.circuit import QuantumCircuit
 from ..core.gate import Gate
 
 

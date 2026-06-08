@@ -4,19 +4,45 @@ from __future__ import annotations
 
 import numpy as np
 import pytest
-from numpy.typing import NDArray
 
 from quantumium.core.gate import (
-    Gate, I, X, Y, Z, H, S, T, CNOT, SWAP, CZ, CCX,
-    controlled, Rx, Ry, Rz, CRx, CRy, CRz, Rxx, Rzz,
+    Gate,
+    I,
+    X,
+    Y,
+    Z,
+    H,
+    S,
+    T,
+    CNOT,
+    SWAP,
+    CZ,
+    CCX,
+    controlled,
+    Rx,
+    Ry,
+    Rz,
+    CRx,
+    CRy,
+    CRz,
+    Rxx,
+    Rzz,
 )
 from quantumium.core.qubit import Qubit
 from quantumium.core.circuit import QuantumCircuit
 from quantumium.core.noise import (
-    NoiseChannel, NoiseModel, bit_flip, phase_flip, depolarizing, amplitude_damping,
+    NoiseChannel,
+    NoiseModel,
+    bit_flip,
+    phase_flip,
+    depolarizing,
+    amplitude_damping,
 )
 from quantumium.core.parameter import (
-    Parameter, ParameterVector, ParameterizedCircuit, hardware_efficient_template,
+    Parameter,
+    ParameterVector,
+    ParameterizedCircuit,
+    hardware_efficient_template,
 )
 
 

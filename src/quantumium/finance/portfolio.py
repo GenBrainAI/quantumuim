@@ -22,9 +22,6 @@ from dataclasses import dataclass
 import numpy as np
 from numpy.typing import NDArray
 
-from ..core.circuit import QuantumCircuit
-from ..core.gate import Gate, H
-
 
 @dataclass
 class PortfolioResult:
@@ -44,6 +41,7 @@ class PortfolioResult:
         optimal_bitstring: Binary string of length *num_assets* where
             ``'1'`` at position *i* means asset *i* is selected.
     """
+
     selection: list[int]
     expected_return: float
     risk: float

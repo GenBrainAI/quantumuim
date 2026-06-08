@@ -2,12 +2,11 @@
 
 from __future__ import annotations
 
-import math
 from dataclasses import dataclass
 
 import numpy as np
 
-from .network import QuantumChannel, QuantumNetwork
+from .network import QuantumNetwork
 
 
 @dataclass
@@ -38,8 +37,7 @@ def _fidelity_from_dm(rho: np.ndarray) -> float:
     return float(np.real(phi_plus.conj() @ rho @ phi_plus))
 
 
-def generate_entanglement(network: QuantumNetwork, node_a: str,
-                          node_b: str) -> EntangledPair:
+def generate_entanglement(network: QuantumNetwork, node_a: str, node_b: str) -> EntangledPair:
     channel = network.get_channel(node_a, node_b)
     fidelity = channel.channel_fidelity
     return EntangledPair(node_a, node_b, fidelity)

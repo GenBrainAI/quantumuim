@@ -14,7 +14,7 @@ import numpy as np
 from numpy.typing import NDArray
 
 from ..core.circuit import QuantumCircuit
-from ..core.gate import Gate, I, X, Y, Z, CNOT
+from ..core.gate import I, X, Y, Z, CNOT
 
 PAULIS = [I, X, Y, Z]
 

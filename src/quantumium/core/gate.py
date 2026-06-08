@@ -42,38 +42,62 @@ S = Gate(np.array([[1, 0], [0, 1j]], dtype=complex), "S")
 T = Gate(np.array([[1, 0], [0, np.exp(1j * np.pi / 4)]], dtype=complex), "T")
 
 # Standard two-qubit gates
-CNOT = Gate(np.array([
-    [1, 0, 0, 0],
-    [0, 1, 0, 0],
-    [0, 0, 0, 1],
-    [0, 0, 1, 0],
-], dtype=complex), "CNOT")
+CNOT = Gate(
+    np.array(
+        [
+            [1, 0, 0, 0],
+            [0, 1, 0, 0],
+            [0, 0, 0, 1],
+            [0, 0, 1, 0],
+        ],
+        dtype=complex,
+    ),
+    "CNOT",
+)
 
-SWAP = Gate(np.array([
-    [1, 0, 0, 0],
-    [0, 0, 1, 0],
-    [0, 1, 0, 0],
-    [0, 0, 0, 1],
-], dtype=complex), "SWAP")
+SWAP = Gate(
+    np.array(
+        [
+            [1, 0, 0, 0],
+            [0, 0, 1, 0],
+            [0, 1, 0, 0],
+            [0, 0, 0, 1],
+        ],
+        dtype=complex,
+    ),
+    "SWAP",
+)
 
 
-CZ = Gate(np.array([
-    [1, 0, 0, 0],
-    [0, 1, 0, 0],
-    [0, 0, 1, 0],
-    [0, 0, 0, -1],
-], dtype=complex), "CZ")
+CZ = Gate(
+    np.array(
+        [
+            [1, 0, 0, 0],
+            [0, 1, 0, 0],
+            [0, 0, 1, 0],
+            [0, 0, 0, -1],
+        ],
+        dtype=complex,
+    ),
+    "CZ",
+)
 
-CCX = Gate(np.array([
-    [1, 0, 0, 0, 0, 0, 0, 0],
-    [0, 1, 0, 0, 0, 0, 0, 0],
-    [0, 0, 1, 0, 0, 0, 0, 0],
-    [0, 0, 0, 1, 0, 0, 0, 0],
-    [0, 0, 0, 0, 1, 0, 0, 0],
-    [0, 0, 0, 0, 0, 1, 0, 0],
-    [0, 0, 0, 0, 0, 0, 0, 1],
-    [0, 0, 0, 0, 0, 0, 1, 0],
-], dtype=complex), "CCX")
+CCX = Gate(
+    np.array(
+        [
+            [1, 0, 0, 0, 0, 0, 0, 0],
+            [0, 1, 0, 0, 0, 0, 0, 0],
+            [0, 0, 1, 0, 0, 0, 0, 0],
+            [0, 0, 0, 1, 0, 0, 0, 0],
+            [0, 0, 0, 0, 1, 0, 0, 0],
+            [0, 0, 0, 0, 0, 1, 0, 0],
+            [0, 0, 0, 0, 0, 0, 0, 1],
+            [0, 0, 0, 0, 0, 0, 1, 0],
+        ],
+        dtype=complex,
+    ),
+    "CCX",
+)
 
 
 def controlled(gate: Gate, name: str = "") -> Gate:
@@ -91,26 +115,44 @@ def controlled(gate: Gate, name: str = "") -> Gate:
 
 def Rx(theta: float) -> Gate:
     """Rotation around X-axis."""
-    return Gate(np.array([
-        [np.cos(theta / 2), -1j * np.sin(theta / 2)],
-        [-1j * np.sin(theta / 2), np.cos(theta / 2)],
-    ], dtype=complex), f"Rx({theta:.3f})")
+    return Gate(
+        np.array(
+            [
+                [np.cos(theta / 2), -1j * np.sin(theta / 2)],
+                [-1j * np.sin(theta / 2), np.cos(theta / 2)],
+            ],
+            dtype=complex,
+        ),
+        f"Rx({theta:.3f})",
+    )
 
 
 def Ry(theta: float) -> Gate:
     """Rotation around Y-axis."""
-    return Gate(np.array([
-        [np.cos(theta / 2), -np.sin(theta / 2)],
-        [np.sin(theta / 2), np.cos(theta / 2)],
-    ], dtype=complex), f"Ry({theta:.3f})")
+    return Gate(
+        np.array(
+            [
+                [np.cos(theta / 2), -np.sin(theta / 2)],
+                [np.sin(theta / 2), np.cos(theta / 2)],
+            ],
+            dtype=complex,
+        ),
+        f"Ry({theta:.3f})",
+    )
 
 
 def Rz(theta: float) -> Gate:
     """Rotation around Z-axis."""
-    return Gate(np.array([
-        [np.exp(-1j * theta / 2), 0],
-        [0, np.exp(1j * theta / 2)],
-    ], dtype=complex), f"Rz({theta:.3f})")
+    return Gate(
+        np.array(
+            [
+                [np.exp(-1j * theta / 2), 0],
+                [0, np.exp(1j * theta / 2)],
+            ],
+            dtype=complex,
+        ),
+        f"Rz({theta:.3f})",
+    )
 
 
 def CRx(theta: float) -> Gate:
@@ -132,19 +174,31 @@ def Rxx(theta: float) -> Gate:
     """Two-qubit XX rotation: exp(-i theta/2 X⊗X)."""
     c = np.cos(theta / 2)
     s = np.sin(theta / 2)
-    return Gate(np.array([
-        [c, 0, 0, -1j * s],
-        [0, c, -1j * s, 0],
-        [0, -1j * s, c, 0],
-        [-1j * s, 0, 0, c],
-    ], dtype=complex), f"Rxx({theta:.3f})")
+    return Gate(
+        np.array(
+            [
+                [c, 0, 0, -1j * s],
+                [0, c, -1j * s, 0],
+                [0, -1j * s, c, 0],
+                [-1j * s, 0, 0, c],
+            ],
+            dtype=complex,
+        ),
+        f"Rxx({theta:.3f})",
+    )
 
 
 def Rzz(theta: float) -> Gate:
     """Two-qubit ZZ rotation: exp(-i theta/2 Z⊗Z)."""
-    return Gate(np.array([
-        [np.exp(-1j * theta / 2), 0, 0, 0],
-        [0, np.exp(1j * theta / 2), 0, 0],
-        [0, 0, np.exp(1j * theta / 2), 0],
-        [0, 0, 0, np.exp(-1j * theta / 2)],
-    ], dtype=complex), f"Rzz({theta:.3f})")
+    return Gate(
+        np.array(
+            [
+                [np.exp(-1j * theta / 2), 0, 0, 0],
+                [0, np.exp(1j * theta / 2), 0, 0],
+                [0, 0, np.exp(1j * theta / 2), 0],
+                [0, 0, 0, np.exp(-1j * theta / 2)],
+            ],
+            dtype=complex,
+        ),
+        f"Rzz({theta:.3f})",
+    )

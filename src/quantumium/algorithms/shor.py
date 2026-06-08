@@ -44,6 +44,7 @@ class ShorResult:
     success : bool
         Whether non-trivial factors were successfully found.
     """
+
     N: int
     a: int
     order: int | None
@@ -142,6 +143,7 @@ def _inverse_qft_inplace(qc: QuantumCircuit, qubits: list[int]) -> None:
         j = n - 1 - i
         qi, qj = qubits[i], qubits[j]
         from ..core.gate import SWAP
+
         qc.apply(SWAP, qi, qj)
 
     for i in range(n):
@@ -349,16 +351,18 @@ def shor_factor(
     if N < 4:
         raise ValueError(f"N must be >= 4, got {N}")
     if N % 2 == 0:
-        return ShorResult(N=N, a=2, order=None, factors=(2, N // 2),
-                          phase_estimate=0.0, success=True)
+        return ShorResult(
+            N=N, a=2, order=None, factors=(2, N // 2), phase_estimate=0.0, success=True
+        )
 
     candidates = [a] if a is not None else list(range(2, min(N, max_attempts + 2)))
 
     for base in candidates:
         g = gcd(base, N)
         if g > 1:
-            return ShorResult(N=N, a=base, order=None, factors=(g, N // g),
-                              phase_estimate=0.0, success=True)
+            return ShorResult(
+                N=N, a=base, order=None, factors=(g, N // g), phase_estimate=0.0, success=True
+            )
 
         phase, order = quantum_order_finding(base, N, num_counting_qubits)
 
@@ -376,14 +380,19 @@ def shor_factor(
         f2 = gcd(half_power - 1, N)
 
         if f1 > 1 and f1 < N:
-            return ShorResult(N=N, a=base, order=order,
-                              factors=(f1, N // f1),
-                              phase_estimate=phase, success=True)
+            return ShorResult(
+                N=N, a=base, order=order, factors=(f1, N // f1), phase_estimate=phase, success=True
+            )
         if f2 > 1 and f2 < N:
-            return ShorResult(N=N, a=base, order=order,
-                              factors=(f2, N // f2),
-                              phase_estimate=phase, success=True)
+            return ShorResult(
+                N=N, a=base, order=order, factors=(f2, N // f2), phase_estimate=phase, success=True
+            )
 
-    return ShorResult(N=N, a=candidates[-1] if candidates else 2,
-                      order=None, factors=None,
-                      phase_estimate=0.0, success=False)
+    return ShorResult(
+        N=N,
+        a=candidates[-1] if candidates else 2,
+        order=None,
+        factors=None,
+        phase_estimate=0.0,
+        success=False,
+    )

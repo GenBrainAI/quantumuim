@@ -31,8 +31,9 @@ def logical_z(code: SurfaceCode) -> np.ndarray:
     return op
 
 
-def has_logical_error(code: SurfaceCode, x_correction: np.ndarray,
-                      z_correction: np.ndarray) -> bool:
+def has_logical_error(
+    code: SurfaceCode, x_correction: np.ndarray, z_correction: np.ndarray
+) -> bool:
     """Check if the net effect of errors + correction is a non-trivial logical operator."""
     lx = logical_x(code)
     lz = logical_z(code)

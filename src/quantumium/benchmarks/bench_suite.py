@@ -12,12 +12,13 @@ from dataclasses import dataclass
 import numpy as np
 
 from quantumium.core.circuit import QuantumCircuit
-from quantumium.core.gate import H, CNOT, X, Z, S, T, Rz, controlled
+from quantumium.core.gate import H, CNOT, X, Z, S, Rz, controlled
 
 
 @dataclass
 class BenchmarkResult:
     """Result from a single benchmark run."""
+
     circuit_name: str
     num_qubits: int
     gate_count: int
@@ -86,7 +87,7 @@ class BenchmarkSuite:
             qc.measure_all(shots=self._shots)
             times.append(time.perf_counter() - t0)
         median_s = sorted(times)[len(times) // 2]
-        shots_per_sec = self._shots / median_s if median_s > 0 else float('inf')
+        shots_per_sec = self._shots / median_s if median_s > 0 else float("inf")
         return median_s * 1000, shots_per_sec
 
     def run_all(self) -> list[BenchmarkResult]:
@@ -105,25 +106,31 @@ class BenchmarkSuite:
         for name, builder, args in circuits:
             construction_ms, qc = self._time_construction(builder, *args)
             simulation_ms, shots_per_sec = self._time_simulation(qc)
-            results.append(BenchmarkResult(
-                circuit_name=name,
-                num_qubits=qc.num_qubits,
-                gate_count=len(qc.instructions),
-                construction_ms=construction_ms,
-                simulation_ms=simulation_ms,
-                shots_per_sec=shots_per_sec,
-            ))
+            results.append(
+                BenchmarkResult(
+                    circuit_name=name,
+                    num_qubits=qc.num_qubits,
+                    gate_count=len(qc.instructions),
+                    construction_ms=construction_ms,
+                    simulation_ms=simulation_ms,
+                    shots_per_sec=shots_per_sec,
+                )
+            )
 
         return results
 
     def print_report(self, results: list[BenchmarkResult]) -> None:
-        print(f"{'Circuit':<14} {'Qubits':>6} {'Gates':>6} "
-              f"{'Build(ms)':>10} {'Sim(ms)':>10} {'Shots/s':>10}")
+        print(
+            f"{'Circuit':<14} {'Qubits':>6} {'Gates':>6} "
+            f"{'Build(ms)':>10} {'Sim(ms)':>10} {'Shots/s':>10}"
+        )
         print("-" * 62)
         for r in results:
-            print(f"{r.circuit_name:<14} {r.num_qubits:>6} {r.gate_count:>6} "
-                  f"{r.construction_ms:>10.2f} {r.simulation_ms:>10.2f} "
-                  f"{r.shots_per_sec:>10.0f}")
+            print(
+                f"{r.circuit_name:<14} {r.num_qubits:>6} {r.gate_count:>6} "
+                f"{r.construction_ms:>10.2f} {r.simulation_ms:>10.2f} "
+                f"{r.shots_per_sec:>10.0f}"
+            )
 
 
 def main():

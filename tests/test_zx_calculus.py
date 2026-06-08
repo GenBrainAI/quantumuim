@@ -6,7 +6,7 @@ import numpy as np
 import pytest
 
 from quantumium.core.circuit import QuantumCircuit
-from quantumium.core.gate import H, X, Z, S, T, CNOT, CZ, Rz, Rx, Y, SWAP, I
+from quantumium.core.gate import H, X, Z, S, T, CNOT, CZ, Rz, Rx, Y
 from quantumium.zx import ZXDiagram, zx_optimize
 from quantumium.zx.convert import _circuit_unitary
 from quantumium.zx.diagram import REGULAR, HADAMARD
@@ -25,6 +25,7 @@ def _unitaries_equivalent(c1, c2, atol=1e-6):
 
 
 # --- ZXDiagram data structure ---
+
 
 class TestZXDiagram:
     def test_create_empty(self):
@@ -82,6 +83,7 @@ class TestZXDiagram:
 
 # --- Circuit → ZX conversion ---
 
+
 class TestCircuitToZX:
     def test_identity_circuit(self):
         qc = QuantumCircuit(1)
@@ -135,6 +137,7 @@ class TestCircuitToZX:
 
 
 # --- ZX → Circuit (round-trip) ---
+
 
 class TestRoundTrip:
     def test_empty(self):
@@ -224,6 +227,7 @@ class TestRoundTrip:
 
 # --- Spider fusion ---
 
+
 class TestSpiderFusion:
     def test_fuse_two_z_spiders(self):
         qc = QuantumCircuit(1)
@@ -280,6 +284,7 @@ class TestSpiderFusion:
 
 # --- Identity removal ---
 
+
 class TestIdentityRemoval:
     def test_remove_identity_spider(self):
         d = ZXDiagram(1)
@@ -305,6 +310,7 @@ class TestIdentityRemoval:
 
 # --- Color change ---
 
+
 class TestColorChange:
     def test_h_z_h_becomes_x(self):
         qc = QuantumCircuit(1)
@@ -327,6 +333,7 @@ class TestColorChange:
 
 
 # --- Full simplification with semantics preservation ---
+
 
 class TestSimplify:
     def test_simplify_preserves_identity(self):
@@ -363,6 +370,7 @@ class TestSimplify:
 
 
 # --- T-count reduction ---
+
 
 class TestTCountReduction:
     def test_adjacent_t_merge(self):
@@ -408,6 +416,7 @@ class TestTCountReduction:
 
 # --- Equivalence checking ---
 
+
 class TestEquivalence:
     def test_same_circuit_equivalent(self):
         qc = QuantumCircuit(1)
@@ -436,6 +445,7 @@ class TestEquivalence:
 
 # --- zx_optimize one-liner ---
 
+
 class TestZXOptimize:
     def test_optimize_reduces_gates(self):
         qc = QuantumCircuit(1)
@@ -460,10 +470,12 @@ class TestZXOptimize:
 
 # --- Existing tests unbroken ---
 
+
 class TestExistingTestsUnbroken:
     def test_import_core(self):
         from quantumium.core.circuit import QuantumCircuit as QC
         from quantumium.core.gate import H as HG
+
         qc = QC(1)
         qc.apply(HG, 0)
         state = qc.statevector()
@@ -471,5 +483,6 @@ class TestExistingTestsUnbroken:
 
     def test_import_surface_code(self):
         from quantumium.surface_code.lattice import SurfaceCode
+
         lattice = SurfaceCode(3)
         assert lattice.distance == 3

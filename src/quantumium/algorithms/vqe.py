@@ -8,13 +8,12 @@ and classical optimization to minimize ⟨ψ(θ)|H|ψ(θ)⟩.
 from __future__ import annotations
 
 from dataclasses import dataclass
-from typing import Callable
 
 import numpy as np
 from numpy.typing import NDArray
 
 from ..core.circuit import QuantumCircuit
-from ..core.gate import Gate, H, CNOT, Ry, Rz
+from ..core.gate import CNOT, Ry, Rz
 
 
 @dataclass
@@ -32,13 +31,16 @@ class VQEResult:
     num_iterations : int
         Number of iterations completed in the best run.
     """
+
     optimal_energy: float
     optimal_params: NDArray[np.floating]
     history: list[float]
     num_iterations: int
 
 
-def pauli_z_expectation(statevector: NDArray[np.complexfloating], qubit: int, num_qubits: int) -> float:
+def pauli_z_expectation(
+    statevector: NDArray[np.complexfloating], qubit: int, num_qubits: int
+) -> float:
     """Compute the expectation value <psi|Z_i|psi> for a single Pauli-Z operator.
 
     Parameters
@@ -64,7 +66,9 @@ def pauli_z_expectation(statevector: NDArray[np.complexfloating], qubit: int, nu
     return expectation
 
 
-def pauli_zz_expectation(statevector: NDArray[np.complexfloating], qubit_i: int, qubit_j: int, num_qubits: int) -> float:
+def pauli_zz_expectation(
+    statevector: NDArray[np.complexfloating], qubit_i: int, qubit_j: int, num_qubits: int
+) -> float:
     """Compute the expectation value <psi|Z_i Z_j|psi> for a two-qubit ZZ operator.
 
     Parameters
@@ -273,12 +277,16 @@ def vqe(
             for i in range(num_params):
                 params_plus = params.copy()
                 params_plus[i] += shift
-                sv_plus = hardware_efficient_ansatz(num_qubits, params_plus, ansatz_depth).statevector()
+                sv_plus = hardware_efficient_ansatz(
+                    num_qubits, params_plus, ansatz_depth
+                ).statevector()
                 e_plus = hamiltonian_expectation(sv_plus, hamiltonian)
 
                 params_minus = params.copy()
                 params_minus[i] -= shift
-                sv_minus = hardware_efficient_ansatz(num_qubits, params_minus, ansatz_depth).statevector()
+                sv_minus = hardware_efficient_ansatz(
+                    num_qubits, params_minus, ansatz_depth
+                ).statevector()
                 e_minus = hamiltonian_expectation(sv_minus, hamiltonian)
 
                 grad[i] = (e_plus - e_minus) / 2

@@ -25,14 +25,12 @@ import numpy as np
 from numpy.typing import NDArray
 
 from ..core.circuit import QuantumCircuit
-from ..core.gate import Gate, H, S
-from .channels import kraus_to_choi
 
 
 # Single-qubit input states for process tomography
 _INPUT_STATES_1Q = [
-    np.array([1, 0], dtype=complex),         # |0>
-    np.array([0, 1], dtype=complex),         # |1>
+    np.array([1, 0], dtype=complex),  # |0>
+    np.array([0, 1], dtype=complex),  # |1>
     np.array([1, 1], dtype=complex) / np.sqrt(2),  # |+>
     np.array([1, 1j], dtype=complex) / np.sqrt(2),  # |+i>
 ]
@@ -59,10 +57,7 @@ def _nqubit_paulis(n: int) -> list[NDArray[np.complexfloating]]:
     """
     if n == 1:
         return _PAULIS_1Q
-    return [
-        _multi_kron(combo)
-        for combo in iterproduct(_PAULIS_1Q, repeat=n)
-    ]
+    return [_multi_kron(combo) for combo in iterproduct(_PAULIS_1Q, repeat=n)]
 
 
 def _multi_kron(matrices: tuple) -> NDArray[np.complexfloating]:
@@ -95,10 +90,7 @@ def _input_states(n: int) -> list[NDArray[np.complexfloating]]:
     """
     if n == 1:
         return _INPUT_STATES_1Q
-    return [
-        _multi_kron_vec(combo)
-        for combo in iterproduct(_INPUT_STATES_1Q, repeat=n)
-    ]
+    return [_multi_kron_vec(combo) for combo in iterproduct(_INPUT_STATES_1Q, repeat=n)]
 
 
 def _multi_kron_vec(vectors: tuple) -> NDArray[np.complexfloating]:
@@ -154,14 +146,15 @@ def _apply_channel_simulation(
             U = full @ U
         else:
             from ..core.circuit import QuantumCircuit as QC
+
             temp = QC(n)
             temp.apply(inst.gate, *inst.target_qubits)
-            sv_temp = temp.statevector()
+            temp.statevector()
             temp_U = np.eye(d, dtype=complex)
             for t_inst in temp.instructions:
                 g = t_inst.gate.matrix
                 tq = t_inst.target_qubits
-                temp_U = temp._expand_gate(g, tq) @ temp_U
+                temp_U = temp._expand_gate(g, tq, n) @ temp_U
             U = temp_U @ U
 
     output_state = U @ input_state
@@ -200,6 +193,7 @@ class ProcessTomographyResult:
             or None if no target was provided.
         input_states_used: Number of input states used in the tomography.
     """
+
     chi_matrix: NDArray[np.complexfloating]
     choi_matrix: NDArray[np.complexfloating]
     num_qubits: int

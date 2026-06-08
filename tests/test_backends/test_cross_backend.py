@@ -3,12 +3,11 @@
 from __future__ import annotations
 
 import numpy as np
-import pytest
 
 from quantumium.core.circuit import QuantumCircuit
-from quantumium.core.gate import H, X, Z, CNOT
+from quantumium.core.gate import H
 from quantumium.core.noise import NoiseModel, depolarizing
-from quantumium.backends import LocalSimulatorBackend, ExecutionResult
+from quantumium.backends import LocalSimulatorBackend
 
 from .conftest import chi_squared_test, hellinger_fidelity
 
@@ -80,8 +79,9 @@ class TestNoiseModelCalibration:
             rho_ideal = bell_circuit.density_matrix()
             fid = np.real(np.trace(rho_ideal @ rho_noisy))
             fidelities.append(fid)
-        assert fidelities[0] > fidelities[1] > fidelities[2], \
+        assert fidelities[0] > fidelities[1] > fidelities[2], (
             f"Fidelity not monotonically decreasing: {fidelities}"
+        )
 
     def test_noisy_measurement_adds_errors(self, bell_circuit):
         noise = NoiseModel(default_single_qubit_noise=depolarizing(0.1))
@@ -132,17 +132,21 @@ class TestExecutionResultAPI:
 
 class TestExistingTestsUnbroken:
     def test_import_backends(self):
-        from quantumium.backends import LocalSimulatorBackend, ExecutionResult, Backend
+        from quantumium.backends import LocalSimulatorBackend
+
         assert LocalSimulatorBackend is not None
 
     def test_import_qiskit_backend(self):
         from quantumium.backends.qiskit_backend import QiskitBackend
+
         assert QiskitBackend is not None
 
     def test_import_cirq_backend(self):
         from quantumium.backends.cirq_backend import CirqBackend
+
         assert CirqBackend is not None
 
     def test_import_braket_backend(self):
         from quantumium.backends.braket_backend import BraketBackend
+
         assert BraketBackend is not None

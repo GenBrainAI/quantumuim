@@ -88,7 +88,7 @@ def gate_fidelity(
     """
     d = U_actual.shape[0]
     overlap = np.trace(U_target.conj().T @ U_actual)
-    return float(abs(overlap)**2 / d**2)
+    return float(abs(overlap) ** 2 / d**2)
 
 
 def process_fidelity(

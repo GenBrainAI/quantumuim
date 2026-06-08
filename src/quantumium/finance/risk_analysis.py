@@ -19,7 +19,6 @@ References:
 
 from __future__ import annotations
 
-import math
 from dataclasses import dataclass
 
 import numpy as np
@@ -48,6 +47,7 @@ class RiskAnalysisResult:
         distribution: Name of the assumed loss distribution (e.g.,
             ``"gaussian"``).
     """
+
     var_quantum: float
     cvar_quantum: float
     var_classical: float
@@ -128,6 +128,7 @@ def _build_gaussian_distribution(
     probs = np.zeros(num_bins)
     for i in range(num_bins):
         from .option_pricing import _norm_cdf
+
         p_hi = _norm_cdf((edges[i + 1] - mu) / sigma)
         p_lo = _norm_cdf((edges[i] - mu) / sigma)
         probs[i] = p_hi - p_lo

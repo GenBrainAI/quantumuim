@@ -4,7 +4,7 @@ import numpy as np
 import pytest
 
 from quantumium.core.qubit import Qubit
-from quantumium.core.gate import H, X, Y, Z, CNOT, Rx, Ry, Rz, Gate
+from quantumium.core.gate import H, X, CNOT, Rx, Ry, Rz, Gate
 from quantumium.core.circuit import QuantumCircuit
 
 

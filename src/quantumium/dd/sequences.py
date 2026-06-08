@@ -90,10 +90,7 @@ class DDSequence:
         """
         if n_pulses < 1:
             raise ValueError("UDD requires at least 1 pulse")
-        times = [
-            math.sin(math.pi * j / (2 * n_pulses + 2)) ** 2
-            for j in range(1, n_pulses + 1)
-        ]
+        times = [math.sin(math.pi * j / (2 * n_pulses + 2)) ** 2 for j in range(1, n_pulses + 1)]
         spacings = [times[0]]
         for i in range(1, len(times)):
             spacings.append(times[i] - times[i - 1])

@@ -24,8 +24,10 @@ SEMIPRIMES: list[tuple[int, int, int]] = [
 def benchmark_factoring() -> None:
     print("SHOR Q+ BENCHMARK")
     print("=" * 70)
-    print(f"{'N':>5} {'n_bits':>6} {'Std Qubits':>10} {'Q+ Qubits':>10} "
-          f"{'Savings':>8} {'Result':>12} {'Time':>8}")
+    print(
+        f"{'N':>5} {'n_bits':>6} {'Std Qubits':>10} {'Q+ Qubits':>10} "
+        f"{'Savings':>8} {'Result':>12} {'Time':>8}"
+    )
     print("-" * 70)
 
     shor = ShorQPlus(strategy="semiclassical")
@@ -59,8 +61,10 @@ def benchmark_factoring() -> None:
         else:
             status = "FAILED"
 
-        print(f"{N:>5} {n_bits:>6} {std_qubits:>10} {qplus_qubits:>10} "
-              f"{savings:>7}  {status:>12} {elapsed:>7.2f}s")
+        print(
+            f"{N:>5} {n_bits:>6} {std_qubits:>10} {qplus_qubits:>10} "
+            f"{savings:>7}  {status:>12} {elapsed:>7.2f}s"
+        )
 
     print("-" * 70)
     print(f"Results: {total_successes}/{len(SEMIPRIMES)} semiprimes factored successfully")
@@ -71,8 +75,10 @@ def benchmark_factoring() -> None:
     for N, _, _ in SEMIPRIMES:
         comp = ShorQPlus.qubit_comparison(N)
         pct = (1 - comp["semiclassical_qft"] / comp["standard_shor"]) * 100
-        print(f"  N={N:>4}: {comp['standard_shor']:>3} -> {comp['semiclassical_qft']:>3} qubits "
-              f"({pct:.0f}% reduction)")
+        print(
+            f"  N={N:>4}: {comp['standard_shor']:>3} -> {comp['semiclassical_qft']:>3} qubits "
+            f"({pct:.0f}% reduction)"
+        )
 
     print()
     print("Q+ LAYER CONTRIBUTIONS")
@@ -80,8 +86,10 @@ def benchmark_factoring() -> None:
     print("  Layer 1 (Compress): Semiclassical QFT reduces counting register n -> 1 qubit")
     print("  Layer 2 (Recycle):  Measure-reset-reuse enables single counting qubit")
     print("  Layer 3 (Cut/Dist): Circuit cutting enables multi-QPU distribution")
-    print(f"\n  Benchmark: factor {SEMIPRIMES[-1][0]} ({comp['n_bits']}-bit) "
-          f"using {comp['semiclassical_qft']} qubits instead of {comp['standard_shor']}")
+    print(
+        f"\n  Benchmark: factor {SEMIPRIMES[-1][0]} ({comp['n_bits']}-bit) "
+        f"using {comp['semiclassical_qft']} qubits instead of {comp['standard_shor']}"
+    )
 
 
 def main() -> None:

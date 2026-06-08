@@ -8,5 +8,9 @@ states, quantum teleportation, and the Quantum Fourier Transform.
 from .templates import bell_pair, ghz_state, quantum_teleportation, qft, inverse_qft
 
 __all__ = [
-    "bell_pair", "ghz_state", "quantum_teleportation", "qft", "inverse_qft",
+    "bell_pair",
+    "ghz_state",
+    "quantum_teleportation",
+    "qft",
+    "inverse_qft",
 ]

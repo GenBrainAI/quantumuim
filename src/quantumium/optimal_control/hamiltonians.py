@@ -27,6 +27,7 @@ class ControlHamiltonian:
         dim: Hilbert space dimension.
         num_controls: Number of control channels.
     """
+
     drift: NDArray[np.complexfloating]
     controls: list[NDArray[np.complexfloating]]
 
@@ -49,7 +50,8 @@ class ControlHamiltonian:
         return len(self.controls)
 
     def total_hamiltonian(
-        self, amplitudes: NDArray[np.floating],
+        self,
+        amplitudes: NDArray[np.floating],
     ) -> NDArray[np.complexfloating]:
         """Compute the total Hamiltonian for given control amplitudes.
 

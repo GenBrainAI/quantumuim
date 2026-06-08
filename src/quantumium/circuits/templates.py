@@ -5,7 +5,7 @@ from __future__ import annotations
 import numpy as np
 
 from quantumium.core.circuit import QuantumCircuit
-from quantumium.core.gate import Gate, H, X, Z, CNOT, SWAP, Rz
+from quantumium.core.gate import Gate, H, CNOT, SWAP
 
 
 def bell_pair(qubit_a: int = 0, qubit_b: int = 1) -> QuantumCircuit:
@@ -79,12 +79,18 @@ def quantum_teleportation() -> QuantumCircuit:
     qc.apply(H, 0)
     qc.apply(CNOT, 1, 2)
 
-    cz = Gate(np.array([
-        [1, 0, 0, 0],
-        [0, 1, 0, 0],
-        [0, 0, 1, 0],
-        [0, 0, 0, -1],
-    ], dtype=complex), "CZ")
+    cz = Gate(
+        np.array(
+            [
+                [1, 0, 0, 0],
+                [0, 1, 0, 0],
+                [0, 0, 1, 0],
+                [0, 0, 0, -1],
+            ],
+            dtype=complex,
+        ),
+        "CZ",
+    )
     qc.apply(cz, 0, 2)
 
     return qc
@@ -171,9 +177,15 @@ def _controlled_phase(theta: float) -> Gate:
     Returns:
         Gate: A 4x4 controlled phase gate.
     """
-    return Gate(np.array([
-        [1, 0, 0, 0],
-        [0, 1, 0, 0],
-        [0, 0, 1, 0],
-        [0, 0, 0, np.exp(1j * theta)],
-    ], dtype=complex), f"CP({theta:.3f})")
+    return Gate(
+        np.array(
+            [
+                [1, 0, 0, 0],
+                [0, 1, 0, 0],
+                [0, 0, 1, 0],
+                [0, 0, 0, np.exp(1j * theta)],
+            ],
+            dtype=complex,
+        ),
+        f"CP({theta:.3f})",
+    )

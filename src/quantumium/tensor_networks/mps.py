@@ -12,8 +12,7 @@ For product states χ=1; for maximally entangled states χ can grow up to 2^(n/2
 
 from __future__ import annotations
 
-from dataclasses import dataclass, field
-from copy import deepcopy
+from dataclasses import dataclass
 
 import numpy as np
 from numpy.typing import NDArray
@@ -29,6 +28,7 @@ class MPS:
         num_qubits: Number of qubits.
         max_bond_dim: Maximum allowed bond dimension for truncation.
     """
+
     tensors: list[NDArray[np.complexfloating]]
     num_qubits: int
     max_bond_dim: int | None = None
@@ -77,7 +77,7 @@ class MPS:
             # tensor[k] shape: (χ_k, 2, χ_{k+1})
             T = self.tensors[k]  # (χ_k, 2, χ_{k+1})
             dim_left = result.shape[0]
-            chi_k = result.shape[1]
+            result.shape[1]
 
             # Contract: result @ T reshaped
             # result[i, α] * T[α, s, β] → new[i, s, β] → new[i*2+s, β]

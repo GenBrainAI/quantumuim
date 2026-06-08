@@ -5,7 +5,6 @@ import numpy as np
 import pytest
 
 from quantumium.tensor_networks.mps import (
-    MPS,
     mps_zero_state,
     mps_product_state,
     mps_from_statevector,
@@ -22,17 +21,21 @@ from quantumium.tensor_networks.operations import (
 H_GATE = np.array([[1, 1], [1, -1]], dtype=complex) / math.sqrt(2)
 X_GATE = np.array([[0, 1], [1, 0]], dtype=complex)
 Z_GATE = np.array([[1, 0], [0, -1]], dtype=complex)
-CNOT_GATE = np.array([
-    [1, 0, 0, 0],
-    [0, 1, 0, 0],
-    [0, 0, 0, 1],
-    [0, 0, 1, 0],
-], dtype=complex)
+CNOT_GATE = np.array(
+    [
+        [1, 0, 0, 0],
+        [0, 1, 0, 0],
+        [0, 0, 0, 1],
+        [0, 0, 1, 0],
+    ],
+    dtype=complex,
+)
 
 
 # ============================================================
 # MPS Construction
 # ============================================================
+
 
 class TestMPSZeroState:
     def test_creates_n_tensors(self):
@@ -135,6 +138,7 @@ class TestMPSFromStatevector:
 # Single-Qubit Gates
 # ============================================================
 
+
 class TestSingleQubitGate:
     def test_x_gate(self):
         mps = mps_zero_state(2)
@@ -165,6 +169,7 @@ class TestSingleQubitGate:
 # ============================================================
 # Two-Qubit Gates
 # ============================================================
+
 
 class TestTwoQubitGate:
     def test_cnot_creates_bell(self):
@@ -221,6 +226,7 @@ class TestTwoQubitGate:
 # Measurement
 # ============================================================
 
+
 class TestMeasurement:
     def test_measure_zero_state(self):
         mps = mps_zero_state(2)
@@ -247,6 +253,7 @@ class TestMeasurement:
 # ============================================================
 # Entanglement Entropy
 # ============================================================
+
 
 class TestEntanglementEntropy:
     def test_product_state_zero_entropy(self):
@@ -280,6 +287,7 @@ class TestEntanglementEntropy:
 # ============================================================
 # Inner Product
 # ============================================================
+
 
 class TestInnerProduct:
     def test_self_overlap(self):
@@ -320,6 +328,7 @@ class TestInnerProduct:
 # ============================================================
 # MPS Copy
 # ============================================================
+
 
 class TestMPSCopy:
     def test_copy_independent(self):

@@ -146,7 +146,9 @@ class TestQubitRecycler:
         for _ in range(20):
             qr = QubitRecycler(2)
 
-            def ctrl_z(power: int, state: NDArray[np.complexfloating]) -> NDArray[np.complexfloating]:
+            def ctrl_z(
+                power: int, state: NDArray[np.complexfloating]
+            ) -> NDArray[np.complexfloating]:
                 out = np.array(state, dtype=complex)
                 out[1] *= (-1) ** power
                 return out
@@ -165,7 +167,9 @@ class TestQubitRecycler:
         for _ in range(30):
             qr = QubitRecycler(n_bits + 1)
 
-            def ctrl_u(power: int, state: NDArray[np.complexfloating]) -> NDArray[np.complexfloating]:
+            def ctrl_u(
+                power: int, state: NDArray[np.complexfloating]
+            ) -> NDArray[np.complexfloating]:
                 perm = ModularArithmeticOptimizer.mod_exp_permutation(7, power, 15, n_bits)
                 return perm @ state
 

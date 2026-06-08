@@ -145,6 +145,7 @@ class RBResult:
         offset_A: Amplitude parameter A from the exponential fit.
         offset_B: Offset parameter B from the exponential fit (ideally 1/d).
     """
+
     sequence_lengths: list[int]
     survival_probabilities: list[float]
     alpha: float
@@ -209,8 +210,9 @@ def randomized_benchmarking(
             # Each gate has probability error_rate of depolarizing
             # After m+1 gates, survival ≈ |<0|sv>|^2 * (1-error_rate)^(m+1)
             ideal_prob = float(abs(sv[0]) ** 2)
-            noisy_prob = ideal_prob * (1 - error_rate) ** (m + 1) + \
-                (1 - (1 - error_rate) ** (m + 1)) / 2
+            noisy_prob = (
+                ideal_prob * (1 - error_rate) ** (m + 1) + (1 - (1 - error_rate) ** (m + 1)) / 2
+            )
             survivals.append(noisy_prob)
 
         survival_probs.append(float(np.mean(survivals)))

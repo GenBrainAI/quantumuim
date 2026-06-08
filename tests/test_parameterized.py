@@ -3,7 +3,7 @@
 import numpy as np
 import pytest
 
-from quantumium.core.gate import H, X, CNOT, Ry, Rz
+from quantumium.core.gate import H, CNOT, Ry, Rz
 from quantumium.core.circuit import QuantumCircuit
 from quantumium.core.parameter import (
     Parameter,

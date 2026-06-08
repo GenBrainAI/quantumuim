@@ -78,8 +78,7 @@ class PhysicalEstimate:
             f"  Magic state factories:{self.n_factories}",
             f"  Factory qubits:       {self.factory_qubits:,}",
             f"  Total physical qubits:{self.total_qubits:,}",
-            f"  Runtime:              {self.runtime_seconds:.2f} s "
-            f"({self.runtime_hours:.4f} h)",
+            f"  Runtime:              {self.runtime_seconds:.2f} s ({self.runtime_hours:.4f} h)",
             f"  Routing overhead:     {self.routing_overhead:.1f}x",
             "",
             self.logical.summary(),

@@ -147,9 +147,9 @@ def phase_flip_decode(state: NDArray[np.complexfloating]) -> NDArray[np.complexf
     plus3 = np.ones(8, dtype=complex) / (2 * np.sqrt(2))
 
     # |---⟩ = (1/2√2) Σ(-1)^parity(i)|i⟩
-    minus3 = np.array(
-        [(-1) ** bin(i).count("1") for i in range(8)], dtype=complex
-    ) / (2 * np.sqrt(2))
+    minus3 = np.array([(-1) ** bin(i).count("1") for i in range(8)], dtype=complex) / (
+        2 * np.sqrt(2)
+    )
 
     alpha = np.dot(plus3.conj(), state)
     beta = np.dot(minus3.conj(), state)

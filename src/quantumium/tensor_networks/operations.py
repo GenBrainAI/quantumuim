@@ -79,12 +79,15 @@ def apply_two_qubit_gate(
     # If gate indices are reversed from physical layout, transpose
     if qubit1 > qubit2:
         # Swap gate indices: |s1 s2⟩ → |s2 s1⟩
-        swap = np.array([
-            [1, 0, 0, 0],
-            [0, 0, 1, 0],
-            [0, 1, 0, 0],
-            [0, 0, 0, 1],
-        ], dtype=complex)
+        swap = np.array(
+            [
+                [1, 0, 0, 0],
+                [0, 0, 1, 0],
+                [0, 1, 0, 0],
+                [0, 0, 0, 1],
+            ],
+            dtype=complex,
+        )
         gate = gate @ swap  # Apply swap before gate
         gate = swap @ gate  # Apply swap after gate too? No — just conjugate.
         # Actually: if gate acts on (q1, q2) but q1 > q2, we need to
@@ -93,7 +96,7 @@ def apply_two_qubit_gate(
         gate_reshaped = gate_reshaped.transpose(1, 0, 3, 2)
         gate = gate_reshaped.reshape(4, 4)
 
-    T_left = mps.tensors[left]   # (χ_L, 2, χ_mid)
+    T_left = mps.tensors[left]  # (χ_L, 2, χ_mid)
     T_right = mps.tensors[right]  # (χ_mid, 2, χ_R)
 
     chi_L = T_left.shape[0]
@@ -101,8 +104,9 @@ def apply_two_qubit_gate(
     chi_R = T_right.shape[2]
 
     # Contract the two tensors: Θ[α, s1, s2, β] = Σ_γ T_left[α,s1,γ] * T_right[γ,s2,β]
-    theta = np.einsum("asc,csb->asb", T_left.reshape(chi_L, 2, chi_mid),
-                       T_right.reshape(chi_mid, 2, chi_R))
+    theta = np.einsum(
+        "asc,csb->asb", T_left.reshape(chi_L, 2, chi_mid), T_right.reshape(chi_mid, 2, chi_R)
+    )
     # theta shape: (χ_L, 2, 2, χ_R) — wait, that's wrong.
     # Let me redo: T_left is (χ_L, 2, χ_mid), T_right is (χ_mid, 2, χ_R)
     theta = np.einsum("aig,gjb->aijb", T_left, T_right)  # (χ_L, 2, 2, χ_R)
@@ -213,12 +217,12 @@ def entanglement_entropy(mps: MPS, cut: int) -> float:
     """
     n = mps.num_qubits
     if cut < 1 or cut >= n:
-        raise ValueError(f"Cut must be between 1 and {n-1}, got {cut}")
+        raise ValueError(f"Cut must be between 1 and {n - 1}, got {cut}")
 
     sv = mps.to_statevector()
-    dim = 2**n
+    2**n
     dim_left = 2**cut
-    dim_right = 2**(n - cut)
+    dim_right = 2 ** (n - cut)
 
     psi_mat = sv.reshape(dim_left, dim_right)
     _, S, _ = np.linalg.svd(psi_mat, full_matrices=False)

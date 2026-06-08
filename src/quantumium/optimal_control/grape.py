@@ -23,7 +23,7 @@ from numpy.typing import NDArray
 
 from .hamiltonians import ControlHamiltonian
 from .pulses import PulseSequence
-from .fidelity import propagator_sequence, gate_fidelity, _matrix_exp
+from .fidelity import propagator_sequence, gate_fidelity
 
 
 @dataclass
@@ -41,6 +41,7 @@ class GRAPEResult:
         converged (bool): Whether the optimization reached the convergence
             threshold before exhausting iterations.
     """
+
     optimal_pulse: PulseSequence
     fidelity: float
     fidelity_history: list[float]
@@ -85,8 +86,7 @@ def grape_optimize(
 
     if target.shape != (dim, dim):
         raise ValueError(
-            f"Target unitary shape {target.shape} doesn't match "
-            f"Hamiltonian dimension {dim}"
+            f"Target unitary shape {target.shape} doesn't match Hamiltonian dimension {dim}"
         )
 
     # Initialize pulse

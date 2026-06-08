@@ -5,7 +5,6 @@ import numpy as np
 from quantumium.algorithms.vqe import (
     pauli_z_expectation,
     pauli_zz_expectation,
-    hamiltonian_expectation,
     hardware_efficient_ansatz,
     h2_hamiltonian,
     vqe,

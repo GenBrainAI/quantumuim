@@ -3,7 +3,7 @@
 from __future__ import annotations
 
 import numpy as np
-from typing import Any, Dict, Tuple, Optional, Union
+from typing import Dict, Tuple, Optional, Union
 
 
 class FermionOperator:
@@ -119,9 +119,7 @@ class FermionOperator:
             if not key:
                 parts.append(f"{coeff}")
             else:
-                ops = " ".join(
-                    f"a{'†' if cr else ''}_{m}" for m, cr in key
-                )
+                ops = " ".join(f"a{'†' if cr else ''}_{m}" for m, cr in key)
                 parts.append(f"{coeff} [{ops}]")
         return " + ".join(parts)
 
@@ -157,7 +155,7 @@ def _normal_order_term(key: Tuple[Tuple[int, bool], ...], coeff: complex) -> Fer
                 # a_i a†_j = delta_ij - a†_j a_i
                 if m_left == m_right:
                     # a_i a†_i = 1 - a†_i a_i
-                    remaining = ops[:i] + ops[i + 2:]
+                    remaining = ops[:i] + ops[i + 2 :]
                     identity_term = _normal_order_term(tuple(remaining), current_coeff)
                     result = result + identity_term
                     ops[i], ops[i + 1] = ops[i + 1], ops[i]

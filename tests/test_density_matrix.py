@@ -1,10 +1,9 @@
 """Tests for density matrix simulation and noisy circuit execution."""
 
 import numpy as np
-import pytest
 
 from quantumium.core.circuit import QuantumCircuit
-from quantumium.core.gate import H, X, CNOT, I
+from quantumium.core.gate import H, X, CNOT
 from quantumium.core.noise import (
     NoiseModel,
     bit_flip,

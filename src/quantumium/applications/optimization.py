@@ -11,7 +11,7 @@ from dataclasses import dataclass
 import numpy as np
 from numpy.typing import NDArray
 
-from ..algorithms.qaoa import qaoa_maxcut, maxcut_cost_operator, QAOAResult
+from ..algorithms.qaoa import qaoa_maxcut, QAOAResult
 
 
 @dataclass
@@ -29,6 +29,7 @@ class OptimizationResult:
         qaoa_result: Full :class:`QAOAResult` from the underlying QAOA
             run, including optimal parameters and convergence history.
     """
+
     problem: str
     solution: str
     objective_value: float
@@ -137,8 +138,6 @@ def solve_tsp_qaoa(
         cost[basis_state] = -(route_cost + penalty * (row_penalty + col_penalty))
 
     from ..algorithms.qaoa import qaoa_circuit, qaoa_expectation
-    from ..core.gate import H
-    from ..core.circuit import QuantumCircuit
 
     best_value = -np.inf
     best_bitstring = None
@@ -226,7 +225,9 @@ def portfolio_optimization(
     penalty = 10.0
 
     for basis_state in range(dim):
-        x = np.array([(basis_state >> (num_qubits - 1 - i)) & 1 for i in range(n_assets)], dtype=float)
+        x = np.array(
+            [(basis_state >> (num_qubits - 1 - i)) & 1 for i in range(n_assets)], dtype=float
+        )
 
         objective = np.dot(expected_returns, x) - risk_aversion * x @ covariance @ x
 
@@ -276,7 +277,7 @@ def portfolio_optimization(
         history=[],
     )
 
-    selected = [i for i, b in enumerate(best_bitstring) if b == '1']
+    [i for i, b in enumerate(best_bitstring) if b == "1"]
     return OptimizationResult(
         problem=f"Portfolio ({n_assets} assets, budget={budget})",
         solution=best_bitstring,

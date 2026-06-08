@@ -5,8 +5,19 @@ import pytest
 
 from quantumium.core.circuit import QuantumCircuit
 from quantumium.core.gate import (
-    Gate, H, X, Z, S, T, CNOT, CZ, CCX,
-    controlled, Rx, Ry, Rz, CRx, CRy, CRz, Rxx, Rzz,
+    H,
+    X,
+    Z,
+    S,
+    CNOT,
+    CZ,
+    CCX,
+    controlled,
+    CRx,
+    CRy,
+    CRz,
+    Rxx,
+    Rzz,
 )
 
 

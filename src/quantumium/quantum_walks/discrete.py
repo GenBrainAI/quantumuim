@@ -22,7 +22,7 @@ from dataclasses import dataclass
 import numpy as np
 from numpy.typing import NDArray
 
-from .graphs import line_graph, cycle_graph
+from .graphs import line_graph
 
 
 def _hadamard_coin() -> NDArray[np.complexfloating]:
@@ -102,6 +102,7 @@ class DiscreteWalkResult:
             vector in the position-coin Hilbert space, of length
             num_vertices * coin_dimension.
     """
+
     position_probabilities: NDArray[np.floating]
     num_vertices: int
     num_steps: int
@@ -148,9 +149,7 @@ def discrete_walk(
         C = np.asarray(coin, dtype=complex)
 
     if C.shape[0] != d_coin:
-        raise ValueError(
-            f"Coin dimension {C.shape[0]} doesn't match graph max degree {d_coin}"
-        )
+        raise ValueError(f"Coin dimension {C.shape[0]} doesn't match graph max degree {d_coin}")
 
     S = _build_shift_operator(adjacency)
     coin_op = np.kron(np.eye(n, dtype=complex), C)
@@ -161,17 +160,17 @@ def discrete_walk(
         cs = np.asarray(initial_coin_state, dtype=complex)
         if len(cs) != d_coin:
             raise ValueError(f"Coin state dimension {len(cs)} != {d_coin}")
-        state[initial_vertex * d_coin:(initial_vertex + 1) * d_coin] = cs
+        state[initial_vertex * d_coin : (initial_vertex + 1) * d_coin] = cs
     else:
         cs = np.ones(d_coin, dtype=complex) / np.sqrt(d_coin)
-        state[initial_vertex * d_coin:(initial_vertex + 1) * d_coin] = cs
+        state[initial_vertex * d_coin : (initial_vertex + 1) * d_coin] = cs
 
     for _ in range(num_steps):
         state = U @ state
 
     probs = np.zeros(n)
     for v in range(n):
-        segment = state[v * d_coin:(v + 1) * d_coin]
+        segment = state[v * d_coin : (v + 1) * d_coin]
         probs[v] = float(np.sum(np.abs(segment) ** 2))
 
     return DiscreteWalkResult(

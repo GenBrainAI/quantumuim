@@ -24,6 +24,7 @@ class PulseSequence:
         num_steps: Number of time steps.
         num_controls: Number of control channels.
     """
+
     amplitudes: NDArray[np.floating]
     dt: float
 
@@ -125,7 +126,7 @@ def gaussian_pulse(
     t_center = (num_steps - 1) * dt / 2
     for i in range(num_steps):
         t = i * dt
-        amps[i, channel] = amplitude * math.exp(-(t - t_center)**2 / (2 * sigma**2))
+        amps[i, channel] = amplitude * math.exp(-((t - t_center) ** 2) / (2 * sigma**2))
     return PulseSequence(amplitudes=amps, dt=dt)
 
 
@@ -158,7 +159,7 @@ def drag_pulse(
 
     for i in range(num_steps):
         t = i * dt
-        gauss = amplitude * math.exp(-(t - t_center)**2 / (2 * sigma**2))
+        gauss = amplitude * math.exp(-((t - t_center) ** 2) / (2 * sigma**2))
         d_gauss = gauss * (-(t - t_center) / sigma**2)
         amps[i, 0] = gauss
         amps[i, 1] = -beta * d_gauss

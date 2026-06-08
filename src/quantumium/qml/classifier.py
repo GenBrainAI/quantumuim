@@ -18,8 +18,7 @@ import numpy as np
 from numpy.typing import NDArray
 
 from ..core.circuit import QuantumCircuit
-from ..core.gate import Gate, H, Ry, Rz, CNOT, Z
-from .encoding import angle_encode
+from ..core.gate import Ry, Rz, CNOT
 
 
 @dataclass
@@ -37,6 +36,7 @@ class VQCResult:
         accuracy: Classification accuracy on the training data after
             the final epoch, as a fraction in [0, 1].
     """
+
     weights: NDArray[np.floating]
     bias: float
     loss_history: list[float]
@@ -195,8 +195,7 @@ def variational_classifier(
             w_minus = weights.copy()
             w_minus[k] -= shift
             grad[k] = (
-                _loss_fn(X, y, w_plus, bias, num_layers)
-                - _loss_fn(X, y, w_minus, bias, num_layers)
+                _loss_fn(X, y, w_plus, bias, num_layers) - _loss_fn(X, y, w_minus, bias, num_layers)
             ) / (2 * np.sin(shift))
 
         # Gradient for bias (finite difference)

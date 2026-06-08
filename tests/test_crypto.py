@@ -95,9 +95,7 @@ class TestBB84Protocol:
     def test_eavesdropper_introduces_errors(self):
         """With Eve, Alice and Bob's keys should differ."""
         result = bb84_protocol(num_qubits=500, eavesdropper=True, seed=42)
-        mismatches = sum(
-            a != b for a, b in zip(result.alice_key, result.bob_key)
-        )
+        mismatches = sum(a != b for a, b in zip(result.alice_key, result.bob_key))
         # Eve causes ~25% errors even in the key portion
         assert mismatches > 0
 

@@ -6,19 +6,20 @@ can be efficiently bound to concrete values for VQE/QAOA workflows.
 
 from __future__ import annotations
 
-from dataclasses import dataclass, field
+from dataclasses import dataclass
 from typing import Callable
 
 import numpy as np
 from numpy.typing import NDArray
 
 from .gate import Gate, Rx, Ry, Rz
-from .circuit import QuantumCircuit, Instruction
+from .circuit import QuantumCircuit
 
 
 @dataclass(frozen=True)
 class Parameter:
     """A symbolic parameter for rotation gates."""
+
     name: str
 
     def __repr__(self) -> str:
@@ -52,6 +53,7 @@ GATE_FACTORIES: dict[str, Callable[[float], Gate]] = {
 @dataclass
 class ParameterizedInstruction:
     """A circuit instruction that may contain a symbolic parameter."""
+
     gate_type: str
     parameter: Parameter | None
     fixed_gate: Gate | None
@@ -83,45 +85,53 @@ class ParameterizedCircuit:
 
     def apply(self, gate: Gate, *qubits: int) -> ParameterizedCircuit:
         """Add a fixed (non-parameterized) gate."""
-        self._instructions.append(ParameterizedInstruction(
-            gate_type="fixed",
-            parameter=None,
-            fixed_gate=gate,
-            target_qubits=tuple(qubits),
-        ))
+        self._instructions.append(
+            ParameterizedInstruction(
+                gate_type="fixed",
+                parameter=None,
+                fixed_gate=gate,
+                target_qubits=tuple(qubits),
+            )
+        )
         return self
 
     def rx(self, param: Parameter, qubit: int) -> ParameterizedCircuit:
         """Add a parameterized Rx rotation."""
         self._parameters.add(param)
-        self._instructions.append(ParameterizedInstruction(
-            gate_type="Rx",
-            parameter=param,
-            fixed_gate=None,
-            target_qubits=(qubit,),
-        ))
+        self._instructions.append(
+            ParameterizedInstruction(
+                gate_type="Rx",
+                parameter=param,
+                fixed_gate=None,
+                target_qubits=(qubit,),
+            )
+        )
         return self
 
     def ry(self, param: Parameter, qubit: int) -> ParameterizedCircuit:
         """Add a parameterized Ry rotation."""
         self._parameters.add(param)
-        self._instructions.append(ParameterizedInstruction(
-            gate_type="Ry",
-            parameter=param,
-            fixed_gate=None,
-            target_qubits=(qubit,),
-        ))
+        self._instructions.append(
+            ParameterizedInstruction(
+                gate_type="Ry",
+                parameter=param,
+                fixed_gate=None,
+                target_qubits=(qubit,),
+            )
+        )
         return self
 
     def rz(self, param: Parameter, qubit: int) -> ParameterizedCircuit:
         """Add a parameterized Rz rotation."""
         self._parameters.add(param)
-        self._instructions.append(ParameterizedInstruction(
-            gate_type="Rz",
-            parameter=param,
-            fixed_gate=None,
-            target_qubits=(qubit,),
-        ))
+        self._instructions.append(
+            ParameterizedInstruction(
+                gate_type="Rz",
+                parameter=param,
+                fixed_gate=None,
+                target_qubits=(qubit,),
+            )
+        )
         return self
 
     def bind(self, values: dict[Parameter, float]) -> QuantumCircuit:
@@ -157,9 +167,7 @@ class ParameterizedCircuit:
             parameter_order = sorted(self._parameters, key=lambda p: p.name)
 
         if len(values) != len(parameter_order):
-            raise ValueError(
-                f"Expected {len(parameter_order)} values, got {len(values)}"
-            )
+            raise ValueError(f"Expected {len(parameter_order)} values, got {len(values)}")
 
         param_dict = {p: float(v) for p, v in zip(parameter_order, values)}
         return self.bind(param_dict)

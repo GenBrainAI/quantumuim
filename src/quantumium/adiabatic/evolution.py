@@ -26,6 +26,7 @@ class AdiabaticResult:
         gap_history: Spectral gap at each schedule point.
         optimal_bitstring: Computational basis state with highest probability.
     """
+
     final_state: NDArray[np.complexfloating]
     ground_state_prob: float
     schedule_values: NDArray[np.floating]

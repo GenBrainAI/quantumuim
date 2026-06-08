@@ -142,7 +142,7 @@ class ZXDiagram:
         pos = len(wire) - 1
         prev_node = wire[pos - 1]
         out_node = wire[pos]
-        prev_et = self._adj.get(prev_node, {}).get(out_node, REGULAR)
+        self._adj.get(prev_node, {}).get(out_node, REGULAR)
         self.remove_edge(prev_node, out_node)
         self.add_edge(prev_node, spider_id, edge_in_type)
         self.add_edge(spider_id, out_node, REGULAR)
@@ -173,20 +173,24 @@ class ZXDiagram:
     @classmethod
     def from_circuit(cls, circuit) -> ZXDiagram:
         from .convert import circuit_to_zx
+
         return circuit_to_zx(circuit)
 
     def to_circuit(self):
         from .convert import zx_to_circuit
+
         return zx_to_circuit(self)
 
     def simplify(self) -> ZXDiagram:
         from .rules import full_simplify
+
         full_simplify(self)
         return self
 
     def is_equivalent(self, other: ZXDiagram) -> bool:
         from .convert import _circuit_unitary
         import numpy as np
+
         u1 = _circuit_unitary(self.to_circuit())
         u2 = _circuit_unitary(other.to_circuit())
         if u1.shape != u2.shape:

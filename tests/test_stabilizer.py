@@ -22,6 +22,7 @@ from quantumium.stabilizer import (
 # Tableau basics
 # ============================================================
 
+
 class TestTableauBasics:
     def test_zero_state_stabilizers(self):
         t = StabilizerTableau(2)
@@ -53,6 +54,7 @@ class TestTableauBasics:
 # ============================================================
 # Clifford gates
 # ============================================================
+
 
 class TestGates:
     def test_hadamard_on_zero(self):
@@ -115,6 +117,7 @@ class TestGates:
 # Statevector conversion
 # ============================================================
 
+
 class TestStatevector:
     def test_zero_state(self):
         t = StabilizerTableau(2)
@@ -171,6 +174,7 @@ class TestStatevector:
 # ============================================================
 # Measurement
 # ============================================================
+
 
 class TestMeasurement:
     def test_deterministic_zero(self):
@@ -235,6 +239,7 @@ class TestMeasurement:
 # Gate sequences and identities
 # ============================================================
 
+
 class TestGateIdentities:
     def test_s_squared_is_z(self):
         t1 = StabilizerTableau(1)
@@ -288,10 +293,10 @@ class TestGateIdentities:
             rng = np.random.default_rng(seed)
             t = StabilizerTableau(3)
 
-            hadamard(t, 0)          # Prepare |+> to teleport
-            hadamard(t, 1)          # Bell pair on 1,2
+            hadamard(t, 0)  # Prepare |+> to teleport
+            hadamard(t, 1)  # Bell pair on 1,2
             cnot(t, 1, 2)
-            cnot(t, 0, 1)           # Bell measurement
+            cnot(t, 0, 1)  # Bell measurement
             hadamard(t, 0)
             m0 = measure(t, 0, rng)
             m1 = measure(t, 1, rng)
@@ -306,5 +311,6 @@ class TestGateIdentities:
             # Qubit 2 is the least significant bit: sum probs where bit 2 is 0 vs 1
             p0_q2 = sum(probs[i] for i in range(8) if (i & 1) == 0)
             p1_q2 = sum(probs[i] for i in range(8) if (i & 1) == 1)
-            assert p0_q2 == pytest.approx(p1_q2, abs=1e-8), \
+            assert p0_q2 == pytest.approx(p1_q2, abs=1e-8), (
                 f"seed={seed}: qubit 2 not in |+> state, p0={p0_q2}, p1={p1_q2}"
+            )

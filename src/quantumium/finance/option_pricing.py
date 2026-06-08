@@ -28,7 +28,7 @@ import numpy as np
 from numpy.typing import NDArray
 
 from ..core.circuit import QuantumCircuit
-from ..core.gate import Gate, H
+from ..core.gate import Gate
 
 
 @dataclass
@@ -52,6 +52,7 @@ class OptionPricingResult:
         volatility: Annualized volatility of the underlying asset.
         maturity: Time to expiration in years.
     """
+
     quantum_price: float
     classical_price: float
     relative_error: float
@@ -233,7 +234,7 @@ def european_option_price(
     # Classical expected payoff (Monte Carlo equivalent)
     discount = math.exp(-rate * maturity)
     classical_expected = float(np.sum(probs * payoffs))
-    classical_price = discount * classical_expected
+    discount * classical_expected
 
     # Black-Scholes benchmark
     bs_price = black_scholes_price(spot, strike, rate, volatility, maturity, option_type)
@@ -270,10 +271,13 @@ def european_option_price(
     for i in range(num_bins):
         if normalized_payoffs[i] > 1e-15:
             theta = 2 * math.asin(min(1.0, math.sqrt(normalized_payoffs[i])))
-            ry = np.array([
-                [math.cos(theta / 2), -math.sin(theta / 2)],
-                [math.sin(theta / 2), math.cos(theta / 2)],
-            ], dtype=complex)
+            ry = np.array(
+                [
+                    [math.cos(theta / 2), -math.sin(theta / 2)],
+                    [math.sin(theta / 2), math.cos(theta / 2)],
+                ],
+                dtype=complex,
+            )
 
             # Build controlled rotation on ancilla, conditioned on price state |i>
             ctrl = np.eye(2 * dim, dtype=complex)

@@ -122,11 +122,13 @@ class QPUOrchestrator:
 
         for i in range(len(partitions) - 1):
             boundary_qubit = partitions[i].qubit_indices[-1]
-            cuts.append(WireCut(
-                qubit=boundary_qubit,
-                after_gate_index=-1,
-                label=f"cut_{i}_{i + 1}",
-            ))
+            cuts.append(
+                WireCut(
+                    qubit=boundary_qubit,
+                    after_gate_index=-1,
+                    label=f"cut_{i}_{i + 1}",
+                )
+            )
 
         n_cuts = len(cuts)
         if self.strategy == DistributionStrategy.CLASSICAL_ONLY:

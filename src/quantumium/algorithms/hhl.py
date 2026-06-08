@@ -44,6 +44,7 @@ class HHLResult:
         The state fidelity |<x_quantum|x_classical>|^2 between the quantum
         and classical solutions. Values close to 1.0 indicate high accuracy.
     """
+
     solution_state: NDArray[np.complexfloating]
     success_probability: float
     classical_solution: NDArray[np.complexfloating]
@@ -83,6 +84,7 @@ def _apply_qft(qc: QuantumCircuit, qubits: list[int]) -> None:
         Indices of the qubits to transform.
     """
     from ..circuits.templates import _controlled_phase
+
     n = len(qubits)
     for i in range(n):
         qc.apply(H, qubits[i])
@@ -109,6 +111,7 @@ def _apply_inverse_qft(qc: QuantumCircuit, qubits: list[int]) -> None:
         Indices of the qubits to transform.
     """
     from ..circuits.templates import _controlled_phase
+
     n = len(qubits)
     for i in range(n // 2):
         qc.apply(SWAP, qubits[i], qubits[n - 1 - i])
@@ -203,7 +206,7 @@ def _build_hhl_circuit(
     # Build a single unitary that applies Ry(theta_k) on ancilla
     # conditioned on clock register encoding k.
     num_clock_states = 2**num_clock
-    ctrl_dim = 2**(num_clock + 1)
+    ctrl_dim = 2 ** (num_clock + 1)
     ctrl_matrix = np.eye(ctrl_dim, dtype=complex)
 
     for k in range(1, num_clock_states):
@@ -213,10 +216,13 @@ def _build_hhl_circuit(
         ratio = min(C / abs(lambda_k), 1.0)
         theta = 2 * np.arcsin(ratio)
 
-        ry = np.array([
-            [np.cos(theta / 2), -np.sin(theta / 2)],
-            [np.sin(theta / 2), np.cos(theta / 2)],
-        ], dtype=complex)
+        ry = np.array(
+            [
+                [np.cos(theta / 2), -np.sin(theta / 2)],
+                [np.sin(theta / 2), np.cos(theta / 2)],
+            ],
+            dtype=complex,
+        )
 
         # Gate matrix basis: |clock_val, ancilla_bit>
         # Index = clock_val * 2 + ancilla_bit

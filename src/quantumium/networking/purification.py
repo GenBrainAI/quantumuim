@@ -2,7 +2,6 @@
 
 from __future__ import annotations
 
-from dataclasses import dataclass
 
 from .entanglement import EntangledPair
 
@@ -11,10 +10,7 @@ def purify_bbpssw(pair1: EntangledPair, pair2: EntangledPair) -> EntangledPair:
     f1 = pair1.fidelity
     f2 = pair2.fidelity
     numerator = f1 * f2 + (1 - f1) * (1 - f2) / 9
-    denominator = (f1 * f2
-                   + f1 * (1 - f2) / 3
-                   + (1 - f1) * f2 / 3
-                   + 5 * (1 - f1) * (1 - f2) / 9)
+    denominator = f1 * f2 + f1 * (1 - f2) / 3 + (1 - f1) * f2 / 3 + 5 * (1 - f1) * (1 - f2) / 9
     f_new = numerator / denominator
     return EntangledPair(pair1.node_a, pair1.node_b, f_new)
 

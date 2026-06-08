@@ -48,7 +48,9 @@ class Qubit:
         """Measure the qubit, collapsing it to |0⟩ or |1⟩. Returns 0 or 1."""
         p0, _ = self.probabilities
         result = 0 if np.random.random() < p0 else 1
-        self._state = np.array([1, 0], dtype=complex) if result == 0 else np.array([0, 1], dtype=complex)
+        self._state = (
+            np.array([1, 0], dtype=complex) if result == 0 else np.array([0, 1], dtype=complex)
+        )
         return result
 
     def __repr__(self) -> str:

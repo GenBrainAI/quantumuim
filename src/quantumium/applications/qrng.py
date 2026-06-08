@@ -9,7 +9,6 @@ outcome is intrinsically probabilistic.
 from __future__ import annotations
 
 import numpy as np
-from numpy.typing import NDArray
 
 from ..core.circuit import QuantumCircuit
 from ..core.gate import H
@@ -130,7 +129,7 @@ def random_bytes(
         bytes: A bytes object of length *num_bytes*.
     """
     bits = random_bits(num_bytes * 8, noise_model)
-    return bytes(int(bits[i:i + 8], 2) for i in range(0, len(bits), 8))
+    return bytes(int(bits[i : i + 8], 2) for i in range(0, len(bits), 8))
 
 
 def random_choice(

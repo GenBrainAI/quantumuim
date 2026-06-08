@@ -38,6 +38,7 @@ H_gate = np.array([[1, 1], [1, -1]], dtype=complex) / np.sqrt(2)
 # Channel Representation Tests
 # ============================================================
 
+
 class TestKrausToChoi:
     def test_identity_channel(self):
         choi = kraus_to_choi([I2])
@@ -281,6 +282,7 @@ class TestQuantumChannelClass:
 # Distance Measure Tests
 # ============================================================
 
+
 class TestTraceDistance:
     def test_identical_states(self):
         rho = np.array([[1, 0], [0, 0]], dtype=complex)
@@ -375,6 +377,7 @@ class TestRelativeEntropy:
 # Process Tomography Tests
 # ============================================================
 
+
 class TestChiMatrix:
     def test_identity_chi(self):
         """Chi of identity: only chi[0,0] = 1 (identity Pauli component)."""
@@ -424,8 +427,7 @@ class TestProcessTomography:
     def test_close_unitaries(self):
         """Small rotation should have high fidelity with identity."""
         theta = 0.01
-        Rz = np.array([[np.exp(-1j * theta / 2), 0],
-                        [0, np.exp(1j * theta / 2)]], dtype=complex)
+        Rz = np.array([[np.exp(-1j * theta / 2), 0], [0, np.exp(1j * theta / 2)]], dtype=complex)
         result = process_tomography(Rz, target_unitary=I2)
         assert result.process_fidelity > 0.99
 

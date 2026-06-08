@@ -1,7 +1,6 @@
 """Tests for fermionic simulation module."""
 
 import numpy as np
-import pytest
 
 from quantumium.fermion.operators import (
     FermionOperator,
@@ -27,6 +26,7 @@ from quantumium.fermion.hamiltonians import (
 # ──────────────────────────────────────────────
 # FermionOperator basics
 # ──────────────────────────────────────────────
+
 
 class TestFermionOperator:
     def test_creation_annihilation(self):
@@ -87,6 +87,7 @@ class TestFermionOperator:
 # Normal ordering
 # ──────────────────────────────────────────────
 
+
 class TestNormalOrder:
     def test_already_normal(self):
         op = FermionOperator.creation(0) * FermionOperator.annihilation(0)
@@ -129,6 +130,7 @@ class TestNormalOrder:
 # ──────────────────────────────────────────────
 # QubitOperator
 # ──────────────────────────────────────────────
+
 
 class TestQubitOperator:
     def test_identity(self):
@@ -174,6 +176,7 @@ class TestQubitOperator:
 # Pauli multiplication
 # ──────────────────────────────────────────────
 
+
 class TestPauliMultiplication:
     def test_xx_is_i(self):
         s, p = _multiply_pauli_strings("X", "X")
@@ -200,6 +203,7 @@ class TestPauliMultiplication:
 # ──────────────────────────────────────────────
 # Jordan-Wigner transform
 # ──────────────────────────────────────────────
+
 
 class TestJordanWigner:
     def test_number_operator(self):
@@ -257,6 +261,7 @@ class TestJordanWigner:
 # Bravyi-Kitaev transform
 # ──────────────────────────────────────────────
 
+
 class TestBravyiKitaev:
     def test_anti_commutation_4mode(self):
         n = 4
@@ -268,8 +273,9 @@ class TestBravyiKitaev:
                 q = bravyi_kitaev(anti, n)
                 mat = q.to_matrix(n)
                 expected = np.eye(2**n) if i == j else np.zeros((2**n, 2**n))
-                np.testing.assert_allclose(mat, expected, atol=1e-10,
-                    err_msg=f"{{a†_{i}, a_{j}}} failed")
+                np.testing.assert_allclose(
+                    mat, expected, atol=1e-10, err_msg=f"{{a†_{i}, a_{j}}} failed"
+                )
 
     def test_anti_commutation_6mode(self):
         n = 6
@@ -281,8 +287,9 @@ class TestBravyiKitaev:
                 q = bravyi_kitaev(anti, n)
                 mat = q.to_matrix(n)
                 expected = np.eye(2**n) if i == j else np.zeros((2**n, 2**n))
-                np.testing.assert_allclose(mat, expected, atol=1e-10,
-                    err_msg=f"{{a†_{i}, a_{j}}} failed for n=6")
+                np.testing.assert_allclose(
+                    mat, expected, atol=1e-10, err_msg=f"{{a†_{i}, a_{j}}} failed for n=6"
+                )
 
     def test_hopping_eigenspectrum(self):
         hop = hopping_operator(0, 1, -1.0)
@@ -325,6 +332,7 @@ class TestBravyiKitaev:
 # BK helper sets
 # ──────────────────────────────────────────────
 
+
 class TestBKSets:
     def test_update_set_mode0(self):
         u = _bk_update_set(0, 8)
@@ -357,6 +365,7 @@ class TestBKSets:
 # JW vs BK equivalence
 # ──────────────────────────────────────────────
 
+
 class TestTransformEquivalence:
     def test_single_mode_number(self):
         n0 = number_operator(0)
@@ -383,13 +392,15 @@ class TestTransformEquivalence:
                 bk = bravyi_kitaev(hop, n).to_matrix(n)
                 jw_eigs = sorted(np.linalg.eigvalsh(jw).real)
                 bk_eigs = sorted(np.linalg.eigvalsh(bk).real)
-                np.testing.assert_allclose(jw_eigs, bk_eigs, atol=1e-10,
-                    err_msg=f"Hopping ({i},{j}) mismatch")
+                np.testing.assert_allclose(
+                    jw_eigs, bk_eigs, atol=1e-10, err_msg=f"Hopping ({i},{j}) mismatch"
+                )
 
 
 # ──────────────────────────────────────────────
 # Hamiltonian builders
 # ──────────────────────────────────────────────
+
 
 class TestNumberOperator:
     def test_eigenvalues(self):
@@ -437,6 +448,7 @@ class TestCoulombOperator:
 # Fermi-Hubbard model
 # ──────────────────────────────────────────────
 
+
 class TestFermiHubbard:
     def test_hermitian(self):
         H = fermi_hubbard(2, t=1.0, U=2.0)
@@ -472,6 +484,7 @@ class TestFermiHubbard:
 # Molecular Hamiltonian
 # ──────────────────────────────────────────────
 
+
 class TestMolecularHamiltonian:
     def test_one_body_only(self):
         h1 = np.array([[1.0, 0.5], [0.5, 2.0]])
@@ -500,6 +513,7 @@ class TestMolecularHamiltonian:
 # ──────────────────────────────────────────────
 # Edge cases
 # ──────────────────────────────────────────────
+
 
 class TestEdgeCases:
     def test_empty_operator_jw(self):
@@ -533,6 +547,7 @@ class TestEdgeCases:
 # Integration tests
 # ──────────────────────────────────────────────
 
+
 class TestIntegration:
     def test_hubbard_jw_bk_full(self):
         H = fermi_hubbard(2, t=1.0, U=4.0)
@@ -555,10 +570,12 @@ class TestIntegration:
         np.testing.assert_allclose(jw_eigs, bk_eigs, atol=1e-10)
 
     def test_end_to_end_h2_like(self):
-        h1 = np.array([
-            [-1.2526, -0.4752],
-            [-0.4752, -0.4752],
-        ])
+        h1 = np.array(
+            [
+                [-1.2526, -0.4752],
+                [-0.4752, -0.4752],
+            ]
+        )
         h2 = np.zeros((2, 2, 2, 2))
         h2[0, 0, 1, 1] = 0.6746
         h2[1, 1, 0, 0] = 0.6746

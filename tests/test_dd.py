@@ -6,7 +6,7 @@ import numpy as np
 import pytest
 
 from quantumium.core.circuit import QuantumCircuit
-from quantumium.core.gate import H, X, Y, Z, CNOT, SWAP
+from quantumium.core.gate import H, X, Y, Z, CNOT
 from quantumium.dd.sequences import DDSequence
 from quantumium.dd.scheduler import DDScheduler
 from quantumium.dd.filters import filter_function, fid_filter, dd_fidelity
@@ -15,6 +15,7 @@ from quantumium.dd.filters import filter_function, fid_filter, dd_fidelity
 # ──────────────────────────────────────────────
 # DDSequence construction
 # ──────────────────────────────────────────────
+
 
 class TestDDSequenceConstruction:
     def test_spin_echo(self):
@@ -78,6 +79,7 @@ class TestDDSequenceConstruction:
 # Pulse times
 # ──────────────────────────────────────────────
 
+
 class TestPulseTimes:
     def test_spin_echo_midpoint(self):
         times = DDSequence.spin_echo().pulse_times()
@@ -111,6 +113,7 @@ class TestPulseTimes:
 # ──────────────────────────────────────────────
 # DDScheduler — idle window detection
 # ──────────────────────────────────────────────
+
 
 class TestDDSchedulerIdleWindows:
     def test_bell_state_idle(self):
@@ -151,6 +154,7 @@ class TestDDSchedulerIdleWindows:
 # ──────────────────────────────────────────────
 # DDScheduler — pulse insertion
 # ──────────────────────────────────────────────
+
 
 class TestDDSchedulerInsert:
     def test_insert_increases_gates(self):
@@ -217,6 +221,7 @@ class TestDDSchedulerInsert:
 # Identity preservation
 # ──────────────────────────────────────────────
 
+
 class TestIdentityPreservation:
     def _dd_fidelity_noiseless(self, seq: DDSequence) -> float:
         """Apply DD sequence directly to |0⟩ and check fidelity."""
@@ -259,6 +264,7 @@ class TestIdentityPreservation:
 # Filter function
 # ──────────────────────────────────────────────
 
+
 class TestFilterFunction:
     def test_fid_filter_nonzero(self):
         omega = np.linspace(0.1, 10, 100)
@@ -300,6 +306,7 @@ class TestFilterFunction:
 # DD fidelity
 # ──────────────────────────────────────────────
 
+
 class TestDDFidelity:
     def _noise_1f(self, omega: np.ndarray) -> np.ndarray:
         return 0.01 / (omega + 1e-10)
@@ -331,6 +338,7 @@ class TestDDFidelity:
 # Noise hierarchy
 # ──────────────────────────────────────────────
 
+
 class TestNoiseHierarchy:
     def test_xy8_best_under_1f(self):
         def noise_1f(omega: np.ndarray) -> np.ndarray:
@@ -344,6 +352,7 @@ class TestNoiseHierarchy:
 # ──────────────────────────────────────────────
 # Edge cases
 # ──────────────────────────────────────────────
+
 
 class TestEdgeCases:
     def test_num_pulses_property(self):
@@ -376,6 +385,7 @@ class TestEdgeCases:
 # ──────────────────────────────────────────────
 # Integration
 # ──────────────────────────────────────────────
+
 
 class TestIntegration:
     def test_full_pipeline(self):

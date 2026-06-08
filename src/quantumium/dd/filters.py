@@ -65,9 +65,9 @@ def filter_function(
 
         w_safe = omega[safe]
         contrib = np.zeros_like(omega, dtype=complex)
-        contrib[safe] = sign * (
-            np.exp(1j * w_safe * t_end) - np.exp(1j * w_safe * t_start)
-        ) / (1j * w_safe)
+        contrib[safe] = (
+            sign * (np.exp(1j * w_safe * t_end) - np.exp(1j * w_safe * t_start)) / (1j * w_safe)
+        )
         contrib[~safe] = sign * (t_end - t_start)
         F += contrib
 
@@ -75,9 +75,7 @@ def filter_function(
     return result
 
 
-def fid_filter(
-    frequencies: NDArray[np.floating], total_time: float
-) -> NDArray[np.floating]:
+def fid_filter(frequencies: NDArray[np.floating], total_time: float) -> NDArray[np.floating]:
     """Filter function for free induction decay (no pulses)."""
     no_dd = DDSequence(name="fid", pulses=[], spacings=[1.0])
     return filter_function(no_dd, frequencies, total_time)

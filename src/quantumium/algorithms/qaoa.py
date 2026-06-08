@@ -32,13 +32,16 @@ class QAOAResult:
     history : list[float]
         Expected cost value at each iteration of the best optimization run.
     """
+
     optimal_params: NDArray[np.floating]
     optimal_value: float
     optimal_bitstring: str
     history: list[float]
 
 
-def maxcut_cost_operator(num_qubits: int, edges: list[tuple[int, int]]) -> NDArray[np.complexfloating]:
+def maxcut_cost_operator(
+    num_qubits: int, edges: list[tuple[int, int]]
+) -> NDArray[np.complexfloating]:
     """Build the diagonal cost operator for the MaxCut problem.
 
     The cost function is C = sum_{(i,j) in E} (1 - Z_i Z_j) / 2,

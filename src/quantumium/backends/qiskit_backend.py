@@ -2,7 +2,6 @@
 
 from __future__ import annotations
 
-import numpy as np
 
 from ..core.circuit import QuantumCircuit
 from .base import Backend, ExecutionResult
@@ -52,6 +51,7 @@ class QiskitBackend(Backend):
         """
         try:
             import qiskit  # noqa: F401
+
             return True
         except ImportError:
             return False
@@ -128,6 +128,7 @@ class QiskitBackend(Backend):
             dict[str, int]: Mapping of bitstrings to observation counts.
         """
         from qiskit_aer import AerSimulator
+
         simulator = AerSimulator()
         result = simulator.run(qiskit_circuit, shots=shots).result()
         return dict(result.get_counts())
@@ -149,10 +150,14 @@ class QiskitBackend(Backend):
         from qiskit_ibm_runtime import QiskitRuntimeService, SamplerV2
 
         service = QiskitRuntimeService()
-        backend = service.least_busy(
-            simulator=False,
-            min_num_qubits=qiskit_circuit.num_qubits,
-        ) if not self._backend_name else service.backend(self._backend_name)
+        backend = (
+            service.least_busy(
+                simulator=False,
+                min_num_qubits=qiskit_circuit.num_qubits,
+            )
+            if not self._backend_name
+            else service.backend(self._backend_name)
+        )
 
         sampler = SamplerV2(backend)
         job = sampler.run([qiskit_circuit], shots=shots)

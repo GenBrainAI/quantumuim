@@ -59,8 +59,7 @@ class TestProcessFidelity:
     def test_close_unitaries(self):
         """Small rotation should have high process fidelity with identity."""
         theta = 0.01
-        Rz = np.array([[np.exp(-1j * theta / 2), 0],
-                        [0, np.exp(1j * theta / 2)]], dtype=complex)
+        Rz = np.array([[np.exp(-1j * theta / 2), 0], [0, np.exp(1j * theta / 2)]], dtype=complex)
         I = np.eye(2, dtype=complex)
         f = process_fidelity(I, Rz)
         assert f > 0.99
@@ -81,8 +80,9 @@ class TestAverageGateFidelity:
         """F_avg = (d * F_proc + 1) / (d + 1)."""
         U = np.eye(2, dtype=complex)
         theta = 0.1
-        V = np.array([[np.cos(theta), -np.sin(theta)],
-                       [np.sin(theta), np.cos(theta)]], dtype=complex)
+        V = np.array(
+            [[np.cos(theta), -np.sin(theta)], [np.sin(theta), np.cos(theta)]], dtype=complex
+        )
         f_proc = process_fidelity(U, V)
         f_avg = average_gate_fidelity(U, V)
         expected = (2 * f_proc + 1) / 3
@@ -98,9 +98,7 @@ class TestCliffordGroup:
     def test_unitary(self):
         """All Cliffords should be unitary."""
         for C in _build_single_qubit_cliffords():
-            np.testing.assert_allclose(
-                C @ C.conj().T, np.eye(2), atol=1e-10
-            )
+            np.testing.assert_allclose(C @ C.conj().T, np.eye(2), atol=1e-10)
 
     def test_inverse_exists(self):
         """Every Clifford should have an inverse in the group."""
@@ -150,9 +148,7 @@ class TestRandomizedBenchmarking:
         assert result.error_per_clifford > 0
 
     def test_result_fields(self):
-        result = randomized_benchmarking(
-            sequence_lengths=[1, 4], num_samples=5, seed=0
-        )
+        result = randomized_benchmarking(sequence_lengths=[1, 4], num_samples=5, seed=0)
         assert len(result.sequence_lengths) == 2
         assert len(result.survival_probabilities) == 2
         assert 0 <= result.alpha <= 1
@@ -162,17 +158,13 @@ class TestRandomizedBenchmarking:
 class TestQuantumVolume:
     def test_low_noise_passes(self):
         """Low noise should give high QV."""
-        result = quantum_volume(
-            num_qubits=2, num_circuits=20, error_rate=0.001, seed=42
-        )
+        result = quantum_volume(num_qubits=2, num_circuits=20, error_rate=0.001, seed=42)
         assert result.passed
         assert result.quantum_volume == 4
 
     def test_high_noise_fails(self):
         """Very high noise should fail QV test."""
-        result = quantum_volume(
-            num_qubits=3, num_circuits=20, error_rate=0.5, seed=42
-        )
+        result = quantum_volume(num_qubits=3, num_circuits=20, error_rate=0.5, seed=42)
         assert not result.passed
 
     def test_result_fields(self):

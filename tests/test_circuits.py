@@ -10,7 +10,7 @@ from quantumium.circuits.templates import (
     qft,
     inverse_qft,
 )
-from quantumium.core.gate import H, X
+from quantumium.core.gate import X
 
 
 class TestBellPair:

@@ -12,7 +12,6 @@ from quantumium.optimal_control.hamiltonians import (
     transmon_hamiltonian,
 )
 from quantumium.optimal_control.pulses import (
-    PulseSequence,
     constant_pulse,
     gaussian_pulse,
     drag_pulse,
@@ -40,6 +39,7 @@ I_GATE = np.eye(2, dtype=complex)
 # ============================================================
 # Hamiltonians
 # ============================================================
+
 
 class TestHamiltonians:
     def test_drift_hermitian(self):
@@ -109,6 +109,7 @@ class TestTransmon:
 # Pulses
 # ============================================================
 
+
 class TestPulses:
     def test_constant_pulse(self):
         p = constant_pulse(1.0, num_steps=10)
@@ -126,9 +127,7 @@ class TestPulses:
 
     def test_gaussian_symmetry(self):
         p = gaussian_pulse(1.0, sigma=0.5, num_steps=21, dt=0.1)
-        np.testing.assert_allclose(
-            p.amplitudes[:, 0], p.amplitudes[::-1, 0], atol=1e-12
-        )
+        np.testing.assert_allclose(p.amplitudes[:, 0], p.amplitudes[::-1, 0], atol=1e-12)
 
     def test_drag_pulse_two_channels(self):
         p = drag_pulse(1.0, sigma=0.5, beta=0.1, num_steps=20)
@@ -153,6 +152,7 @@ class TestPulses:
 # ============================================================
 # Fidelity
 # ============================================================
+
 
 class TestFidelity:
     def test_identity_fidelity(self):
@@ -189,6 +189,7 @@ class TestFidelity:
 # ============================================================
 # Propagator
 # ============================================================
+
 
 class TestPropagator:
     def test_identity_evolution(self):
@@ -238,6 +239,7 @@ class TestPropagator:
 # GRAPE
 # ============================================================
 
+
 class TestGRAPE:
     def test_returns_result(self):
         H0 = np.zeros((2, 2), dtype=complex)
@@ -246,8 +248,7 @@ class TestGRAPE:
         ch = ControlHamiltonian(drift=H0, controls=[Hx, Hy])
 
         result = grape_optimize(
-            ch, X_GATE, num_steps=20, dt=0.05,
-            num_iterations=10, learning_rate=0.5
+            ch, X_GATE, num_steps=20, dt=0.05, num_iterations=10, learning_rate=0.5
         )
         assert isinstance(result, GRAPEResult)
         assert 0 <= result.fidelity <= 1.0 + 1e-10
@@ -259,8 +260,7 @@ class TestGRAPE:
         ch = ControlHamiltonian(drift=H0, controls=[Hx, Hy])
 
         result = grape_optimize(
-            ch, X_GATE, num_steps=50, dt=0.02,
-            num_iterations=200, learning_rate=1.0
+            ch, X_GATE, num_steps=50, dt=0.02, num_iterations=200, learning_rate=1.0
         )
         assert result.fidelity > 0.9
 
@@ -270,8 +270,7 @@ class TestGRAPE:
         ch = ControlHamiltonian(drift=H0, controls=[Hx])
 
         result = grape_optimize(
-            ch, X_GATE, num_steps=30, dt=0.05,
-            num_iterations=50, learning_rate=0.5
+            ch, X_GATE, num_steps=30, dt=0.05, num_iterations=50, learning_rate=0.5
         )
         # Fidelity should improve from initial to final
         assert result.fidelity_history[-1] >= result.fidelity_history[0] - 0.01
@@ -282,8 +281,7 @@ class TestGRAPE:
         ch = ControlHamiltonian(drift=H0, controls=[Hx])
 
         result = grape_optimize(
-            ch, X_GATE, num_steps=20, dt=0.05,
-            num_iterations=50, max_amplitude=5.0
+            ch, X_GATE, num_steps=20, dt=0.05, num_iterations=50, max_amplitude=5.0
         )
         assert np.all(np.abs(result.optimal_pulse.amplitudes) <= 5.0 + 1e-10)
 
@@ -303,8 +301,7 @@ class TestGRAPE:
         init = constant_pulse(1.0, num_steps=20, dt=0.05)
 
         result = grape_optimize(
-            ch, X_GATE, num_steps=20, dt=0.05,
-            num_iterations=20, initial_pulse=init
+            ch, X_GATE, num_steps=20, dt=0.05, num_iterations=20, initial_pulse=init
         )
         assert isinstance(result, GRAPEResult)
 
@@ -315,7 +312,6 @@ class TestGRAPE:
         ch = ControlHamiltonian(drift=H0, controls=[Hx, Hy])
 
         result = grape_optimize(
-            ch, H_GATE, num_steps=50, dt=0.02,
-            num_iterations=300, learning_rate=1.0
+            ch, H_GATE, num_steps=50, dt=0.02, num_iterations=300, learning_rate=1.0
         )
         assert result.fidelity > 0.85

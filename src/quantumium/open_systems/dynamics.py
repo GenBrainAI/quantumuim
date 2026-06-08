@@ -19,6 +19,7 @@ class EvolutionResult:
         expect_values: Dict mapping operator labels to expectation
             value arrays (populated if observables were provided).
     """
+
     times: NDArray[np.floating]
     states: list[NDArray[np.complexfloating]]
     expect_values: dict[str, NDArray[np.floating]]

@@ -116,9 +116,7 @@ class ShorQPlus:
                     layers_used=["trivial_gcd"],
                 )
 
-            phase, order = self._qplus_order_finding(
-                base, N, n_bits, n_counting_bits, strategy
-            )
+            phase, order = self._qplus_order_finding(base, N, n_bits, n_counting_bits, strategy)
 
             if order is None or order == 0:
                 continue

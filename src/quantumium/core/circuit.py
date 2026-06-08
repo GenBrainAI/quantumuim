@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from dataclasses import dataclass, field
+from dataclasses import dataclass
 
 import numpy as np
 from numpy.typing import NDArray
@@ -30,7 +30,9 @@ class QuantumCircuit:
         """Apply a gate to the specified qubit(s). Returns self for chaining."""
         for q in qubits:
             if q < 0 or q >= self.num_qubits:
-                raise IndexError(f"Qubit index {q} out of range for {self.num_qubits}-qubit circuit")
+                raise IndexError(
+                    f"Qubit index {q} out of range for {self.num_qubits}-qubit circuit"
+                )
         if gate.num_qubits != len(qubits):
             raise ValueError(
                 f"Gate {gate.name} requires {gate.num_qubits} qubits, got {len(qubits)}"

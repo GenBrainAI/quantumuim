@@ -40,12 +40,15 @@ def _controlled_phase(k: int) -> Gate:
         A two-qubit controlled phase gate.
     """
     angle = 2 * np.pi / (2**k)
-    matrix = np.array([
-        [1, 0, 0, 0],
-        [0, 1, 0, 0],
-        [0, 0, 1, 0],
-        [0, 0, 0, np.exp(1j * angle)],
-    ], dtype=complex)
+    matrix = np.array(
+        [
+            [1, 0, 0, 0],
+            [0, 1, 0, 0],
+            [0, 0, 1, 0],
+            [0, 0, 0, np.exp(1j * angle)],
+        ],
+        dtype=complex,
+    )
     return Gate(matrix, f"CR{k}")
 
 
@@ -134,10 +137,13 @@ def _controlled_phase_dag(k: int) -> Gate:
         A two-qubit controlled phase gate (inverse of CR_k).
     """
     angle = -2 * np.pi / (2**k)
-    matrix = np.array([
-        [1, 0, 0, 0],
-        [0, 1, 0, 0],
-        [0, 0, 1, 0],
-        [0, 0, 0, np.exp(1j * angle)],
-    ], dtype=complex)
+    matrix = np.array(
+        [
+            [1, 0, 0, 0],
+            [0, 1, 0, 0],
+            [0, 0, 1, 0],
+            [0, 0, 0, np.exp(1j * angle)],
+        ],
+        dtype=complex,
+    )
     return Gate(matrix, f"CR{k}†")

@@ -27,10 +27,12 @@ def step1_standard_qft_cost() -> None:
 
     for n_bits in [4, 6, 8]:
         qft_circuit = qft(n_bits)
-        print(f"  {n_bits}-bit QFT: {qft_circuit.num_qubits} counting qubits, "
-              f"circuit depth = {qft_circuit.depth}")
+        print(
+            f"  {n_bits}-bit QFT: {qft_circuit.num_qubits} counting qubits, "
+            f"circuit depth = {qft_circuit.depth}"
+        )
 
-    print(f"\n  For 8-bit Shor: need 8 counting + 8 work = 16+ qubits")
+    print("\n  For 8-bit Shor: need 8 counting + 8 work = 16+ qubits")
     print()
 
 
@@ -46,7 +48,7 @@ def step2_semiclassical_compression() -> None:
     rz_matrix = Rz(theta).matrix
 
     def ctrl_rz(power: int, state: NDArray[np.complexfloating]) -> NDArray[np.complexfloating]:
-        u = np.linalg.matrix_power(rz_matrix, power)
+        u: NDArray[np.complexfloating] = np.linalg.matrix_power(rz_matrix, power)
         return u @ state
 
     sqft = SemiclassicalQFT(n_bits=8)
@@ -87,7 +89,7 @@ def step3_qubit_strategy_comparison() -> None:
 
     std = ModularArithmeticOptimizer.qubit_count(8, "standard")
     qp = ModularArithmeticOptimizer.qubit_count(8, "semiclassical")
-    print(f"\n  Reduction: {std} → {qp} qubits ({(1 - qp/std)*100:.0f}% fewer)")
+    print(f"\n  Reduction: {std} → {qp} qubits ({(1 - qp / std) * 100:.0f}% fewer)")
     print()
 
 
@@ -109,8 +111,10 @@ def step4_full_factoring() -> None:
         result = shor.factor(15, max_attempts=10)
         if result.success and result.factors:
             p, q = result.factors
-            print(f"  Trial {trial}: 15 = {p} × {q} "
-                  f"(used {result.qubits_used} qubits, layers: {result.layers_used})")
+            print(
+                f"  Trial {trial}: 15 = {p} × {q} "
+                f"(used {result.qubits_used} qubits, layers: {result.layers_used})"
+            )
             break
     else:
         print("  (probabilistic — may need multiple trials)")

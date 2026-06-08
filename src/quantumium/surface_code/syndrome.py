@@ -24,7 +24,9 @@ def inject_error(code: SurfaceCode, error_type: str, qubit: int) -> None:
 
 
 def inject_random_errors(
-    code: SurfaceCode, p: float, rng: np.random.Generator | None = None,
+    code: SurfaceCode,
+    p: float,
+    rng: np.random.Generator | None = None,
 ) -> None:
     """Apply independent depolarizing noise at rate p to every data qubit."""
     if rng is None:

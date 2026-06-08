@@ -15,7 +15,6 @@ from __future__ import annotations
 from dataclasses import dataclass
 
 import numpy as np
-from numpy.typing import NDArray
 
 from ..core.circuit import QuantumCircuit
 from ..core.gate import Gate, H
@@ -36,6 +35,7 @@ class SimonResult:
     num_queries : int
         Total number of quantum oracle queries used.
     """
+
     secret: str
     equations: list[str]
     num_queries: int
@@ -259,7 +259,9 @@ def simon_algorithm(
 
         if rank >= n:
             return SimonResult(
-                secret="0" * n, equations=equations, num_queries=num_queries,
+                secret="0" * n,
+                equations=equations,
+                num_queries=num_queries,
             )
 
         if rank == n - 1:

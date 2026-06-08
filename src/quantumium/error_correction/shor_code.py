@@ -63,9 +63,11 @@ def _logical_one() -> NDArray[np.complexfloating]:
         for b1 in [0b000, 0b111]:
             for b2 in [0b000, 0b111]:
                 idx = (b0 << 6) | (b1 << 3) | b2
-                parity = (1 if b0 == 0b111 else 0) + \
-                         (1 if b1 == 0b111 else 0) + \
-                         (1 if b2 == 0b111 else 0)
+                parity = (
+                    (1 if b0 == 0b111 else 0)
+                    + (1 if b1 == 0b111 else 0)
+                    + (1 if b2 == 0b111 else 0)
+                )
                 sign = (-1) ** parity
                 state[idx] = sign
     state /= np.linalg.norm(state)

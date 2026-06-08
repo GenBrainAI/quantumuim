@@ -5,12 +5,10 @@ import numpy as np
 from quantumium.algorithms.hamiltonian_sim import (
     exact_evolution,
     first_order_trotter,
-    second_order_trotter,
     trotter_error,
     simulate_evolution,
     transverse_field_ising,
     pauli_x,
-    pauli_z,
     zz_interaction,
 )
 

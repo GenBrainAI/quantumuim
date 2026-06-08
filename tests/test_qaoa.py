@@ -1,7 +1,6 @@
 """Tests for QAOA implementation."""
 
 import numpy as np
-import pytest
 
 from quantumium.algorithms.qaoa import (
     maxcut_cost_operator,

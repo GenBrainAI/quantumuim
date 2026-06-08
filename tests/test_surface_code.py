@@ -4,7 +4,7 @@ import numpy as np
 import pytest
 
 from quantumium.surface_code.lattice import SurfaceCode
-from quantumium.surface_code.syndrome import inject_error, measure_syndrome, inject_random_errors
+from quantumium.surface_code.syndrome import inject_error, measure_syndrome
 from quantumium.surface_code.decoder import mwpm_decode
 from quantumium.surface_code.logical import logical_x, logical_z, has_logical_error
 from quantumium.surface_code.threshold import estimate_threshold
@@ -128,8 +128,9 @@ class TestMWPMDecoder:
             inject_error(code, "X", q)
             x_syn, z_syn = measure_syndrome(code)
             x_corr, z_corr = mwpm_decode(code, x_syn, z_syn)
-            assert not has_logical_error(code, x_corr, z_corr), \
+            assert not has_logical_error(code, x_corr, z_corr), (
                 f"Failed to correct X error on qubit {q} for d={d}"
+            )
 
     @pytest.mark.parametrize("d", [3, 5, 7])
     def test_correct_all_single_z_errors(self, d):
@@ -140,8 +141,9 @@ class TestMWPMDecoder:
             inject_error(code, "Z", q)
             x_syn, z_syn = measure_syndrome(code)
             x_corr, z_corr = mwpm_decode(code, x_syn, z_syn)
-            assert not has_logical_error(code, x_corr, z_corr), \
+            assert not has_logical_error(code, x_corr, z_corr), (
                 f"Failed to correct Z error on qubit {q} for d={d}"
+            )
 
     def test_no_error_no_correction(self):
         code = SurfaceCode(3)
@@ -201,26 +203,38 @@ class TestThresholdEstimation:
 
     def test_basic_run(self):
         result = estimate_threshold(
-            distances=[3], error_rates=[0.001, 0.01], num_trials=50, seed=42,
+            distances=[3],
+            error_rates=[0.001, 0.01],
+            num_trials=50,
+            seed=42,
         )
         assert 3 in result.logical_error_rates
         assert len(result.logical_error_rates[3]) == 2
 
     def test_low_noise_low_logical_error(self):
         result = estimate_threshold(
-            distances=[3], error_rates=[0.0001], num_trials=100, seed=42,
+            distances=[3],
+            error_rates=[0.0001],
+            num_trials=100,
+            seed=42,
         )
         assert result.logical_error_rates[3][0] < 0.1
 
     def test_logical_error_increases_with_noise(self):
         result = estimate_threshold(
-            distances=[3], error_rates=[0.001, 0.05], num_trials=200, seed=42,
+            distances=[3],
+            error_rates=[0.001, 0.05],
+            num_trials=200,
+            seed=42,
         )
         rates = result.logical_error_rates[3]
         assert rates[1] >= rates[0]
 
     def test_multiple_distances(self):
         result = estimate_threshold(
-            distances=[3, 5], error_rates=[0.005], num_trials=50, seed=42,
+            distances=[3, 5],
+            error_rates=[0.005],
+            num_trials=50,
+            seed=42,
         )
         assert len(result.logical_error_rates) == 2

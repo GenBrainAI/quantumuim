@@ -11,7 +11,7 @@ from typing import Callable
 
 import numpy as np
 
-from ..core.circuit import QuantumCircuit, Instruction
+from ..core.circuit import QuantumCircuit
 from ..core.gate import Gate, I, X, Y, Z, H, S, T, CNOT, SWAP, Rx, Ry, Rz
 
 
@@ -69,7 +69,7 @@ def _extract_rotation_angle(gate: Gate) -> tuple[str, float] | None:
     for prefix in ("Rx", "Ry", "Rz"):
         if name.startswith(prefix + "("):
             try:
-                angle = float(name[len(prefix) + 1:-1])
+                angle = float(name[len(prefix) + 1 : -1])
                 return prefix, angle
             except ValueError:
                 pass
@@ -157,7 +157,7 @@ def _decompose_u3(matrix: np.ndarray) -> str:
             places, suitable for embedding in an OpenQASM ``u3(...)`` call.
     """
     a = matrix[0, 0]
-    b = matrix[0, 1]
+    matrix[0, 1]
     c = matrix[1, 0]
     d = matrix[1, 1]
 
@@ -201,7 +201,12 @@ def from_qasm(qasm_str: str) -> QuantumCircuit:
 
     for line in qasm_str.strip().split("\n"):
         line = line.strip()
-        if not line or line.startswith("//") or line.startswith("OPENQASM") or line.startswith("include"):
+        if (
+            not line
+            or line.startswith("//")
+            or line.startswith("OPENQASM")
+            or line.startswith("include")
+        ):
             continue
 
         qreg_match = re.match(r"qreg\s+\w+\[(\d+)\];", line)
@@ -254,10 +259,16 @@ def from_qasm(qasm_str: str) -> QuantumCircuit:
             qc.apply(rotation_factories[gate_name](params[0]), *qubits)
         elif gate_name == "u3" and len(params) == 3:
             theta, phi, lam = params
-            matrix = np.array([
-                [np.cos(theta / 2), -np.exp(1j * lam) * np.sin(theta / 2)],
-                [np.exp(1j * phi) * np.sin(theta / 2), np.exp(1j * (phi + lam)) * np.cos(theta / 2)],
-            ], dtype=complex)
+            matrix = np.array(
+                [
+                    [np.cos(theta / 2), -np.exp(1j * lam) * np.sin(theta / 2)],
+                    [
+                        np.exp(1j * phi) * np.sin(theta / 2),
+                        np.exp(1j * (phi + lam)) * np.cos(theta / 2),
+                    ],
+                ],
+                dtype=complex,
+            )
             qc.apply(Gate(matrix, "U3"), *qubits)
         elif gate_name == "measure":
             pass

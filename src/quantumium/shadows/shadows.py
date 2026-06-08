@@ -6,7 +6,7 @@ estimation, shadow norm calculation, and fidelity estimation.
 
 from __future__ import annotations
 
-from dataclasses import dataclass, field
+from dataclasses import dataclass
 
 import numpy as np
 from numpy.typing import NDArray
@@ -18,26 +18,27 @@ PAULI_Y = np.array([[0, -1j], [1j, 0]], dtype=complex)
 PAULI_Z = np.array([[1, 0], [0, -1]], dtype=complex)
 
 PAULI_EIGENSTATES = {
-    'X': {
+    "X": {
         0: np.array([1, 1], dtype=complex) / np.sqrt(2),
         1: np.array([1, -1], dtype=complex) / np.sqrt(2),
     },
-    'Y': {
+    "Y": {
         0: np.array([1, 1j], dtype=complex) / np.sqrt(2),
         1: np.array([1, -1j], dtype=complex) / np.sqrt(2),
     },
-    'Z': {
+    "Z": {
         0: np.array([1, 0], dtype=complex),
         1: np.array([0, 1], dtype=complex),
     },
 }
 
-PAULI_MATRICES = {'I': PAULI_I, 'X': PAULI_X, 'Y': PAULI_Y, 'Z': PAULI_Z}
+PAULI_MATRICES = {"I": PAULI_I, "X": PAULI_X, "Y": PAULI_Y, "Z": PAULI_Z}
 
 
 @dataclass
 class Snapshot:
     """A single classical shadow measurement record."""
+
     bases: str
     outcomes: tuple[int, ...]
 
@@ -45,6 +46,7 @@ class Snapshot:
 @dataclass
 class ShadowResult:
     """Result of an expectation value estimation."""
+
     value: float
     num_snapshots: int
     num_groups: int
@@ -92,19 +94,16 @@ class ClassicalShadow:
         num_qubits = int(np.log2(len(state)))
 
         snapshots = []
-        basis_choices = 'XYZ'
+        basis_choices = "XYZ"
 
         for _ in range(num_snapshots):
-            bases = ''.join(rng.choice(list(basis_choices)) for _ in range(num_qubits))
+            bases = "".join(rng.choice(list(basis_choices)) for _ in range(num_qubits))
             rotation = _pauli_rotation_matrix(bases)
             rotated = rotation @ state
             probs = np.abs(rotated) ** 2
             probs = probs / probs.sum()
             outcome_idx = rng.choice(len(probs), p=probs)
-            outcomes = tuple(
-                (outcome_idx >> (num_qubits - 1 - q)) & 1
-                for q in range(num_qubits)
-            )
+            outcomes = tuple((outcome_idx >> (num_qubits - 1 - q)) & 1 for q in range(num_qubits))
             snapshots.append(Snapshot(bases=bases, outcomes=outcomes))
 
         return cls(num_qubits, snapshots)
@@ -117,10 +116,7 @@ class ClassicalShadow:
         outcomes_list: list[tuple[int, ...]],
     ) -> ClassicalShadow:
         """Construct from experimental measurement records."""
-        snapshots = [
-            Snapshot(bases=b, outcomes=o)
-            for b, o in zip(bases_list, outcomes_list)
-        ]
+        snapshots = [Snapshot(bases=b, outcomes=o) for b, o in zip(bases_list, outcomes_list)]
         return cls(num_qubits, snapshots)
 
     def snapshot_state(self, idx: int) -> NDArray[np.complexfloating]:
@@ -153,10 +149,9 @@ class ClassicalShadow:
         if num_groups is None:
             num_groups = max(1, min(T, int(np.ceil(np.log2(T + 1)))))
 
-        traces = np.array([
-            np.real(np.trace(observable @ self.snapshot_state(i)))
-            for i in range(T)
-        ])
+        traces = np.array(
+            [np.real(np.trace(observable @ self.snapshot_state(i))) for i in range(T)]
+        )
 
         group_size = T // num_groups
         if group_size == 0:
@@ -196,7 +191,7 @@ class ClassicalShadow:
             val = 1.0
             for q in range(self._num_qubits):
                 p_char = pauli_string[q]
-                if p_char == 'I':
+                if p_char == "I":
                     continue
                 basis = snap.bases[q]
                 outcome = snap.outcomes[q]
@@ -205,9 +200,7 @@ class ClassicalShadow:
                     break
                 eigenstate = PAULI_EIGENSTATES[basis][outcome]
                 pauli_mat = PAULI_MATRICES[p_char]
-                local_val = 3.0 * float(np.real(
-                    eigenstate.conj() @ pauli_mat @ eigenstate
-                ))
+                local_val = 3.0 * float(np.real(eigenstate.conj() @ pauli_mat @ eigenstate))
                 val *= local_val
             traces.append(val)
 
@@ -217,8 +210,7 @@ class ClassicalShadow:
             return ShadowResult(value=float(np.median(traces)), num_snapshots=T, num_groups=T)
 
         group_means = [
-            np.mean(traces[k * group_size:(k + 1) * group_size])
-            for k in range(num_groups)
+            np.mean(traces[k * group_size : (k + 1) * group_size]) for k in range(num_groups)
         ]
         return ShadowResult(
             value=float(np.median(group_means)),
@@ -280,8 +272,8 @@ def shadow_norm_pauli(pauli_string: str) -> float:
     For a k-local Pauli operator (k non-identity terms), the shadow
     norm is 3^k. This determines sample complexity: O(3^k / epsilon^2).
     """
-    k = sum(1 for c in pauli_string if c != 'I')
-    return float(3 ** k)
+    k = sum(1 for c in pauli_string if c != "I")
+    return float(3**k)
 
 
 def shadow_norm_observable(
@@ -296,7 +288,7 @@ def shadow_norm_observable(
     """
     n = int(np.log2(observable.shape[0]))
     op_norm = float(np.linalg.norm(observable, ord=2))
-    return (2 ** n + 1) * op_norm
+    return (2**n + 1) * op_norm
 
 
 def required_snapshots(
@@ -312,9 +304,7 @@ def required_snapshots(
 
     Uses: T = O(log(M/delta) * shadow_norm^2 / epsilon^2)
     """
-    return int(np.ceil(
-        2.0 * np.log(2 * num_observables / delta) * shadow_norm ** 2 / epsilon ** 2
-    ))
+    return int(np.ceil(2.0 * np.log(2 * num_observables / delta) * shadow_norm**2 / epsilon**2))
 
 
 def pauli_decomposition(
@@ -326,13 +316,13 @@ def pauli_decomposition(
     O = sum_P c_P * P, where c_P = tr(P * O) / 2^n.
     """
     n = int(np.log2(observable.shape[0]))
-    dim = 2 ** n
-    paulis = ['I', 'X', 'Y', 'Z']
+    dim = 2**n
+    paulis = ["I", "X", "Y", "Z"]
     result = {}
 
     def _generate_pauli_strings(n):
         if n == 0:
-            yield ''
+            yield ""
             return
         for suffix in _generate_pauli_strings(n - 1):
             for p in paulis:
@@ -358,9 +348,9 @@ def _pauli_string_matrix(pauli_string: str) -> NDArray[np.complexfloating]:
 def _pauli_rotation_matrix(bases: str) -> NDArray[np.complexfloating]:
     """Build the rotation matrix to change from Pauli basis to computational."""
     rotations = {
-        'X': np.array([[1, 1], [1, -1]], dtype=complex) / np.sqrt(2),
-        'Y': np.array([[1, -1j], [1, 1j]], dtype=complex) / np.sqrt(2),
-        'Z': np.eye(2, dtype=complex),
+        "X": np.array([[1, 1], [1, -1]], dtype=complex) / np.sqrt(2),
+        "Y": np.array([[1, -1j], [1, 1j]], dtype=complex) / np.sqrt(2),
+        "Z": np.eye(2, dtype=complex),
     }
     result = np.array([[1]], dtype=complex)
     for b in bases:

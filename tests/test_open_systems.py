@@ -40,6 +40,7 @@ RHO_PLUS = 0.5 * np.array([[1, 1], [1, 1]], dtype=complex)
 # Operators
 # ============================================================
 
+
 class TestOperators:
     def test_sigma_minus(self):
         sm = sigma_minus()
@@ -80,7 +81,7 @@ class TestOperators:
         ops = thermal_operator(0.1, n_thermal=0.5)
         assert len(ops) == 2
         assert ops[0][0] == pytest.approx(0.15)  # γ(1+n̄)
-        assert ops[1][0] == pytest.approx(0.05)   # γn̄
+        assert ops[1][0] == pytest.approx(0.05)  # γn̄
 
     def test_annihilation_operator(self):
         a = annihilation_operator(3)
@@ -108,6 +109,7 @@ class TestOperators:
 # ============================================================
 # Dynamics utilities
 # ============================================================
+
 
 class TestDynamics:
     def test_expect_pure(self):
@@ -146,6 +148,7 @@ class TestDynamics:
 # ============================================================
 # Lindblad RHS
 # ============================================================
+
 
 class TestLindbladRHS:
     def test_closed_system_unitary(self):
@@ -189,6 +192,7 @@ class TestLindbladRHS:
     def test_time_dependent_hamiltonian(self):
         def H_t(t):
             return np.cos(t) * SZ / 2
+
         system = LindbladSystem(hamiltonian=H_t)
         drho0 = lindblad_rhs(RHO_PLUS, system, t=0.0)
         drho_pi2 = lindblad_rhs(RHO_PLUS, system, t=math.pi / 2)
@@ -198,6 +202,7 @@ class TestLindbladRHS:
 # ============================================================
 # Lindblad evolution
 # ============================================================
+
 
 class TestLindbladEvolve:
     def test_closed_system_preserves_purity(self):
@@ -257,6 +262,7 @@ class TestLindbladEvolve:
 # mesolve
 # ============================================================
 
+
 class TestMesolve:
     def test_returns_evolution_result(self):
         system = LindbladSystem(hamiltonian=SZ / 2)
@@ -299,6 +305,7 @@ class TestMesolve:
 # ============================================================
 # Steady state
 # ============================================================
+
 
 class TestSteadyState:
     def test_decay_steady_state_is_ground(self):
@@ -358,6 +365,7 @@ class TestSteadyState:
     def test_time_dependent_raises(self):
         def H_t(t):
             return t * SZ
+
         system = LindbladSystem(hamiltonian=H_t)
         with pytest.raises(ValueError, match="time-independent"):
             steady_state(system)
@@ -366,6 +374,7 @@ class TestSteadyState:
 # ============================================================
 # Multi-qubit
 # ============================================================
+
 
 class TestMultiQubit:
     def test_two_qubit_independent_decay(self):

@@ -7,7 +7,6 @@ a product of simpler exponentials.
 
 from __future__ import annotations
 
-from dataclasses import dataclass
 
 import numpy as np
 from numpy.typing import NDArray
@@ -16,7 +15,9 @@ from ..core.circuit import QuantumCircuit
 from ..core.gate import Gate
 
 
-def exact_evolution(hamiltonian: NDArray[np.complexfloating], time: float) -> NDArray[np.complexfloating]:
+def exact_evolution(
+    hamiltonian: NDArray[np.complexfloating], time: float
+) -> NDArray[np.complexfloating]:
     """Compute the exact time evolution operator U = exp(-iHt) via eigendecomposition.
 
     Parameters
@@ -219,6 +220,7 @@ def simulate_evolution(
 
 # Common Hamiltonian terms for spin systems
 
+
 def pauli_x(qubit: int, num_qubits: int) -> NDArray[np.complexfloating]:
     """Build the full-system Pauli-X operator acting on a single qubit.
 
@@ -294,7 +296,9 @@ def zz_interaction(qubit_i: int, qubit_j: int, num_qubits: int) -> NDArray[np.co
     return pauli_z(qubit_i, num_qubits) @ pauli_z(qubit_j, num_qubits)
 
 
-def transverse_field_ising(num_qubits: int, J: float = 1.0, h: float = 0.5) -> list[NDArray[np.complexfloating]]:
+def transverse_field_ising(
+    num_qubits: int, J: float = 1.0, h: float = 0.5
+) -> list[NDArray[np.complexfloating]]:
     """Build the transverse-field Ising model Hamiltonian as separate terms.
 
     The Hamiltonian is H = -J * sum_i Z_i Z_{i+1} - h * sum_i X_i,

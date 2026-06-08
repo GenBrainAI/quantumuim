@@ -1,7 +1,5 @@
 """Tests for quantum networking simulation (Phase 28)."""
 
-import math
-
 import numpy as np
 import pytest
 
@@ -14,7 +12,7 @@ from quantumium.networking import (
     teleport,
     distribute_entanglement,
 )
-from quantumium.networking.network import QuantumChannel, NetworkNode
+from quantumium.networking.network import QuantumChannel
 from quantumium.networking.purification import purify_rounds
 from quantumium.networking.teleportation import teleportation_fidelity
 
@@ -22,6 +20,7 @@ from quantumium.networking.teleportation import teleportation_fidelity
 # ---------------------------------------------------------------------------
 # QuantumNetwork topology
 # ---------------------------------------------------------------------------
+
 
 class TestQuantumNetwork:
     def test_add_nodes_and_links(self):
@@ -114,6 +113,7 @@ class TestTopologies:
 # Quantum Channel
 # ---------------------------------------------------------------------------
 
+
 class TestQuantumChannel:
     def test_transmission_probability(self):
         ch = QuantumChannel("A", "B", distance_km=0, loss_db_per_km=0.2)
@@ -136,14 +136,14 @@ class TestQuantumChannel:
         assert ch_long.channel_fidelity > 0.25
 
     def test_depolarizing_rate(self):
-        ch = QuantumChannel("A", "B", distance_km=50, loss_db_per_km=0.2,
-                            depolarizing_rate=0.01)
+        ch = QuantumChannel("A", "B", distance_km=50, loss_db_per_km=0.2, depolarizing_rate=0.01)
         assert 0.25 < ch.channel_fidelity < 1.0
 
 
 # ---------------------------------------------------------------------------
 # Entanglement generation
 # ---------------------------------------------------------------------------
+
 
 class TestEntanglementGeneration:
     def test_generate_direct(self):
@@ -189,6 +189,7 @@ class TestEntanglementGeneration:
 # Entanglement swapping
 # ---------------------------------------------------------------------------
 
+
 class TestEntanglementSwapping:
     def test_swap_basic(self):
         pair1 = EntangledPair("A", "R", 0.95)
@@ -214,7 +215,7 @@ class TestEntanglementSwapping:
 
     def test_swap_chain(self):
         f = 0.95
-        pairs = [EntangledPair(f"N{i}", f"N{i+1}", f) for i in range(4)]
+        pairs = [EntangledPair(f"N{i}", f"N{i + 1}", f) for i in range(4)]
         current = pairs[0]
         for p in pairs[1:]:
             current = entanglement_swap(current, p)
@@ -238,6 +239,7 @@ class TestEntanglementSwapping:
 # ---------------------------------------------------------------------------
 # BBPSSW purification
 # ---------------------------------------------------------------------------
+
 
 class TestPurification:
     def test_purify_improves_above_half(self):
@@ -288,6 +290,7 @@ class TestPurification:
 # Teleportation
 # ---------------------------------------------------------------------------
 
+
 class TestTeleportation:
     def test_teleport_perfect_channel(self):
         pair = EntangledPair("A", "B", 1.0)
@@ -336,6 +339,7 @@ class TestTeleportation:
 # One-liner API: distribute_entanglement
 # ---------------------------------------------------------------------------
 
+
 class TestDistributeEntanglement:
     def test_direct_link(self):
         net = QuantumNetwork()
@@ -373,6 +377,7 @@ class TestDistributeEntanglement:
 # Integration: repeater chain fidelity scaling
 # ---------------------------------------------------------------------------
 
+
 class TestFidelityScaling:
     def test_fidelity_decreases_with_chain_length(self):
         fidelities = []
@@ -393,8 +398,7 @@ class TestFidelityScaling:
         net_direct.add_link("A", "B", distance_km=200)
         pair_direct = distribute_entanglement(net_direct, "A", "B")
 
-        net_rep = QuantumNetwork.chain(["A", "R1", "R2", "R3", "B"],
-                                       segment_distance_km=50)
+        net_rep = QuantumNetwork.chain(["A", "R1", "R2", "R3", "B"], segment_distance_km=50)
         pair_rep = distribute_entanglement(net_rep, "A", "B")
         assert pair_rep.fidelity > 0.25
 
@@ -409,14 +413,17 @@ class TestFidelityScaling:
 # Existing tests unbroken
 # ---------------------------------------------------------------------------
 
+
 class TestExistingTestsUnbroken:
     def test_import_core(self):
         from quantumium.core.circuit import QuantumCircuit
         from quantumium.core.gate import H, CNOT
+
         qc = QuantumCircuit(2)
         qc.apply(H, 0).apply(CNOT, 0, 1)
         assert len(qc.instructions) == 2
 
     def test_import_zx(self):
         from quantumium.zx import zx_optimize
+
         assert callable(zx_optimize)
