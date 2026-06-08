@@ -225,7 +225,7 @@ def _project_to_physical(rho: NDArray[np.complexfloating]) -> NDArray[np.complex
     if eigvals.sum() > 0:
         eigvals /= eigvals.sum()
 
-    return eigvecs @ np.diag(eigvals) @ eigvecs.conj().T
+    return eigvecs @ np.diag(eigvals) @ eigvecs.conj().T  # type: ignore[no-any-return]
 
 
 def maximum_likelihood(
@@ -303,7 +303,7 @@ def maximum_likelihood(
             rho_new /= trace
         rho = rho_new
 
-    return rho
+    return rho  # type: ignore[no-any-return]
 
 
 def state_fidelity(

@@ -22,7 +22,7 @@ class NoiseChannel:
 
     def apply(self, density_matrix: NDArray[np.complexfloating]) -> NDArray[np.complexfloating]:
         """Apply this noise channel to a density matrix via Kraus operators."""
-        return sum(k @ density_matrix @ k.conj().T for k in self.kraus_operators)  # type: ignore[return-value]
+        return sum(k @ density_matrix @ k.conj().T for k in self.kraus_operators)  # type: ignore[no-any-return, return-value, unused-ignore]
 
 
 def bit_flip(p: float) -> NoiseChannel:

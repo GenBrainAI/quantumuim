@@ -87,7 +87,7 @@ def shor_encode(state: NDArray[np.complexfloating]) -> NDArray[np.complexfloatin
     if state.shape != (2,):
         raise ValueError(f"Input must be a 2-element array, got shape {state.shape}")
 
-    return state[0] * _logical_zero() + state[1] * _logical_one()
+    return state[0] * _logical_zero() + state[1] * _logical_one()  # type: ignore[no-any-return]
 
 
 def _bit_flip_syndrome_block(state: NDArray[np.complexfloating], block: int) -> tuple[int, int]:
@@ -157,7 +157,7 @@ def _phase_flip_syndrome_blocks(state: NDArray[np.complexfloating]) -> tuple[int
 
 def shor_syndrome(
     state: NDArray[np.complexfloating],
-) -> dict:
+) -> dict:  # type: ignore[type-arg]
     """Measure all syndromes for the 9-qubit Shor code.
 
     Evaluates the bit-flip syndromes within each of the three 3-qubit
@@ -178,7 +178,7 @@ def shor_syndrome(
 
 def shor_correct(
     state: NDArray[np.complexfloating],
-    syndrome: dict | None = None,
+    syndrome: dict | None = None,  # type: ignore[type-arg]
 ) -> NDArray[np.complexfloating]:
     """Apply corrections based on the Shor code syndrome measurement.
 

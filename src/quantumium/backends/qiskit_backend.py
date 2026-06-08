@@ -56,7 +56,7 @@ class QiskitBackend(Backend):
         except ImportError:
             return False
 
-    def _translate_circuit(self, circuit: QuantumCircuit):
+    def _translate_circuit(self, circuit: QuantumCircuit):  # type: ignore[no-untyped-def]
         """Convert a Quantumium circuit to a Qiskit QuantumCircuit.
 
         Each Quantumium gate is mapped to a Qiskit ``Operator`` unitary and
@@ -117,7 +117,7 @@ class QiskitBackend(Backend):
             backend_name=self.name,
         )
 
-    def _run_simulator(self, qiskit_circuit, shots: int) -> dict[str, int]:
+    def _run_simulator(self, qiskit_circuit, shots: int) -> dict[str, int]:  # type: ignore[no-untyped-def]
         """Execute the circuit on the local Aer simulator.
 
         Args:
@@ -133,7 +133,7 @@ class QiskitBackend(Backend):
         result = simulator.run(qiskit_circuit, shots=shots).result()
         return dict(result.get_counts())
 
-    def _run_hardware(self, qiskit_circuit, shots: int) -> dict[str, int]:
+    def _run_hardware(self, qiskit_circuit, shots: int) -> dict[str, int]:  # type: ignore[no-untyped-def]
         """Execute the circuit on IBM Quantum cloud hardware.
 
         Uses ``qiskit-ibm-runtime`` to submit the circuit via the

@@ -80,7 +80,7 @@ def classical_var(
     cumulative = np.cumsum(sorted_probs)
 
     var_idx = np.searchsorted(cumulative, confidence)
-    var_idx = min(var_idx, len(sorted_losses) - 1)
+    var_idx = min(var_idx, len(sorted_losses) - 1)  # type: ignore[arg-type]
     var_value = float(sorted_losses[var_idx])
 
     tail_mask = sorted_losses >= var_value

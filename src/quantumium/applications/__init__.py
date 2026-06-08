@@ -10,3 +10,5 @@ of the core quantum simulation and algorithm modules. It includes:
 - **qrng**: Quantum random number generation with statistical validation,
   leveraging Born-rule randomness from superposition measurements.
 """
+
+__all__ = ["chemistry", "optimization", "qrng"]

@@ -34,7 +34,7 @@ def exact_evolution(
     """
     eigenvalues, eigenvectors = np.linalg.eigh(hamiltonian)
     exp_diag = np.diag(np.exp(-1j * eigenvalues * time))
-    return eigenvectors @ exp_diag @ eigenvectors.conj().T
+    return eigenvectors @ exp_diag @ eigenvectors.conj().T  # type: ignore[no-any-return]
 
 
 def first_order_trotter(
@@ -155,7 +155,7 @@ def trotter_error(
         If ``order`` is not 1 or 2.
     """
     H_full = sum(terms)
-    U_exact = exact_evolution(H_full, time)
+    U_exact = exact_evolution(H_full, time)  # type: ignore[arg-type]
 
     if order == 1:
         U_trotter = first_order_trotter(terms, time, steps)

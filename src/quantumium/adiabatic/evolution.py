@@ -66,7 +66,7 @@ def polynomial_schedule(t: float, T: float, power: float = 2.0) -> float:
     Returns:
         float: Schedule parameter s in [0, 1].
     """
-    return (t / T) ** power
+    return (t / T) ** power  # type: ignore[no-any-return]
 
 
 def adiabatic_evolve(

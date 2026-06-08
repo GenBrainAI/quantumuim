@@ -17,7 +17,7 @@ class TeleportationResult:
     channel_fidelity: float
 
 
-def teleport(state: np.ndarray | list, pair: EntangledPair) -> TeleportationResult:
+def teleport(state: np.ndarray | list, pair: EntangledPair) -> TeleportationResult:  # type: ignore[type-arg]
     psi = np.asarray(state, dtype=complex)
     if psi.shape == (2,):
         psi = psi / np.linalg.norm(psi)

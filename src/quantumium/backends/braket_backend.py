@@ -86,7 +86,7 @@ class BraketBackend(Backend):
         except ImportError:
             return False
 
-    def _translate_circuit(self, circuit: QuantumCircuit):
+    def _translate_circuit(self, circuit: QuantumCircuit):  # type: ignore[no-untyped-def]
         """Convert a Quantumium circuit to an Amazon Braket Circuit.
 
         Each Quantumium gate is applied as a ``Unitary`` instruction on the

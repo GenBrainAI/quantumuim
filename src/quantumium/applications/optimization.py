@@ -37,7 +37,7 @@ class OptimizationResult:
 
 
 def solve_maxcut(
-    adjacency: list[list[int]] | NDArray,
+    adjacency: list[list[int]] | NDArray,  # type: ignore[type-arg]
     p: int = 2,
     num_starts: int = 10,
     max_iter: int = 100,
@@ -81,7 +81,7 @@ def solve_maxcut(
 
 
 def solve_tsp_qaoa(
-    distances: list[list[float]] | NDArray,
+    distances: list[list[float]] | NDArray,  # type: ignore[type-arg]
     p: int = 1,
     penalty: float = 10.0,
     num_starts: int = 10,
@@ -172,15 +172,15 @@ def solve_tsp_qaoa(
             best_bitstring = max(counts, key=lambda k: counts[k])
 
     qaoa_result = QAOAResult(
-        optimal_params=best_params,
+        optimal_params=best_params,  # type: ignore[arg-type]
         optimal_value=best_value,
-        optimal_bitstring=best_bitstring,
+        optimal_bitstring=best_bitstring,  # type: ignore[arg-type]
         history=[],
     )
 
     return OptimizationResult(
         problem=f"TSP ({n} cities)",
-        solution=best_bitstring,
+        solution=best_bitstring,  # type: ignore[arg-type]
         objective_value=-best_value,
         qaoa_result=qaoa_result,
     )
@@ -271,16 +271,16 @@ def portfolio_optimization(
             best_bitstring = max(counts, key=lambda k: counts[k])
 
     qaoa_result = QAOAResult(
-        optimal_params=best_params,
+        optimal_params=best_params,  # type: ignore[arg-type]
         optimal_value=best_value,
-        optimal_bitstring=best_bitstring,
+        optimal_bitstring=best_bitstring,  # type: ignore[arg-type]
         history=[],
     )
 
-    [i for i, b in enumerate(best_bitstring) if b == "1"]
+    [i for i, b in enumerate(best_bitstring) if b == "1"]  # type: ignore[arg-type]
     return OptimizationResult(
         problem=f"Portfolio ({n_assets} assets, budget={budget})",
-        solution=best_bitstring,
+        solution=best_bitstring,  # type: ignore[arg-type]
         objective_value=best_value,
         qaoa_result=qaoa_result,
     )

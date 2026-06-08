@@ -120,9 +120,9 @@ def grape_optimize(
         # L[k] = U_{N-1} @ ... @ U_{k+1} (backward, not including step k)
         # L[N-1] = I, L[k] = L[k+1] @ U_{k+1}
         L = [None] * num_steps
-        L[num_steps - 1] = np.eye(dim, dtype=complex)
+        L[num_steps - 1] = np.eye(dim, dtype=complex)  # type: ignore[call-overload]
         for k in range(num_steps - 2, -1, -1):
-            L[k] = L[k + 1] @ step_unitaries[k + 1]
+            L[k] = L[k + 1] @ step_unitaries[k + 1]  # type: ignore[operator]
 
         overlap = np.trace(target.conj().T @ U_total)
         overlap_conj = np.conj(overlap)

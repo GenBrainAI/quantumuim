@@ -69,7 +69,7 @@ class BenchmarkSuite:
                     qc.apply(CNOT, q, q + 1)
         return qc
 
-    def _time_construction(self, builder, *args) -> tuple[float, QuantumCircuit]:
+    def _time_construction(self, builder, *args) -> tuple[float, QuantumCircuit]:  # type: ignore[no-untyped-def]
         times = []
         qc = None
         for _ in range(self._repeats):
@@ -77,7 +77,7 @@ class BenchmarkSuite:
             qc = builder(*args)
             times.append(time.perf_counter() - t0)
         median_s = sorted(times)[len(times) // 2]
-        return median_s * 1000, qc
+        return median_s * 1000, qc  # type: ignore[return-value]
 
     def _time_simulation(self, qc: QuantumCircuit) -> tuple[float, float]:
         sim_repeats = min(self._repeats, 2) if qc.num_qubits >= 6 else self._repeats
@@ -133,7 +133,7 @@ class BenchmarkSuite:
             )
 
 
-def main():
+def main():  # type: ignore[no-untyped-def]
     print("Quantumium Benchmark Suite")
     print("=" * 62)
     suite = BenchmarkSuite()
@@ -142,4 +142,4 @@ def main():
 
 
 if __name__ == "__main__":
-    main()
+    main()  # type: ignore[no-untyped-call]

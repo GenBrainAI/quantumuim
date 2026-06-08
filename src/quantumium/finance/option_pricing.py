@@ -187,9 +187,9 @@ def _payoff(
         ValueError: If *option_type* is not ``"call"`` or ``"put"``.
     """
     if option_type == "call":
-        return np.maximum(prices - strike, 0.0)
+        return np.maximum(prices - strike, 0.0)  # type: ignore[no-any-return]
     elif option_type == "put":
-        return np.maximum(strike - prices, 0.0)
+        return np.maximum(strike - prices, 0.0)  # type: ignore[no-any-return]
     raise ValueError(f"Unknown option_type '{option_type}'")
 
 

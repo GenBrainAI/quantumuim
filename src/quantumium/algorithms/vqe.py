@@ -210,7 +210,7 @@ def h2_hamiltonian() -> NDArray[np.complexfloating]:
     Y0Y1 = np.kron(Y, Y)
 
     H = g0 * I + g1 * Z0 + g2 * Z1 + g3 * Z0Z1 + g4 * X0X1 + g5 * Y0Y1
-    return H
+    return H  # type: ignore[return-value]
 
 
 def vqe(
@@ -307,7 +307,7 @@ def vqe(
 
     return VQEResult(
         optimal_energy=best_energy,
-        optimal_params=best_params,
+        optimal_params=best_params,  # type: ignore[arg-type]
         history=best_history,
         num_iterations=len(best_history),
     )

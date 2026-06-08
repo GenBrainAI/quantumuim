@@ -51,7 +51,7 @@ class HHLResult:
     fidelity: float
 
 
-def _hermitian_exp(A: NDArray, t: float) -> NDArray:
+def _hermitian_exp(A: NDArray, t: float) -> NDArray:  # type: ignore[type-arg]
     """Compute the matrix exponential exp(i*A*t) via eigendecomposition.
 
     Parameters
@@ -67,7 +67,7 @@ def _hermitian_exp(A: NDArray, t: float) -> NDArray:
         The unitary matrix exp(i*A*t).
     """
     eigenvalues, eigenvectors = np.linalg.eigh(A)
-    return eigenvectors @ np.diag(np.exp(1j * eigenvalues * t)) @ eigenvectors.conj().T
+    return eigenvectors @ np.diag(np.exp(1j * eigenvalues * t)) @ eigenvectors.conj().T  # type: ignore[no-any-return]
 
 
 def _apply_qft(qc: QuantumCircuit, qubits: list[int]) -> None:

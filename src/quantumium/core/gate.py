@@ -22,7 +22,7 @@ class Gate:
 
     @property
     def matrix(self) -> NDArray[np.complexfloating]:
-        return self._matrix.copy()
+        return self._matrix.copy()  # type: ignore[no-any-return]
 
     @property
     def num_qubits(self) -> int:

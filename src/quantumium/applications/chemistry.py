@@ -172,8 +172,8 @@ def get_molecular_hamiltonian(molecule: str) -> tuple[NDArray[np.complexfloating
         raise ValueError(f"Unknown molecule '{molecule}'. Available: {available}")
 
     mol = MOLECULAR_HAMILTONIANS[molecule]
-    H = _build_hamiltonian(mol["coefficients"], mol["num_qubits"])
-    return H, mol["num_qubits"]
+    H = _build_hamiltonian(mol["coefficients"], mol["num_qubits"])  # type: ignore[arg-type]
+    return H, mol["num_qubits"]  # type: ignore[return-value]
 
 
 def simulate_molecule(

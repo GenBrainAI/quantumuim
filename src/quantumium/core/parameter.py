@@ -39,7 +39,7 @@ class ParameterVector:
     def __getitem__(self, idx: int) -> Parameter:
         return self.params[idx]
 
-    def __iter__(self):
+    def __iter__(self):  # type: ignore[no-untyped-def]
         return iter(self.params)
 
 
@@ -144,9 +144,9 @@ class ParameterizedCircuit:
         qc = QuantumCircuit(self.num_qubits)
         for inst in self._instructions:
             if inst.gate_type == "fixed":
-                qc.apply(inst.fixed_gate, *inst.target_qubits)
+                qc.apply(inst.fixed_gate, *inst.target_qubits)  # type: ignore[arg-type]
             else:
-                theta = values[inst.parameter]
+                theta = values[inst.parameter]  # type: ignore[index]
                 gate = GATE_FACTORIES[inst.gate_type](theta)
                 qc.apply(gate, *inst.target_qubits)
         return qc

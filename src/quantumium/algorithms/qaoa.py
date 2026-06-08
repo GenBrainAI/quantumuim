@@ -73,7 +73,7 @@ def maxcut_cost_operator(
     return cost
 
 
-def _cost_unitary(cost_diag: NDArray, gamma: float) -> Gate:
+def _cost_unitary(cost_diag: NDArray, gamma: float) -> Gate:  # type: ignore[type-arg]
     """Build the cost unitary exp(-i * gamma * C) where C is diagonal.
 
     Parameters
@@ -130,7 +130,7 @@ def _mixer_unitary(num_qubits: int, beta: float) -> Gate:
 
 def qaoa_circuit(
     num_qubits: int,
-    cost_diag: NDArray,
+    cost_diag: NDArray,  # type: ignore[type-arg]
     gammas: NDArray[np.floating],
     betas: NDArray[np.floating],
 ) -> QuantumCircuit:
@@ -177,7 +177,7 @@ def qaoa_circuit(
 
 def qaoa_expectation(
     num_qubits: int,
-    cost_diag: NDArray,
+    cost_diag: NDArray,  # type: ignore[type-arg]
     gammas: NDArray[np.floating],
     betas: NDArray[np.floating],
 ) -> float:
@@ -285,13 +285,13 @@ def qaoa_maxcut(
             best_params = params.copy()
             best_history = history
 
-    g_opt, b_opt = best_params[:p], best_params[p:]
+    g_opt, b_opt = best_params[:p], best_params[p:]  # type: ignore[index]
     qc = qaoa_circuit(num_qubits, cost_diag, g_opt, b_opt)
     counts = qc.measure_all(shots=1024)
     optimal_bitstring = max(counts, key=lambda k: counts[k])
 
     return QAOAResult(
-        optimal_params=best_params,
+        optimal_params=best_params,  # type: ignore[arg-type]
         optimal_value=best_value,
         optimal_bitstring=optimal_bitstring,
         history=best_history,

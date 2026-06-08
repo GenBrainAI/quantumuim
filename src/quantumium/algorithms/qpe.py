@@ -194,4 +194,4 @@ def estimate_phase(
 
     best = max(input_counts, key=input_counts.get)  # type: ignore[arg-type]
     measured_int = int(best[::-1], 2)
-    return measured_int / (2**num_counting_qubits)
+    return measured_int / (2**num_counting_qubits)  # type: ignore[no-any-return]

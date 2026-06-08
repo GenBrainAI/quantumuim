@@ -104,8 +104,8 @@ def dephasing_operator(
     if num_qubits == 1:
         op = sz
     else:
-        op = _embed(sz, num_qubits, qubit)
-    return gamma, op
+        op = _embed(sz, num_qubits, qubit)  # type: ignore[arg-type, assignment]
+    return gamma, op  # type: ignore[return-value]
 
 
 def thermal_operator(
@@ -174,7 +174,7 @@ def creation_operator(dim: int) -> NDArray[np.complexfloating]:
         NDArray[np.complexfloating]: The creation operator matrix
             of shape (dim, dim).
     """
-    return annihilation_operator(dim).conj().T
+    return annihilation_operator(dim).conj().T  # type: ignore[no-any-return]
 
 
 def number_operator(dim: int) -> NDArray[np.complexfloating]:

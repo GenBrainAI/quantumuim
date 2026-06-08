@@ -3,3 +3,5 @@
 Implements the classical shadow protocol (Huang, Kueng, Preskill 2020)
 for predicting many properties of a quantum state from few measurements.
 """
+
+__all__ = ["shadows"]

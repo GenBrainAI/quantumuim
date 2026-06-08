@@ -133,7 +133,7 @@ def _solve_linear_system(equations: list[str], n: int) -> str | None:
 
     # Gaussian elimination over GF(2)
     rows, cols = matrix.shape
-    pivot_cols = []
+    pivot_cols = []  # type: ignore[var-annotated]
 
     for col in range(cols):
         pivot_row = None

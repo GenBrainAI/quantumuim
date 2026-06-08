@@ -103,14 +103,14 @@ def _chebyshev(n: int, x: NDArray[np.floating]) -> NDArray[np.floating]:
     if n == 0:
         return np.ones_like(x)
     if n == 1:
-        return x.copy()
+        return x.copy()  # type: ignore[no-any-return]
     T_prev2 = np.ones_like(x)
     T_prev1 = x.copy()
     for _ in range(2, n + 1):
         T_curr = 2 * x * T_prev1 - T_prev2
         T_prev2 = T_prev1
         T_prev1 = T_curr
-    return T_prev1
+    return T_prev1  # type: ignore[no-any-return]
 
 
 def chebyshev_angles(degree: int) -> NDArray[np.floating]:
@@ -220,4 +220,4 @@ def _fit_chebyshev(
         basis[:, k] = _chebyshev(k, grid)
 
     coeffs, _, _, _ = np.linalg.lstsq(basis, values, rcond=None)
-    return coeffs
+    return coeffs  # type: ignore[no-any-return]

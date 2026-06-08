@@ -27,7 +27,7 @@ from .graphs import line_graph
 
 def _hadamard_coin() -> NDArray[np.complexfloating]:
     """Hadamard coin for 2-dimensional coin space."""
-    return np.array([[1, 1], [1, -1]], dtype=complex) / np.sqrt(2)
+    return np.array([[1, 1], [1, -1]], dtype=complex) / np.sqrt(2)  # type: ignore[no-any-return]
 
 
 def _grover_coin(d: int) -> NDArray[np.complexfloating]:
@@ -42,7 +42,7 @@ def _grover_coin(d: int) -> NDArray[np.complexfloating]:
 def _dft_coin(d: int) -> NDArray[np.complexfloating]:
     """Discrete Fourier Transform coin for d-dimensional coin space."""
     omega = np.exp(2j * np.pi / d)
-    return np.array(
+    return np.array(  # type: ignore[no-any-return]
         [[omega ** (j * k) for k in range(d)] for j in range(d)],
         dtype=complex,
     ) / np.sqrt(d)

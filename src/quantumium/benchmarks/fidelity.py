@@ -72,4 +72,4 @@ def average_gate_fidelity(
     """
     d = U_ideal.shape[0]
     f_proc = process_fidelity(U_ideal, U_actual)
-    return (d * f_proc + 1) / (d + 1)
+    return (d * f_proc + 1) / (d + 1)  # type: ignore[no-any-return]

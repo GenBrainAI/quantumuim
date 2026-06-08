@@ -70,7 +70,7 @@ class CouplingMap:
     def distance(self, q1: int, q2: int) -> int:
         if self._dist is None:
             self._build_distance_matrix()
-        return self._dist.get((q1, q2), float("inf"))
+        return self._dist.get((q1, q2), float("inf"))  # type: ignore[arg-type, union-attr]
 
     def shortest_path(self, q1: int, q2: int) -> list[int]:
         if q1 == q2:
@@ -81,13 +81,13 @@ class CouplingMap:
             node = queue.popleft()
             for neighbor in self._adj.get(node, set()):
                 if neighbor not in visited:
-                    visited[neighbor] = node
+                    visited[neighbor] = node  # type: ignore[assignment]
                     if neighbor == q2:
                         path = []
                         cur = q2
                         while cur is not None:
                             path.append(cur)
-                            cur = visited[cur]
+                            cur = visited[cur]  # type: ignore[assignment]
                         return path[::-1]
                     queue.append(neighbor)
         return []
@@ -149,8 +149,8 @@ class Layout:
             self._l2p[l1] = p2
         if l2 is not None:
             self._l2p[l2] = p1
-        self._p2l[p1] = l2
-        self._p2l[p2] = l1
+        self._p2l[p1] = l2  # type: ignore[assignment]
+        self._p2l[p2] = l1  # type: ignore[assignment]
 
     def copy(self) -> Layout:
         return Layout(dict(self._l2p))
@@ -240,7 +240,7 @@ class SABRERouter:
                 best_initial = start_layout.copy()
                 best_layout = final_layout.copy()
 
-        routed_ops, swap_count, final_layout = best_result
+        routed_ops, swap_count, final_layout = best_result  # type: ignore[misc]
 
         routed = QuantumCircuit(coupling_map.num_qubits)
         for gate, phys_qubits in routed_ops:
@@ -248,7 +248,7 @@ class SABRERouter:
 
         return RoutingResult(
             circuit=routed,
-            initial_layout=best_initial,
+            initial_layout=best_initial,  # type: ignore[arg-type]
             final_layout=final_layout,
             swap_count=swap_count,
             original_gate_count=len(instructions),

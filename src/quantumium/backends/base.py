@@ -28,7 +28,7 @@ class ExecutionResult:
     counts: dict[str, int]
     shots: int
     backend_name: str
-    metadata: dict = field(default_factory=dict)
+    metadata: dict = field(default_factory=dict)  # type: ignore[type-arg]
 
     @property
     def probabilities(self) -> dict[str, float]:

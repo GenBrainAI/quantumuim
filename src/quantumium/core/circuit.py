@@ -108,7 +108,7 @@ class QuantumCircuit:
         for j in range(n - k):
             perm[remaining_axes[j]] = k + j
 
-        return result.transpose(perm).reshape(2**n)
+        return result.transpose(perm).reshape(2**n)  # type: ignore[no-any-return]
 
     def _expand_gate(
         self,
@@ -214,7 +214,7 @@ class QuantumCircuit:
             perm2[remaining_all[j]] = k + j
         result = result.transpose(perm2)
 
-        return result.reshape(dim, dim)
+        return result.reshape(dim, dim)  # type: ignore[no-any-return]
 
     @staticmethod
     def _apply_channel_tensor(

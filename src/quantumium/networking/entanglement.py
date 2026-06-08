@@ -16,7 +16,7 @@ class EntangledPair:
     fidelity: float
     density_matrix: np.ndarray | None = None
 
-    def __post_init__(self):
+    def __post_init__(self):  # type: ignore[no-untyped-def]
         if self.density_matrix is None:
             self.density_matrix = _werner_state(self.fidelity)
 

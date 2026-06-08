@@ -60,7 +60,7 @@ def _nqubit_paulis(n: int) -> list[NDArray[np.complexfloating]]:
     return [_multi_kron(combo) for combo in iterproduct(_PAULIS_1Q, repeat=n)]
 
 
-def _multi_kron(matrices: tuple) -> NDArray[np.complexfloating]:
+def _multi_kron(matrices: tuple) -> NDArray[np.complexfloating]:  # type: ignore[type-arg]
     """Compute the Kronecker (tensor) product of a sequence of matrices.
 
     Args:
@@ -72,7 +72,7 @@ def _multi_kron(matrices: tuple) -> NDArray[np.complexfloating]:
     result = matrices[0]
     for m in matrices[1:]:
         result = np.kron(result, m)
-    return result
+    return result  # type: ignore[no-any-return]
 
 
 def _input_states(n: int) -> list[NDArray[np.complexfloating]]:
@@ -93,7 +93,7 @@ def _input_states(n: int) -> list[NDArray[np.complexfloating]]:
     return [_multi_kron_vec(combo) for combo in iterproduct(_INPUT_STATES_1Q, repeat=n)]
 
 
-def _multi_kron_vec(vectors: tuple) -> NDArray[np.complexfloating]:
+def _multi_kron_vec(vectors: tuple) -> NDArray[np.complexfloating]:  # type: ignore[type-arg]
     """Compute the Kronecker (tensor) product of a sequence of vectors.
 
     Args:
@@ -105,7 +105,7 @@ def _multi_kron_vec(vectors: tuple) -> NDArray[np.complexfloating]:
     result = vectors[0]
     for v in vectors[1:]:
         result = np.kron(result, v)
-    return result
+    return result  # type: ignore[no-any-return]
 
 
 def _apply_channel_simulation(

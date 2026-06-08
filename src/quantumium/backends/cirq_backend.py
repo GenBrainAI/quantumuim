@@ -55,7 +55,7 @@ class CirqBackend(Backend):
         except ImportError:
             return False
 
-    def _translate_circuit(self, circuit: QuantumCircuit):
+    def _translate_circuit(self, circuit: QuantumCircuit):  # type: ignore[no-untyped-def]
         """Convert a Quantumium circuit to a Cirq Circuit.
 
         Each Quantumium gate is wrapped in a ``cirq.MatrixGate`` and applied
@@ -122,7 +122,7 @@ class CirqBackend(Backend):
             backend_name=self.name,
         )
 
-    def _result_to_counts(self, result, num_qubits: int) -> dict[str, int]:
+    def _result_to_counts(self, result, num_qubits: int) -> dict[str, int]:  # type: ignore[no-untyped-def]
         """Convert a Cirq measurement result to bitstring counts.
 
         Iterates over each measurement row, converts the binary array to a
@@ -145,7 +145,7 @@ class CirqBackend(Backend):
             counts[bitstring] = counts.get(bitstring, 0) + 1
         return counts
 
-    def _run_hardware(self, cirq_circuit, shots: int) -> dict[str, int]:
+    def _run_hardware(self, cirq_circuit, shots: int) -> dict[str, int]:  # type: ignore[no-untyped-def]
         """Execute the circuit on Google Quantum hardware via the Cirq Engine.
 
         Connects to the Google Quantum Engine, selects the configured

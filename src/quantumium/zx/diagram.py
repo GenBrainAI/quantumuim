@@ -171,12 +171,12 @@ class ZXDiagram:
     # ---- high-level API ----
 
     @classmethod
-    def from_circuit(cls, circuit) -> ZXDiagram:
+    def from_circuit(cls, circuit) -> ZXDiagram:  # type: ignore[no-untyped-def]
         from .convert import circuit_to_zx
 
         return circuit_to_zx(circuit)
 
-    def to_circuit(self):
+    def to_circuit(self):  # type: ignore[no-untyped-def]
         from .convert import zx_to_circuit
 
         return zx_to_circuit(self)
@@ -191,8 +191,8 @@ class ZXDiagram:
         from .convert import _circuit_unitary
         import numpy as np
 
-        u1 = _circuit_unitary(self.to_circuit())
-        u2 = _circuit_unitary(other.to_circuit())
+        u1 = _circuit_unitary(self.to_circuit())  # type: ignore[no-untyped-call]
+        u2 = _circuit_unitary(other.to_circuit())  # type: ignore[no-untyped-call]
         if u1.shape != u2.shape:
             return False
         product = u1.conj().T @ u2

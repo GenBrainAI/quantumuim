@@ -205,7 +205,7 @@ def _matrix_sqrt(
     """
     eigvals, eigvecs = np.linalg.eigh(A)
     eigvals = np.maximum(eigvals, 0.0)
-    return eigvecs @ np.diag(np.sqrt(eigvals)) @ eigvecs.conj().T
+    return eigvecs @ np.diag(np.sqrt(eigvals)) @ eigvecs.conj().T  # type: ignore[no-any-return]
 
 
 def _matrix_log2(
@@ -221,4 +221,4 @@ def _matrix_log2(
     log_eigvals = np.zeros_like(eigvals, dtype=float)
     mask = eigvals > tol
     log_eigvals[mask] = np.log2(eigvals[mask])
-    return eigvecs @ np.diag(log_eigvals).astype(complex) @ eigvecs.conj().T
+    return eigvecs @ np.diag(log_eigvals).astype(complex) @ eigvecs.conj().T  # type: ignore[no-any-return]

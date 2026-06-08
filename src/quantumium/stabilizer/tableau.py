@@ -382,7 +382,7 @@ def to_statevector(tableau: StabilizerTableau) -> NDArray[np.complexfloating]:
         if norm > 1e-15:
             psi /= norm
 
-    return psi
+    return psi  # type: ignore[no-any-return]
 
 
 def _pauli_matrix(

@@ -306,7 +306,7 @@ DEFAULT_PASSES = [
 
 def transpile(
     circuit: QuantumCircuit,
-    passes: list | None = None,
+    passes: list | None = None,  # type: ignore[type-arg]
     repeat: int = 2,
 ) -> QuantumCircuit:
     """Run optimization passes on a circuit.

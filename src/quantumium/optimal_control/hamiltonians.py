@@ -38,7 +38,7 @@ class ControlHamiltonian:
         Returns:
             int: Dimension d of the drift Hamiltonian (d x d).
         """
-        return self.drift.shape[0]
+        return self.drift.shape[0]  # type: ignore[no-any-return]
 
     @property
     def num_controls(self) -> int:
@@ -69,7 +69,7 @@ class ControlHamiltonian:
         H = self.drift.copy()
         for k, u_k in enumerate(amplitudes):
             H = H + u_k * self.controls[k]
-        return H
+        return H  # type: ignore[no-any-return]
 
 
 def drift_hamiltonian(
@@ -92,7 +92,7 @@ def drift_hamiltonian(
     I2 = np.eye(2, dtype=complex)
 
     if num_qubits == 1:
-        return frequency / 2 * Z
+        return frequency / 2 * Z  # type: ignore[return-value]
 
     H = np.zeros((2**num_qubits, 2**num_qubits), dtype=complex)
     for q in range(num_qubits):
@@ -121,7 +121,7 @@ def control_hamiltonian_x(
     I2 = np.eye(2, dtype=complex)
 
     if num_qubits == 1:
-        return X / 2
+        return X / 2  # type: ignore[return-value]
 
     term = np.array([[1]], dtype=complex)
     for k in range(num_qubits):
@@ -150,7 +150,7 @@ def control_hamiltonian_y(
     I2 = np.eye(2, dtype=complex)
 
     if num_qubits == 1:
-        return Y / 2
+        return Y / 2  # type: ignore[return-value]
 
     term = np.array([[1]], dtype=complex)
     for k in range(num_qubits):

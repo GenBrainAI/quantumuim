@@ -202,7 +202,7 @@ def _extract_phase_from_counting_register(
     best_reversed = _bit_reverse(best_idx, num_counting_qubits)
 
     # Phase φ = y / 2^n, where eigenvalue = exp(2πiφ)
-    return best_reversed / (2**num_counting_qubits)
+    return best_reversed / (2**num_counting_qubits)  # type: ignore[no-any-return]
 
 
 # ============================================================

@@ -402,7 +402,7 @@ class QuantumChannel:
         Returns:
             Output density matrix of shape (d, d).
         """
-        return sum(K @ rho @ K.conj().T for K in self.kraus)
+        return sum(K @ rho @ K.conj().T for K in self.kraus)  # type: ignore[no-any-return]
 
     def compose(self, other: QuantumChannel) -> QuantumChannel:
         """Compose this channel with another: (self . other)(rho) = self(other(rho)).

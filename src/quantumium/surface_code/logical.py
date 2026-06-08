@@ -49,4 +49,4 @@ def has_logical_error(
     # A logical Z error: total_z anticommutes with logical X.
     logical_z_error = (np.dot(total_z, lx) % 2) == 1
 
-    return logical_x_error or logical_z_error
+    return logical_x_error or logical_z_error  # type: ignore[no-any-return]

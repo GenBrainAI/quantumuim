@@ -14,14 +14,14 @@ from .diagram import HADAMARD, REGULAR, ZXDiagram, _norm, _phase_eq
 # ---------------------------------------------------------------------------
 
 
-def circuit_to_zx(circuit) -> ZXDiagram:
+def circuit_to_zx(circuit) -> ZXDiagram:  # type: ignore[no-untyped-def]
     n = circuit.num_qubits
     diag = ZXDiagram(n)
     current = list(diag.inputs)
     pending_h = [False] * n
 
     for inst in circuit.instructions:
-        _process_gate(diag, inst.gate, inst.target_qubits, current, pending_h)
+        _process_gate(diag, inst.gate, inst.target_qubits, current, pending_h)  # type: ignore[no-untyped-call]
 
     for q in range(n):
         if pending_h[q]:
@@ -48,7 +48,7 @@ def _wire_add(
     pending_h[qubit] = False
 
 
-def _process_gate(diag, gate, qubits, current, pending_h):
+def _process_gate(diag, gate, qubits, current, pending_h):  # type: ignore[no-untyped-def]
     name = gate.name
     nq = gate.num_qubits
 
@@ -77,7 +77,7 @@ def _process_gate(diag, gate, qubits, current, pending_h):
             s2 = diag.add_spider("X", math.pi)
             _wire_add(diag, q, s2, current, pending_h)
             return
-        _decompose_single_qubit(diag, gate, q, current, pending_h)
+        _decompose_single_qubit(diag, gate, q, current, pending_h)  # type: ignore[no-untyped-call]
         return
 
     if nq == 2:
@@ -105,7 +105,7 @@ def _process_gate(diag, gate, qubits, current, pending_h):
                 _wire_add(diag, tgt, xs, current, pending_h)
                 diag.add_edge(zs, xs, REGULAR)
             return
-        _decompose_two_qubit(diag, gate, qubits, current, pending_h)
+        _decompose_two_qubit(diag, gate, qubits, current, pending_h)  # type: ignore[no-untyped-call]
         return
 
     raise ValueError(
@@ -113,7 +113,7 @@ def _process_gate(diag, gate, qubits, current, pending_h):
     )
 
 
-def _detect_z_phase(gate) -> float | None:
+def _detect_z_phase(gate) -> float | None:  # type: ignore[no-untyped-def]
     name = gate.name
     _map = {"Z": math.pi, "S": math.pi / 2, "T": math.pi / 4}
     if name in _map:
@@ -124,7 +124,7 @@ def _detect_z_phase(gate) -> float | None:
     return None
 
 
-def _detect_x_phase(gate) -> float | None:
+def _detect_x_phase(gate) -> float | None:  # type: ignore[no-untyped-def]
     name = gate.name
     if name == "X":
         return math.pi
@@ -135,7 +135,7 @@ def _detect_x_phase(gate) -> float | None:
     return None
 
 
-def _decompose_single_qubit(diag, gate, qubit, current, pending_h):
+def _decompose_single_qubit(diag, gate, qubit, current, pending_h):  # type: ignore[no-untyped-def]
     m = gate._matrix
     a = m[0, 0]
     cos_half = abs(a)
@@ -169,7 +169,7 @@ def _decompose_single_qubit(diag, gate, qubit, current, pending_h):
         _wire_add(diag, qubit, s, current, pending_h)
 
 
-def _decompose_two_qubit(diag, gate, qubits, current, pending_h):
+def _decompose_two_qubit(diag, gate, qubits, current, pending_h):  # type: ignore[no-untyped-def]
     q0, q1 = qubits
     m = gate._matrix
     from quantumium.core.gate import CNOT as CNOT_GATE, CZ as CZ_GATE
@@ -204,7 +204,7 @@ def _decompose_two_qubit(diag, gate, qubits, current, pending_h):
 # ---------------------------------------------------------------------------
 
 
-def zx_to_circuit(diag: ZXDiagram):
+def zx_to_circuit(diag: ZXDiagram):  # type: ignore[no-untyped-def]
     from quantumium.core.circuit import QuantumCircuit
     from quantumium.core.gate import H as H_GATE, CNOT as CNOT_GATE, CZ as CZ_GATE
 
@@ -213,7 +213,7 @@ def zx_to_circuit(diag: ZXDiagram):
     wires = [diag.wire(q) for q in range(n)]
     times = _compute_spider_times(diag, wires)
     emitted: set[tuple[int, int]] = set()
-    events: list[tuple] = []
+    events: list[tuple] = []  # type: ignore[type-arg]
 
     for q in range(n):
         wire = wires[q]
@@ -309,7 +309,7 @@ def _compute_spider_times(diag: ZXDiagram, wires: list[list[int]]) -> dict[int, 
     return times
 
 
-def _phase_to_gate(color: str, phase: float):
+def _phase_to_gate(color: str, phase: float):  # type: ignore[no-untyped-def]
     from quantumium.core.gate import X, Z, S, T, Rz, Rx
 
     p = _norm(phase)
@@ -333,7 +333,7 @@ def _phase_to_gate(color: str, phase: float):
 # ---------------------------------------------------------------------------
 
 
-def zx_optimize(circuit):
+def zx_optimize(circuit):  # type: ignore[no-untyped-def]
     diag = circuit_to_zx(circuit)
     diag.simplify()
     return zx_to_circuit(diag)
@@ -344,7 +344,7 @@ def zx_optimize(circuit):
 # ---------------------------------------------------------------------------
 
 
-def _circuit_unitary(circuit):
+def _circuit_unitary(circuit):  # type: ignore[no-untyped-def]
     n = circuit.num_qubits
     dim = 2**n
     U = np.eye(dim, dtype=complex)

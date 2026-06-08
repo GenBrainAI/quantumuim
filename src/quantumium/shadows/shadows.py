@@ -204,7 +204,7 @@ class ClassicalShadow:
                 val *= local_val
             traces.append(val)
 
-        traces = np.array(traces)
+        traces = np.array(traces)  # type: ignore[assignment]
         group_size = T // num_groups
         if group_size == 0:
             return ShadowResult(value=float(np.median(traces)), num_snapshots=T, num_groups=T)
@@ -288,7 +288,7 @@ def shadow_norm_observable(
     """
     n = int(np.log2(observable.shape[0]))
     op_norm = float(np.linalg.norm(observable, ord=2))
-    return (2**n + 1) * op_norm
+    return (2**n + 1) * op_norm  # type: ignore[no-any-return]
 
 
 def required_snapshots(
@@ -320,15 +320,15 @@ def pauli_decomposition(
     paulis = ["I", "X", "Y", "Z"]
     result = {}
 
-    def _generate_pauli_strings(n):
+    def _generate_pauli_strings(n):  # type: ignore[no-untyped-def]
         if n == 0:
             yield ""
             return
-        for suffix in _generate_pauli_strings(n - 1):
+        for suffix in _generate_pauli_strings(n - 1):  # type: ignore[no-untyped-call]
             for p in paulis:
                 yield p + suffix
 
-    for pstr in _generate_pauli_strings(n):
+    for pstr in _generate_pauli_strings(n):  # type: ignore[no-untyped-call]
         mat = _pauli_string_matrix(pstr)
         coeff = float(np.real(np.trace(mat @ observable))) / dim
         if abs(coeff) > 1e-12:

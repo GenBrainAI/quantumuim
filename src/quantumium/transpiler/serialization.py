@@ -27,11 +27,11 @@ NAMED_GATES: dict[str, Gate] = {
 }
 """Lookup table mapping gate name strings to pre-built Gate instances."""
 
-ROTATION_FACTORIES: dict[str, callable] = {"Rx": Rx, "Ry": Ry, "Rz": Rz}
+ROTATION_FACTORIES: dict[str, callable] = {"Rx": Rx, "Ry": Ry, "Rz": Rz}  # type: ignore[valid-type]
 """Mapping of rotation gate prefixes to their factory functions."""
 
 
-def to_dict(circuit: QuantumCircuit) -> dict:
+def to_dict(circuit: QuantumCircuit) -> dict:  # type: ignore[type-arg]
     """Serialize a quantum circuit to a plain dictionary.
 
     Named gates are stored by name alone; rotation gates include the angle;
@@ -47,7 +47,7 @@ def to_dict(circuit: QuantumCircuit) -> dict:
     """
     instructions = []
     for inst in circuit.instructions:
-        entry: dict = {"qubits": list(inst.target_qubits)}
+        entry: dict = {"qubits": list(inst.target_qubits)}  # type: ignore[type-arg]
 
         if inst.gate.name in NAMED_GATES:
             entry["gate"] = inst.gate.name
@@ -78,7 +78,7 @@ def to_dict(circuit: QuantumCircuit) -> dict:
     }
 
 
-def from_dict(data: dict) -> QuantumCircuit:
+def from_dict(data: dict) -> QuantumCircuit:  # type: ignore[type-arg]
     """Deserialize a quantum circuit from a dictionary.
 
     Accepts a dictionary previously produced by :func:`to_dict` and
@@ -107,7 +107,7 @@ def from_dict(data: dict) -> QuantumCircuit:
         if gate_name in NAMED_GATES:
             qc.apply(NAMED_GATES[gate_name], *qubits)
         elif gate_name in ROTATION_FACTORIES:
-            qc.apply(ROTATION_FACTORIES[gate_name](entry["angle"]), *qubits)
+            qc.apply(ROTATION_FACTORIES[gate_name](entry["angle"]), *qubits)  # type: ignore[misc]
         elif gate_name == "custom":
             real = np.array(entry["matrix_real"])
             imag = np.array(entry["matrix_imag"])

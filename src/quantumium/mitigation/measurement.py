@@ -59,7 +59,7 @@ def mitigate_probabilities(
     total = corrected.sum()
     if total > 0:
         corrected = corrected / total
-    return corrected
+    return corrected  # type: ignore[no-any-return]
 
 
 def mitigate_counts(

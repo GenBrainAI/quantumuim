@@ -48,7 +48,7 @@ def _random_su4(rng: np.random.Generator) -> NDArray[np.complexfloating]:
     # Ensure det = 1
     det = np.linalg.det(Q)
     Q = Q / (det ** (1 / 4))
-    return Q
+    return Q  # type: ignore[no-any-return]
 
 
 def _build_qv_circuit(

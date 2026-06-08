@@ -38,7 +38,7 @@ class Qubit:
 
     @property
     def state(self) -> NDArray[np.complexfloating]:
-        return self._state.copy()
+        return self._state.copy()  # type: ignore[no-any-return]
 
     @property
     def probabilities(self) -> tuple[float, float]:

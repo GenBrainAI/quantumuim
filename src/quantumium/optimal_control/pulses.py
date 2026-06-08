@@ -35,7 +35,7 @@ class PulseSequence:
         Returns:
             int: Number of time steps.
         """
-        return self.amplitudes.shape[0]
+        return self.amplitudes.shape[0]  # type: ignore[no-any-return]
 
     @property
     def num_controls(self) -> int:
@@ -44,7 +44,7 @@ class PulseSequence:
         Returns:
             int: Number of control channels.
         """
-        return self.amplitudes.shape[1]
+        return self.amplitudes.shape[1]  # type: ignore[no-any-return]
 
     @property
     def total_time(self) -> float:

@@ -29,7 +29,7 @@ def _matrix_exp(
 ) -> NDArray[np.complexfloating]:
     """Compute exp(-i A t) via eigendecomposition."""
     eigvals, eigvecs = np.linalg.eigh(A)
-    return eigvecs @ np.diag(np.exp(-1j * eigvals * t)) @ eigvecs.conj().T
+    return eigvecs @ np.diag(np.exp(-1j * eigvals * t)) @ eigvecs.conj().T  # type: ignore[no-any-return]
 
 
 @dataclass

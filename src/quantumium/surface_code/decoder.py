@@ -59,7 +59,7 @@ def _bfs_distances(
 ) -> dict[int, int]:
     """BFS from multiple sources, return distance to each reachable node."""
     dist: dict[int, int] = {}
-    queue = deque()
+    queue = deque()  # type: ignore[var-annotated]
     for s in sources:
         dist[s] = 0
         queue.append(s)
@@ -227,7 +227,7 @@ def _greedy_matching(
 
     matched = [False] * n
     pairs: list[tuple[int, int | None]] = []
-    for dist, i, j in edges:
+    for dist, i, j in edges:  # type: ignore[assignment]
         if matched[i]:
             continue
         if j is None:

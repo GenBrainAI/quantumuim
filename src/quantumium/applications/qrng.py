@@ -35,7 +35,7 @@ def random_bits(
             *num_bits*.
     """
     batch_size = min(num_bits, 8)
-    bits = []
+    bits = []  # type: ignore[var-annotated]
 
     while len(bits) < num_bits:
         remaining = num_bits - len(bits)
@@ -108,7 +108,7 @@ def random_float(noise_model: NoiseModel | None = None, precision: int = 32) -> 
     """
     bits = random_bits(precision, noise_model)
     value = int(bits, 2)
-    return value / (2**precision)
+    return value / (2**precision)  # type: ignore[no-any-return]
 
 
 def random_bytes(
@@ -133,7 +133,7 @@ def random_bytes(
 
 
 def random_choice(
-    items: list,
+    items: list,  # type: ignore[type-arg]
     noise_model: NoiseModel | None = None,
 ) -> object:
     """Select a random item from a list using quantum randomness.
@@ -158,9 +158,9 @@ def random_choice(
 
 
 def random_shuffle(
-    items: list,
+    items: list,  # type: ignore[type-arg]
     noise_model: NoiseModel | None = None,
-) -> list:
+) -> list:  # type: ignore[type-arg]
     """Return a new list with items shuffled using quantum randomness.
 
     Implements the Fisher-Yates (Knuth) shuffle algorithm with swap
@@ -184,7 +184,7 @@ def random_shuffle(
     return result
 
 
-def entropy_test(num_bits: int = 1000, noise_model: NoiseModel | None = None) -> dict:
+def entropy_test(num_bits: int = 1000, noise_model: NoiseModel | None = None) -> dict:  # type: ignore[type-arg]
     """Run basic statistical tests on quantum random bits.
 
     Generates *num_bits* quantum random bits and computes several

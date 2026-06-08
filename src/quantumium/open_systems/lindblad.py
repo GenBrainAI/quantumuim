@@ -38,7 +38,7 @@ class LindbladSystem:
             int: Dimension d of the system Hamiltonian (d x d).
         """
         H = self._get_hamiltonian(0.0)
-        return H.shape[0]
+        return H.shape[0]  # type: ignore[no-any-return]
 
     def _get_hamiltonian(self, t: float) -> NDArray[np.complexfloating]:
         if callable(self.hamiltonian):
@@ -107,7 +107,7 @@ def lindblad_evolve(
         rho = rho + (dt / 6) * (k1 + 2 * k2 + 2 * k3 + k4)
         t += dt
 
-    return rho
+    return rho  # type: ignore[no-any-return]
 
 
 def mesolve(
@@ -199,16 +199,16 @@ def _steady_state_eigen(system: LindbladSystem, d: int) -> NDArray[np.complexflo
     rho = rho_vec.reshape((d, d))
     rho = (rho + rho.conj().T) / 2
     rho = rho / np.trace(rho)
-    return rho
+    return rho  # type: ignore[no-any-return]
 
 
 def _steady_state_evolve(system: LindbladSystem, d: int) -> NDArray[np.complexfloating]:
     """Find steady state by long-time evolution."""
     rho = np.eye(d, dtype=complex) / d
-    rho = lindblad_evolve(rho, system, dt=0.01, num_steps=10000)
+    rho = lindblad_evolve(rho, system, dt=0.01, num_steps=10000)  # type: ignore[arg-type, assignment]
     rho = (rho + rho.conj().T) / 2
     rho = rho / np.trace(rho)
-    return rho
+    return rho  # type: ignore[no-any-return]
 
 
 def _liouvillian(system: LindbladSystem, d: int) -> NDArray[np.complexfloating]:
