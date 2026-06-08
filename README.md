@@ -3,14 +3,14 @@
 [![CI](https://github.com/GenBrainAI/quantumuim/actions/workflows/ci.yml/badge.svg)](https://github.com/GenBrainAI/quantumuim/actions/workflows/ci.yml)
 [![Python 3.10+](https://img.shields.io/badge/python-3.10%2B-blue.svg)](https://www.python.org/downloads/)
 [![License: MIT](https://img.shields.io/badge/License-MIT-green.svg)](LICENSE)
-[![Tests](https://img.shields.io/badge/tests-1709%20passed-brightgreen.svg)](tests/)
+[![Tests](https://img.shields.io/badge/tests-1766%20passed-brightgreen.svg)](tests/)
 [![Coverage](https://img.shields.io/badge/coverage-report-yellow.svg)](https://github.com/GenBrainAI/quantumuim/actions/workflows/ci.yml)
 
 A comprehensive quantum computing SDK for Python. Build quantum circuits, run
 algorithms, simulate noise, and execute on real hardware from IBM, Google, and
 Amazon — all through a single, clean API.
 
-**30 packages** | **12 algorithms** | **4 hardware backends** | **1,709 tests**
+**30 packages** | **12 algorithms** | **4 hardware backends** | **1,766 tests**
 
 ### Key Features
 
@@ -256,7 +256,7 @@ See `examples/` for the full list.
 ## Testing
 
 ```bash
-python -m pytest tests/ -q    # 1,709 tests
+python -m pytest tests/ -q    # 1,766 tests
 ```
 
 ## Documentation

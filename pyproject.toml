@@ -47,6 +47,7 @@ all-backends = [
 dev = [
     "pytest>=7.0",
     "pytest-cov>=4.0",
+    "hypothesis>=6.0",
     "ruff>=0.4",
     "mypy>=1.0",
 ]
@@ -87,7 +88,7 @@ source = ["quantumium"]
 omit = ["*/backends/qiskit_*", "*/backends/cirq_*", "*/backends/braket_*"]
 
 [tool.coverage.report]
-fail_under = 70
+fail_under = 85
 show_missing = true
 skip_empty = true
 exclude_lines = [
