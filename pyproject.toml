@@ -61,6 +61,9 @@ notebooks = [
     "matplotlib>=3.7",
 ]
 
+[project.scripts]
+quantumium = "quantumium.cli:main"
+
 [project.urls]
 Homepage = "https://github.com/GenBrainAI/quantumuim"
 Repository = "https://github.com/GenBrainAI/quantumuim"
