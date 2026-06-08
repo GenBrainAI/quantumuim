@@ -2,124 +2,129 @@
 
 All notable changes to the Quantumium SDK are documented in this file.
 
-## [0.3.0] - Unreleased
+The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
+
+## [0.3.0] - 2026-06-08
+
+### Q+ Algorithm — Beyond-Qubit-Count Quantum Framework
+- `ShorQPlus`: Factors semiprimes using 54–60% fewer qubits than standard Shor
+- Three-layer architecture: algorithmic compression, qubit recycling, circuit cutting
+- `compress`: Semiclassical QFT, modular arithmetic optimization (Beauregard/Häner)
+- `recycle`: Mid-circuit measurement and qubit reuse with feed-forward control
+- `cut`: Circuit cutting with Pauli decomposition and classical recombination
+- `distribute`: Multi-QPU orchestration (classical, LOCC, teleport strategies)
+- Benchmark: N=143 factored in 23 ms using only 10 qubits (vs 25 standard)
+- 70+ tests, demo scripts, Shor benchmark suite
+
+### Statevector Simulator Optimization
+- Replaced O(4^n) full matrix multiplication with O(2^n) tensor contraction
+- `np.tensordot` gate application: reshape state as rank-n tensor, contract on target axes
+- Density matrix optimization: two O(4^n × 4^k) contractions replace O(8^n) multiply
+- Practical simulation range extended from ~8 qubits to 20+
+- Speedups: 75x (5q) → 6,919x (8q) → 12,399x (Random-8x3)
+- Density matrix speedups: 27x (GHZ-7-noisy) → 62x (Random-7x3-noisy)
+- Fixed qubit-ordering bug in `_apply_single_qubit_channel` (kron MSB vs LSB)
+- `_expand_gate()` preserved for backward compatibility (6 external callers)
+- 44 benchmarks across 5 categories (statevector, density matrix, MPS, VQE/QAOA, Q+ Shor)
+
+### MkDocs Documentation Site
+- Material theme with dark/light toggle, deep purple/cyan palette
+- Auto-generated API reference via mkdocstrings for all modules
+- Tutorials: Bell state, VQE for H2, Q+ factoring
+- Q+ API reference, transpiler API reference
+- Example gallery, benchmarks page with real performance data
+- `mkdocs build --strict` passes with zero warnings
 
 ### Qubit Routing & Mapping (Phase 31)
-- `CouplingMap`: physical qubit connectivity graph with BFS distance matrix
+- `CouplingMap`: physical qubit connectivity with BFS distance matrix
 - Factory constructors for linear, grid, and heavy-hex topologies
-- `Layout`: bidirectional logical↔physical qubit mapping with SWAP tracking
-- `SABRERouter`: SABRE algorithm with forward+backward passes and extended-set lookahead scoring
-- `route(circuit, coupling_map)` one-liner API returning `RoutingResult`
-- Coupling compliance: all 2Q gates operate on connected physical qubits after routing
-- Measurement preservation verified through layout permutation remapping
-- Integration with existing transpiler (`decompose_swap` pass)
-- 44 new tests, example demo
+- `SABRERouter`: forward+backward passes with extended-set lookahead
+- `route(circuit, coupling_map)` one-liner API
+- 44 tests
 
 ### Classical Shadow Tomography (Phase 32)
-- `ClassicalShadow`: random Pauli measurement protocol with inverted channel reconstruction
-- `estimate_pauli()`: efficient per-qubit factorized Pauli expectation estimation
-- `estimate_expectation()`: general observable estimation via Pauli decomposition
-- Median-of-means estimation for robust statistics
-- `shadow_norm_pauli()`: shadow norm calculation (3^k scaling for k-local operators)
-- `estimate_fidelity()`: fidelity estimation between shadow and target state
-- `estimate_purity()`: purity estimation via shadow cross-correlations
-- `pauli_decomposition()`: observable decomposition into Pauli basis
-- `required_snapshots()`: sample complexity calculator with O(log M) scaling for M observables
-- 54 new tests, example demo
+- `ClassicalShadow`: random Pauli measurement protocol
+- Pauli expectation estimation, fidelity estimation, purity estimation
+- Median-of-means robust statistics, shadow norm calculation
+- `required_snapshots()` sample complexity with O(log M) scaling
+- 54 tests
 
 ### Fermionic Simulation (Phase 33)
-- `FermionOperator`: sum-of-products ladder operator algebra with complex coefficients
-- Operator algebra: addition, multiplication, dagger, normal ordering via anti-commutation
-- `QubitOperator`: Pauli string algebra with `to_matrix()` for full matrix construction
-- `jordan_wigner()`: fermion-to-qubit mapping with O(n) Z-string anti-commutation
-- `bravyi_kitaev()`: O(log n) Pauli weight via Fenwick tree (update/parity/children sets)
-- `fermi_hubbard()`: 1D Hubbard model with spin-up/down modes, periodic/open boundary
-- `molecular_hamiltonian()`: from one/two-body integrals in physicist's notation
-- `number_operator()`, `hopping_operator()`, `coulomb_operator()` builder functions
-- JW and BK produce identical eigenspectra across all test Hamiltonians
-- 69 new tests, example demo with 7 sections
+- `FermionOperator`: ladder operator algebra with complex coefficients
+- `QubitOperator`: Pauli string algebra with full matrix construction
+- `jordan_wigner()`: O(n) Z-string anti-commutation enforcement
+- `bravyi_kitaev()`: O(log n) Pauli weight via Fenwick tree
+- `fermi_hubbard()`, `molecular_hamiltonian()` builder functions
+- JW and BK produce identical eigenspectra — verified across all test Hamiltonians
+- 69 tests
 
 ### Dynamical Decoupling (Phase 34)
-- `DDSequence`: pulse sequence dataclass with normalized spacings and pulse times
-- Factory methods: `spin_echo()`, `cpmg(n)`, `xy4()`, `xy8()`, `udd(n)` with sin^2 spacing
-- `DDScheduler`: identifies idle windows in quantum circuits and inserts DD pulses
-- Configurable gate durations (`DEFAULT_DURATIONS`) and minimum idle window thresholds
-- `filter_function()`: computes |F(omega)|^2 for noise frequency suppression analysis
-- `dd_fidelity()`: overlap integral with arbitrary noise spectra S(omega)
-- XY-8 achieves >99% fidelity under 1/f noise; UDD fidelity scales with pulse count
-- 50 new tests, example demo with 7 sections
+- `DDSequence`: spin echo, CPMG, XY-4, XY-8, UDD sequences
+- `DDScheduler`: automatic DD pulse insertion into circuit idle windows
+- Filter function computation for noise spectral analysis
+- XY-8 achieves >99% fidelity under 1/f noise
+- Configurable gate durations and minimum idle window thresholds
+- 50 tests
 
 ### Resource Estimation (Phase 35)
-- `CircuitAnalyzer`: T-gate counting, T-depth, Clifford counting, rotation decomposition costs
-- `LogicalResources`: logical qubit count, circuit depth, T-gate budget with rotation synthesis
-- `PhysicalEstimate`: surface code distance, physical qubit count, runtime, factory allocation
-- `ResourceEstimator`: end-to-end pipeline from circuit to physical cost report
+- `CircuitAnalyzer`: T-gate counting, T-depth, rotation decomposition costs
+- `ResourceEstimator`: end-to-end circuit → physical qubit/runtime pipeline
 - `MagicStateFactory`: 15-to-1 distillation cost model with multi-round support
-- Surface code distance selection from target error rate and physical error rate
-- Toffoli = 7T verified, rotation synthesis O(log(1/ε)) T-cost scaling confirmed
-- 52 new tests, example demo with 7 sections
+- Surface code distance selection from target error rate
+- Toffoli = 7T verified, rotation synthesis O(log(1/ε)) confirmed
+- 52 tests
+
+### Release Polish
+- LICENSE: MIT with copyright 2024-2026 Quantumium Contributors
+- README: PyPI-ready with badges, Q+ showcase, performance highlights
+- pyproject.toml: verified classifiers, URLs, keywords, optional dependencies
+- Clean wheel/sdist generation via `python -m build`
 
 ### Stats
-- 33 packages, 1364 tests, 38 examples, 3 notebooks, 23 KB articles, MkDocs documentation site
+- 30 packages, 1,709 tests, 37 examples, 3 notebooks, 28+ KB articles
+- 44 performance benchmarks, MkDocs documentation site
+- v0.3.0 milestone: Phases 31–35 complete + Q+ algorithm + simulator optimization
 
 ---
 
-## [0.2.0] - Unreleased
+## [0.2.0] - 2026
 
 ### Surface Code Error Correction (Phase 26)
 - Rotated planar surface code for distances d=3, 5, 7
-- Self-contained Minimum Weight Perfect Matching (MWPM) decoder using BFS-based graph distances
-- Syndrome extraction for X, Z, and Y errors
-- Logical X/Z operators with anticommutation verification
-- Monte Carlo threshold estimation
-- 56 new tests
+- Self-contained MWPM decoder using BFS-based graph distances
+- Syndrome extraction, logical X/Z operators, Monte Carlo threshold estimation
+- 56 tests
 
 ### ZX-Calculus Optimization Engine (Phase 27)
-- `ZXDiagram` graph data structure with Z/X spiders and Hadamard edges
-- Circuit-to-ZX and ZX-to-circuit conversion with round-trip unitary equivalence
-- Simplification rules: spider fusion, identity removal, color change, Hadamard cancellation
+- `ZXDiagram` with Z/X spiders and Hadamard edges
+- Circuit-to-ZX and ZX-to-circuit round-trip conversion
+- Spider fusion, identity removal, color change, Hadamard cancellation
 - T-count reduction via phase merging through CNOT controls
-- `zx_optimize(circuit)` one-liner API for automatic circuit simplification
-- 58 new tests
+- `zx_optimize(circuit)` one-liner API
+- 58 tests
 
 ### Quantum Networking Simulation (Phase 28)
-- `QuantumNetwork` graph topology with star, chain, and mesh constructors
-- Entanglement generation with channel loss (exponential decay with distance)
-- Entanglement swapping through repeater chains with fidelity tracking
-- BBPSSW purification protocol (fidelity improvement for F > 0.5)
-- Quantum teleportation with depolarizing noise model
+- `QuantumNetwork` graph topology (star, chain, mesh)
+- Entanglement generation, swapping, BBPSSW purification
+- Quantum teleportation with depolarizing noise
 - `distribute_entanglement(network, source, target)` one-liner API
-- 50 new tests
+- 50 tests
 
 ### Real Hardware Validation (Phase 29)
-- Comprehensive `LocalSimulatorBackend` tests: Bell, GHZ, Grover, QFT round-trip, Toffoli, edge cases
-- Backend-specific tests for Qiskit, Cirq, Braket with graceful skip when SDK not installed
-- Cross-backend statistical validation: chi-squared goodness-of-fit, Hellinger fidelity
-- Noise model calibration tests: depolarizing degradation monotonicity, gate-specific noise
-- Self-contained chi-squared CDF implementation (no scipy dependency)
-- Shared test fixtures via `conftest.py` with skip markers and statistical helpers
-- 96 new tests (70 pass locally, 26 skip for absent vendor SDKs)
-
-### Knowledge Base
-- Surface codes guide, ZX-calculus guide, quantum networking guide
-- Hardware validation guide, SDK benchmarking methodology, v0.3.0 roadmap candidates
+- Backend-specific tests: Qiskit, Cirq, Braket (graceful skip when absent)
+- Cross-backend statistical validation: chi-squared, Hellinger fidelity
+- Noise model calibration: depolarizing degradation monotonicity
+- 96 tests (70 local, 26 skip for absent vendor SDKs)
 
 ### Documentation Site & Community (Phase 30)
-- MkDocs documentation site with Material theme (dark/light toggle)
-- Auto-generated API reference via mkdocstrings for all 26 modules
-- Example gallery page with 33 runnable scripts organized by category
-- `BenchmarkSuite` for circuit construction and simulation timing
-- GitHub contribution templates: bug report, feature request, PR template
-- `mkdocs build --strict` passes with zero warnings
-
-### Knowledge Base
-- Surface codes guide, ZX-calculus guide, quantum networking guide
-- Hardware validation guide, SDK benchmarking methodology, v0.3.0 roadmap candidates
-- Qubit routing & mapping guide, classical shadows guide
+- MkDocs Material theme documentation site
+- Auto-generated API reference via mkdocstrings
+- Example gallery, GitHub contribution templates
+- `BenchmarkSuite` for performance tracking
 
 ### Stats
-- 28 packages, 1095 tests, 33 examples, 3 notebooks, 23 KB articles, MkDocs documentation site
-- v0.2.0 milestone: Phases 26-30 complete
+- 28 packages, 1,095 tests, 33 examples, 3 notebooks, 23 KB articles
+- v0.2.0 milestone: Phases 26–30 complete
 
 ---
 
@@ -127,94 +132,43 @@ All notable changes to the Quantumium SDK are documented in this file.
 
 Initial release of the Quantumium quantum computing SDK.
 
-### Recent Additions (pre-release)
-- Fixed flaky Simon's algorithm test — added classical period verification
-- 3 Jupyter notebook tutorials (intro, algorithms, finance)
-- 4 additional example scripts (adiabatic, stabilizer, benchmarking, tomography)
-- 28 total runnable examples, 3 interactive notebooks
-
 ### Core Framework
-- Qubit state vector representation with measurement and superposition
-- Full quantum gate library: I, X, Y, Z, H, S, T, CNOT, CZ, SWAP, CCX (Toffoli)
-- Rotation gates: Rx, Ry, Rz, CRx, CRy, CRz, Rxx, Rzz
-- `controlled()` factory for creating controlled versions of any single-qubit gate
 - `QuantumCircuit` with statevector and density matrix simulation
-- Noise models: bit flip, phase flip, depolarizing, amplitude damping channels
-- Noisy measurement simulation via density matrix evolution
-- Parameterized circuits with symbolic `Parameter` objects for variational workflows
-- Hardware-efficient ansatz template generator
+- Full gate library: I, X, Y, Z, H, S, T, CNOT, CZ, SWAP, CCX, Rx, Ry, Rz, CRx, CRy, CRz, Rxx, Rzz
+- `controlled()` factory for arbitrary controlled gates
+- Noise models: bit flip, phase flip, depolarizing, amplitude damping
+- Parameterized circuits with symbolic `Parameter` objects
 
 ### Algorithms
-- Grover's search algorithm with quadratic speedup
-- Deutsch-Jozsa algorithm for constant vs balanced oracle classification
-- Bernstein-Vazirani algorithm for hidden string recovery
-- Simon's algorithm for hidden subgroup / period finding
-- Quantum Fourier Transform (QFT) and inverse QFT
-- Quantum Phase Estimation (QPE)
-- Variational Quantum Eigensolver (VQE) with Adam optimizer
-- Quantum Approximate Optimization Algorithm (QAOA) for MaxCut
-- Hamiltonian simulation via Trotter-Suzuki decomposition
-- Shor's factoring algorithm (educational implementation)
-- HHL algorithm for quantum linear systems (Ax=b)
-- Quantum counting and amplitude estimation
+- Grover's search, Deutsch-Jozsa, Bernstein-Vazirani, Simon's
+- QFT, QPE, VQE (Adam optimizer), QAOA (MaxCut)
+- Hamiltonian simulation (Trotter-Suzuki), Shor's factoring, HHL
 
 ### Hardware Backends
 - `LocalSimulatorBackend` — built-in statevector simulator
-- `QiskitBackend` — IBM Quantum via Qiskit Runtime (Aer simulator + real hardware)
-- `CirqBackend` — Google Quantum AI via Cirq
+- `QiskitBackend` — IBM Quantum (Aer + hardware)
+- `CirqBackend` — Google Quantum AI
 - `BraketBackend` — Amazon Braket (IonQ, Rigetti, OQC, QuEra, SV1/DM1/TN1)
 
 ### Domain Applications
-- **Quantum Chemistry:** Molecular simulation (H2, LiH, HeH+), potential energy surfaces via VQE
-- **Optimization:** MaxCut, TSP, portfolio optimization via QAOA
-- **Quantum Random Number Generation:** bits, integers, floats, bytes, shuffle
-- **Quantum Finance:** Option pricing (amplitude estimation), risk analysis (VaR/CVaR), portfolio optimization
-- **Quantum Cryptography:** BB84 quantum key distribution simulation, cryptographic QRNG
-
-### Quantum Machine Learning
-- Amplitude, angle, and basis encoding of classical data
-- Variational quantum classifier (VQC) with training loop
-- Quantum kernel methods for SVM
-
-### Transpiler
-- Circuit optimization passes: inverse cancellation, gate merging, CNOT cancellation, commutation, SWAP decomposition
-- OpenQASM 2.0 import and export with round-trip fidelity
-- JSON circuit serialization (save/load)
-
-### Error Correction
-- 3-qubit bit-flip code
-- 3-qubit phase-flip code
-- Shor 9-qubit code
-
-### Error Mitigation
-- Zero-Noise Extrapolation (ZNE) with Richardson extrapolation
-- Measurement error mitigation via calibration matrices
-- Pauli twirling for noise symmetrization
-
-### Quantum Information Theory
-- Quantum channels: Kraus, Choi, superoperator representations
-- Distance measures: trace distance, fidelity, diamond norm
-- Process tomography via linear inversion
+- Quantum chemistry: H2, LiH, HeH+ molecular simulation
+- Finance: option pricing, VaR/CVaR, portfolio optimization
+- Optimization: MaxCut, TSP via QAOA
+- Quantum machine learning: amplitude/angle/basis encoding, VQC, quantum kernels
+- Cryptography: BB84 QKD, cryptographic QRNG
 
 ### Advanced Simulation
-- **Tensor Networks:** Matrix Product State (MPS) simulation with configurable bond dimension
-- **Stabilizer Simulation:** Clifford tableau for efficient simulation of Clifford circuits
-- **Open Quantum Systems:** Lindblad master equation solver for dissipative dynamics
-- **Adiabatic Computing:** Adiabatic evolution with customizable Hamiltonians
+- Tensor networks (MPS), stabilizer tableaux, Lindblad master equation
+- Adiabatic computing, quantum walks, QSP/QSVT, GRAPE optimal control
 
-### Additional Modules
-- Quantum walks (discrete and continuous) on arbitrary graphs
-- Quantum signal processing (QSP) and Quantum Singular Value Transformation (QSVT)
-- Quantum optimal control via GRAPE pulse optimization
-- State tomography via linear inversion and maximum likelihood estimation
-- Benchmarking: randomized benchmarking, quantum volume, fidelity estimation
-- Circuit templates: Bell pair, GHZ state, quantum teleportation
-- Utilities: partial trace, von Neumann entropy, purity, concurrence, negativity, Schmidt decomposition, ASCII circuit diagrams
+### Transpiler & Error Handling
+- Optimization passes: inverse cancellation, gate merging, CNOT cancellation
+- OpenQASM 2.0 import/export, JSON serialization
+- Error correction: bit-flip, phase-flip, Shor 9-qubit codes
+- Error mitigation: ZNE, measurement error mitigation, Pauli twirling
+- State tomography: linear inversion and MLE
 
 ### Infrastructure
-- PyPI-ready packaging with `pyproject.toml`
-- Optional dependency groups: `[qiskit]`, `[cirq]`, `[braket]`, `[all-backends]`, `[dev]`
+- PyPI-ready `pyproject.toml` with optional dependency groups
 - GitHub Actions CI workflow
-- 877+ tests across 41 test files
-- 24 runnable example scripts
-- Quantum computing knowledge base with theory references
+- 877+ tests, 24 examples

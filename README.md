@@ -3,14 +3,14 @@
 [![CI](https://github.com/GenBrainAI/quantumuim/actions/workflows/ci.yml/badge.svg)](https://github.com/GenBrainAI/quantumuim/actions/workflows/ci.yml)
 [![Python 3.10+](https://img.shields.io/badge/python-3.10%2B-blue.svg)](https://www.python.org/downloads/)
 [![License: MIT](https://img.shields.io/badge/License-MIT-green.svg)](LICENSE)
-[![Tests](https://img.shields.io/badge/tests-1193%20passed-brightgreen.svg)](tests/)
+[![Tests](https://img.shields.io/badge/tests-1709%20passed-brightgreen.svg)](tests/)
 [![Coverage](https://img.shields.io/badge/coverage-report-yellow.svg)](https://github.com/GenBrainAI/quantumuim/actions/workflows/ci.yml)
 
 A comprehensive quantum computing SDK for Python. Build quantum circuits, run
 algorithms, simulate noise, and execute on real hardware from IBM, Google, and
 Amazon — all through a single, clean API.
 
-**27 modules** | **12 algorithms** | **4 hardware backends** | **1193+ tests**
+**30 packages** | **12 algorithms** | **4 hardware backends** | **1,709 tests**
 
 ### Key Features
 
@@ -20,6 +20,36 @@ Amazon — all through a single, clean API.
 - **Domain applications** — quantum chemistry, finance, optimization, cryptography, and machine learning
 - **Advanced simulation** — tensor networks (MPS), stabilizer tableaux, open quantum systems, adiabatic computing
 - **Production tooling** — transpiler, OpenQASM 2.0 import/export, error correction, error mitigation, benchmarking
+
+### Q+ Algorithm — 54–60% Qubit Reduction
+
+Q+ factors integers using dramatically fewer qubits than standard Shor's algorithm:
+
+```python
+from quantumium.qplus.shor import ShorQPlus
+
+result = ShorQPlus().factor(143)
+print(result.factors)   # (11, 13)
+print(result.qubits)    # 10 qubits (vs 25 standard — 60% savings)
+```
+
+| N | Qubits (Q+) | Standard Shor | Savings |
+|---|-------------|---------------|---------|
+| 15 | 6 | 13 | 54% |
+| 77 | 9 | 21 | 57% |
+| 143 | 10 | 25 | **60%** |
+
+### Simulator Performance
+
+Tensor-based statevector simulation — 3,000–12,000x faster than v0.2.0:
+
+| Circuit | v0.2.0 | v0.3.0 | Speedup |
+|---------|--------|--------|---------|
+| GHZ-8 | 1,453 ms | 0.21 ms | **6,919x** |
+| QFT-7 | 1,896 ms | 0.56 ms | **3,385x** |
+| Random-8x3 | 8,059 ms | 0.65 ms | **12,399x** |
+
+20-qubit simulation now runs in under 1 second — previously infeasible.
 
 > **New to Quantumium?** Start with the [Getting Started tutorial](docs/getting-started.md).
 
@@ -97,9 +127,16 @@ qc = pqc.bind({theta: 1.57})
 ### Core (`quantumium.core`)
 - **Qubit**: State vector representation with measurement
 - **Gate**: Full gate library — I, X, Y, Z, H, S, T, CNOT, CZ, CCX (Toffoli), SWAP, Rx, Ry, Rz, CRx, CRy, CRz, Rxx, Rzz, plus `controlled()` factory
-- **QuantumCircuit**: Statevector and density matrix simulation, noisy measurement
+- **QuantumCircuit**: Statevector and density matrix simulation with tensor contraction, noisy measurement
 - **Noise**: Bit flip, phase flip, depolarizing, amplitude damping channels with NoiseModel
 - **Parameter**: Symbolic parameterized circuits for variational workflows
+
+### Q+ Algorithm (`quantumium.qplus`)
+- **ShorQPlus**: Integer factoring with 54–60% qubit reduction
+- **compress**: Semiclassical QFT, modular arithmetic optimization
+- **recycle**: Mid-circuit measurement and qubit reuse
+- **cut**: Circuit cutting with Pauli decomposition
+- **distribute**: Multi-QPU orchestration
 
 ### Algorithms (`quantumium.algorithms`)
 | Algorithm | Module | Description |
@@ -136,85 +173,52 @@ qc = pqc.bind({theta: 1.57})
 - **Portfolio Optimization**: Quantum-enhanced portfolio selection
 
 ### Fermionic Simulation (`quantumium.fermion`)
-- **FermionOperator**: Ladder operator algebra with complex coefficients, dagger, normal ordering via anti-commutation
-- **QubitOperator**: Pauli string algebra with full matrix construction
-- **Jordan-Wigner transform**: Fermion-to-qubit mapping with O(n) Z-string anti-commutation enforcement
-- **Bravyi-Kitaev transform**: O(log n) Pauli weight via Fenwick tree encoding
-- **Hamiltonian builders**: Fermi-Hubbard model, molecular Hamiltonian from one/two-body integrals
-- JW and BK produce identical eigenspectra for all Hamiltonians
+- **FermionOperator**: Ladder operator algebra with complex coefficients
+- **Jordan-Wigner transform**: O(n) Z-string anti-commutation enforcement
+- **Bravyi-Kitaev transform**: O(log n) Pauli weight via Fenwick tree
+- **Hamiltonian builders**: Fermi-Hubbard, molecular Hamiltonian from integrals
 
 ### Dynamical Decoupling (`quantumium.dd`)
-- **DDSequence**: Pulse sequence definitions — spin echo, CPMG, XY-4, XY-8, UDD with arbitrary order
-- **DDScheduler**: Identifies idle windows in quantum circuits and inserts DD pulse sequences automatically
-- **Filter function**: Computes |F(omega)|^2 to analyze noise frequency suppression per sequence
-- **Fidelity estimation**: Overlap integral with arbitrary noise spectra S(omega) for coherence prediction
-- Configurable gate durations, minimum idle window thresholds, and pulse insertion strategies
+- **DDSequence**: Spin echo, CPMG, XY-4, XY-8, UDD pulse sequences
+- **DDScheduler**: Automatic idle window detection and DD insertion
+- **Filter function**: Noise frequency suppression analysis
 
 ### Resource Estimation (`quantumium.resource_estimation`)
-- **CircuitAnalyzer**: T-gate counting, T-depth, Clifford counting, rotation gate decomposition costs
-- **ResourceEstimator**: End-to-end pipeline from circuit to physical qubit/runtime estimates
-- **MagicStateFactory**: 15-to-1 distillation cost model with multi-round support
-- **Surface code model**: Distance selection from target error rate, physical qubit scaling (2d^2-1)
-- Configurable physical error rates, code cycle times, and routing overhead
+- **CircuitAnalyzer**: T-gate counting, T-depth, rotation decomposition costs
+- **ResourceEstimator**: End-to-end circuit → physical qubit/runtime estimates
+- **MagicStateFactory**: 15-to-1 distillation cost model
 
 ### Classical Shadows (`quantumium.shadows`)
-- Random Pauli measurement protocol for efficient state property estimation
-- Median-of-means estimation, shadow norms, sample complexity bounds
-- Pauli expectation values, fidelity estimation, purity estimation
-- Pauli decomposition of general observables
+- Random Pauli measurement protocol, median-of-means estimation
+- Pauli expectation values, fidelity, purity estimation
 
 ### Transpiler (`quantumium.transpiler`)
 - **Optimization passes**: Inverse cancellation, gate merging, CNOT cancellation, commutation, SWAP decomposition
-- **Qubit routing**: SABRE algorithm for topology-aware SWAP insertion (linear, grid, heavy-hex coupling maps)
+- **Qubit routing**: SABRE algorithm for topology-aware SWAP insertion (linear, grid, heavy-hex)
 - **OpenQASM 2.0**: Import/export with round-trip fidelity
 - **JSON serialization**: Save/load circuits to file
 
-### Error Correction (`quantumium.error_correction`)
-- Bit-flip code, phase-flip code, Shor 9-qubit code
-
-### Surface Code (`quantumium.surface_code`)
-- Rotated planar surface code (d=3, 5, 7) with stabilizer orthogonality verification
-- MWPM decoder (self-contained, no external dependencies)
-- Logical X/Z operators, syndrome extraction, Monte Carlo threshold estimation
-
-### ZX-Calculus (`quantumium.zx`)
-- ZX-diagram representation of quantum circuits (Z/X spiders, Hadamard edges)
-- Spider fusion, identity removal, color change simplification rules
-- T-count optimization via phase merging through CNOT controls
-- One-liner API: `zx_optimize(circuit)` for automatic circuit simplification
-
-### Quantum Networking (`quantumium.networking`)
-- Network topology simulation (star, chain, mesh) with quantum channels
-- Entanglement generation, swapping through repeater chains, BBPSSW purification
-- Quantum teleportation with depolarizing noise model
-- One-liner API: `distribute_entanglement(network, source, target)`
-
-### Error Mitigation (`quantumium.mitigation`)
-- Zero-Noise Extrapolation (ZNE), measurement error mitigation, Pauli twirling
-
-### Tomography (`quantumium.tomography`)
-- State tomography via linear inversion and maximum likelihood estimation (MLE)
-
-### Quantum Information (`quantumium.quantum_info`)
-- Quantum channels (Kraus, Choi, superoperator), distance measures (trace distance, fidelity), process tomography
-
-### Benchmarks (`quantumium.benchmarks`)
-- Randomized benchmarking, quantum volume, fidelity estimation
+### Error Correction & Mitigation
+- Bit-flip, phase-flip, Shor 9-qubit codes (`quantumium.error_correction`)
+- Surface code with MWPM decoder (`quantumium.surface_code`)
+- ZNE, measurement error mitigation, Pauli twirling (`quantumium.mitigation`)
 
 ### Advanced Simulation
-- **Tensor Networks** (`quantumium.tensor_networks`): Matrix Product State (MPS) simulation
-- **Stabilizer** (`quantumium.stabilizer`): Clifford tableau for efficient Clifford circuit simulation
-- **Open Systems** (`quantumium.open_systems`): Lindblad master equation for dissipative dynamics
-- **Adiabatic** (`quantumium.adiabatic`): Adiabatic quantum computing with customizable Hamiltonians
-- **Quantum Walks** (`quantumium.quantum_walks`): Discrete and continuous walks on arbitrary graphs
-- **QSP/QSVT** (`quantumium.qsp`): Quantum Signal Processing and Quantum Singular Value Transformation
-- **Optimal Control** (`quantumium.optimal_control`): GRAPE pulse optimization for gate synthesis
+- **Tensor Networks** (`quantumium.tensor_networks`): MPS simulation
+- **Stabilizer** (`quantumium.stabilizer`): Clifford tableau
+- **Open Systems** (`quantumium.open_systems`): Lindblad master equation
+- **Adiabatic** (`quantumium.adiabatic`): Adiabatic quantum computing
+- **Quantum Walks** (`quantumium.quantum_walks`): Discrete and continuous walks
+- **QSP/QSVT** (`quantumium.qsp`): Quantum Signal Processing
+- **Optimal Control** (`quantumium.optimal_control`): GRAPE pulse optimization
+- **ZX-Calculus** (`quantumium.zx`): ZX-diagram optimization, T-count reduction
 
-### Utilities (`quantumium.utils`)
-- **Entanglement**: Partial trace, von Neumann entropy, purity, concurrence, negativity, Schmidt decomposition
-- **Visualization**: ASCII circuit diagrams
+### Utilities & Information Theory
+- Entanglement measures: partial trace, von Neumann entropy, concurrence, negativity, Schmidt decomposition
+- Quantum channels: Kraus, Choi, superoperator representations
+- State/process tomography, ASCII circuit visualization
 
-### Hardware Backends (`quantumium.backends`)
+### Hardware Backends
 | Backend | Provider | Devices |
 |---------|----------|---------|
 | `LocalSimulatorBackend` | Built-in | Statevector simulator |
@@ -222,29 +226,19 @@ qc = pqc.bind({theta: 1.57})
 | `CirqBackend` | Google | Cirq simulator, Google Quantum Engine |
 | `BraketBackend` | Amazon | IonQ, Rigetti, OQC, QuEra, SV1/DM1/TN1 |
 
-### Hardware Validation (`tests/test_backends/`)
-- Comprehensive test suite for all 4 backends: Bell, GHZ, Grover, QFT round-trip
-- Statistical validation: chi-squared goodness-of-fit and Hellinger fidelity
-- Vendor tests skip gracefully when SDK not installed
-- Noise model calibration: depolarizing degradation, monotonicity, gate-specific noise
-- Cross-backend comparison with automated fidelity checks
+## Benchmarks
 
-### Circuit Templates (`quantumium.circuits`)
-Bell pair, GHZ state, quantum teleportation, QFT / inverse QFT
-
-## Jupyter Notebooks
-
-Interactive tutorials for learning quantum computing with Quantumium:
+44 benchmarks across 5 categories. Run them yourself:
 
 ```bash
-jupyter notebook notebooks/intro-to-quantum.ipynb      # Qubits, gates, circuits
-jupyter notebook notebooks/quantum-algorithms.ipynb     # Grover, VQE, QAOA
-jupyter notebook notebooks/quantum-finance.ipynb        # Option pricing, portfolios
+python benchmarks/bench_simulator.py
 ```
+
+See [Benchmarks](docs/benchmarks.md) for full results.
 
 ## Examples
 
-35 runnable example scripts covering every module:
+37 runnable example scripts covering every module:
 
 ```bash
 python examples/bell_state.py               # Bell state basics
@@ -252,19 +246,9 @@ python examples/grover_search.py            # Grover's search
 python examples/shor_factoring.py           # Shor's factoring
 python examples/quantum_finance_demo.py     # Finance applications
 python examples/qml_demo.py                 # Machine learning
-python examples/adiabatic_demo.py           # Adiabatic optimization
-python examples/stabilizer_demo.py          # Clifford simulation
-python examples/benchmarking_demo.py        # Hardware benchmarking
-python examples/tomography_demo.py          # State reconstruction
-python examples/tensor_network_demo.py      # MPS simulation
-python examples/surface_code_demo.py        # Surface code QEC
-python examples/zx_calculus_demo.py         # ZX-calculus optimization
-python examples/networking_demo.py          # Quantum networking
-python examples/hardware_validation_demo.py # Backend validation
-python examples/routing_demo.py            # Qubit routing (SABRE)
-python examples/classical_shadows_demo.py  # Classical shadows
-python examples/algorithms/vqe_h2_example.py    # VQE for H2
-python examples/algorithms/qaoa_maxcut_example.py  # QAOA MaxCut
+python examples/fermionic_demo.py           # Fermionic simulation
+python examples/dd_demo.py                  # Dynamical decoupling
+python examples/resource_estimation_demo.py # Resource estimation
 ```
 
 See `examples/` for the full list.
@@ -272,14 +256,16 @@ See `examples/` for the full list.
 ## Testing
 
 ```bash
-python -m pytest tests/ -q    # 1193 tests
+python -m pytest tests/ -q    # 1,709 tests
 ```
 
 ## Documentation
 
 - [Documentation Site](https://genbrainai.github.io/quantumuim) — full API reference and guides
 - [Getting Started Tutorial](docs/getting-started.md) — step-by-step introduction
-- [Example Gallery](docs/examples.md) — 33 runnable scripts organized by category
+- [Tutorials](docs/tutorials/) — Bell state, VQE, Q+ factoring
+- [Example Gallery](docs/examples.md) — 37 runnable scripts organized by category
+- [Benchmarks](docs/benchmarks.md) — performance data across all simulators
 - [Jupyter Notebooks](notebooks/) — interactive tutorials
 - [Contributing Guide](CONTRIBUTING.md) — development setup and workflow
 - [Changelog](CHANGELOG.md) — version history
@@ -291,19 +277,6 @@ pip install quantumium[docs]
 mkdocs serve
 ```
 
-## Knowledge Base
-
-The `kb/` directory contains 26 reference articles on quantum computing:
-- Quantum mechanics primer, linear algebra essentials
-- Quantum information theory, complexity theory
-- Error correction deep-dive, surface codes guide, ZX-calculus guide, classical shadows guide
-- Algorithm catalog, variational algorithms guide
-- Fermionic simulation guide, dynamical decoupling guide, resource estimation guide
-- Quantum programming patterns
-- Hardware platform comparison, hardware validation guide, qubit routing guide
-- SDK benchmarking methodology, v0.3.0 roadmap candidates
-- Domain guides: QML, cryptography, finance, optimization, simulation, networking
-
 ## License
 
-MIT
+[MIT](LICENSE) — Copyright (c) 2024-2026 Quantumium Contributors
