@@ -1,0 +1,39 @@
+services:
+  # Development environment: live-mounted source, editable install
+  dev:
+    build:
+      context: .
+      target: builder
+    image: quantumium-dev
+    working_dir: /workspace
+    volumes:
+      - .:/workspace
+    command: >
+      sh -c "pip install --no-cache-dir -e '.[dev]' && exec bash"
+    stdin_open: true
+    tty: true
+    environment:
+      - PYTHONUNBUFFERED=1
+
+  # Run the full test suite in a clean container
+  test:
+    build:
+      context: .
+      target: builder
+    image: quantumium-dev
+    working_dir: /workspace
+    volumes:
+      - .:/workspace
+    command: >
+      sh -c "pip install --no-cache-dir -e '.[dev]' && pytest -q"
+    environment:
+      - PYTHONUNBUFFERED=1
+
+  # Production-like runtime image
+  runtime:
+    build:
+      context: .
+      target: runtime
+    image: quantumium
+    stdin_open: true
+    tty: true

@@ -1,0 +1,40 @@
+# VCS
+.git
+.gitignore
+.github
+
+# Python artifacts
+__pycache__
+*.py[cod]
+*.egg-info
+.eggs
+build/
+dist/
+.tox/
+.nox/
+
+# Tooling caches
+.mypy_cache
+.pytest_cache
+.ruff_cache
+.coverage
+htmlcov/
+
+# Environments
+.venv
+venv/
+env/
+
+# Editors / OS
+.idea
+.vscode
+*.swp
+.DS_Store
+
+# Docs build output
+docs/_build
+
+# Docker files themselves (not needed in context)
+Dockerfile
+docker-compose.yml
+.dockerignore
