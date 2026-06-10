@@ -5,10 +5,9 @@ from __future__ import annotations
 import math
 
 import numpy as np
-import pytest
 
 from quantumium.core.circuit import QuantumCircuit
-from quantumium.core.gate import H, X, Y, Z, S, T, CNOT, CZ, SWAP, Rx, Ry, Rz, controlled
+from quantumium.core.gate import H, Y, S, T, CNOT, CZ, SWAP, Rx, Ry, Rz, controlled
 
 
 # ---- ZX-calculus coverage (rules.py 68%, convert.py 73%) ----
@@ -39,7 +38,7 @@ class TestZXRulesCoverage:
 
     def test_color_change_all_hadamard_edges(self):
         from quantumium.zx.rules import color_change
-        from quantumium.zx.diagram import ZXDiagram, HADAMARD, REGULAR
+        from quantumium.zx.diagram import ZXDiagram, HADAMARD
 
         diag = ZXDiagram(1)
         wire = diag._wires[0]
@@ -146,7 +145,7 @@ class TestZXConvertCoverage:
         assert np.allclose(np.abs(diag_vals), 1.0, atol=1e-6)
 
     def test_rx_gate_x_phase(self):
-        from quantumium.zx.convert import circuit_to_zx, _circuit_unitary
+        from quantumium.zx.convert import circuit_to_zx
 
         qc = QuantumCircuit(1)
         qc.apply(Rx(math.pi / 3), 0)

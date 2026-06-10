@@ -2,11 +2,9 @@
 
 from __future__ import annotations
 
-import json
 
 import numpy as np
-import pytest
-from hypothesis import given, settings, assume
+from hypothesis import given, settings
 from hypothesis import strategies as st
 
 from quantumium.core.circuit import QuantumCircuit
